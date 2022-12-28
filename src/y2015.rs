@@ -10,6 +10,8 @@ mod day6;
 mod day7;
 mod day8;
 mod day9;
+mod day10;
+mod day11;
 
 pub fn run_day(day: usize) -> Result<(), Box<dyn Error>> {
     match day {
@@ -22,6 +24,8 @@ pub fn run_day(day: usize) -> Result<(), Box<dyn Error>> {
         7 => crate::run_solution(day7::solve),
         8 => crate::run_solution(day8::solve),
         9 => crate::run_solution(day9::solve),
+        10 => crate::run_solution(day10::solve),
+        11 => crate::run_solution(day11::solve),
         _ => Err(Box::new(SimpleError::new(format!("unexpected day: {day}"))))
     }
 }
