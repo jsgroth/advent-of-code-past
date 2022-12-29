@@ -39,7 +39,7 @@ impl From<FromUtf8Error> for SimpleError {
     }
 }
 
-pub fn run_solution<T1, T2, F>(solution: F) -> Result<(), Box<dyn Error>>
+fn run_solution<T1, T2, F>(solution: F) -> Result<(), Box<dyn Error>>
 where
     T1: Display,
     T2: Display,
