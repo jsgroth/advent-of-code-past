@@ -10,7 +10,7 @@ struct Boss {
     damage: i32,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 enum Spell {
     MagicMissile,
     Drain,
@@ -124,10 +124,10 @@ fn search_for_min_cost(boss: &Boss, state: SearchState, hard_mode: bool, min_so_
     }
 
     let mut result = i32::MAX;
-    for spell in &Spell::SPELLS {
-        if (*spell == Spell::Shield && state.shield_timer > 0) ||
-            (*spell == Spell::Poison && state.poison_timer > 0) ||
-            (*spell == Spell::Recharge && state.recharge_timer > 0) ||
+    for spell in Spell::SPELLS {
+        if (spell == Spell::Shield && state.shield_timer > 0) ||
+            (spell == Spell::Poison && state.poison_timer > 0) ||
+            (spell == Spell::Recharge && state.recharge_timer > 0) ||
             state.player_mana < spell.mana_cost() {
             continue;
         }
