@@ -5,10 +5,7 @@ use std::error::Error;
 use crate::SimpleError;
 
 fn solve_part(input: &str, target_prefix: &str) -> Result<usize, SimpleError> {
-    let line = match input.lines().next() {
-        Some(line) => line,
-        None => return Err(SimpleError::new(String::from("input is empty")))
-    };
+    let line = crate::read_single_line(input)?;
 
     for i in 0.. {
         let s = format!("{line}{i}");

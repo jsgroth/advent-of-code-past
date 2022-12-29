@@ -30,10 +30,7 @@ fn solve_part_1(input: &str) -> Result<u64, SimpleError> {
 }
 
 fn parse_input(input: &str) -> Result<(usize, usize), SimpleError> {
-    let line = match input.lines().next() {
-        Some(line) => line,
-        None => return Err(SimpleError::new(String::from("input is empty"))),
-    };
+    let line = crate::read_single_line(input)?;
 
     let split: Vec<_> = line.split(' ').collect();
     if split.len() < 3 {

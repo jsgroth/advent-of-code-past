@@ -58,10 +58,7 @@ fn contains_red_value(object: &HashMap<String, JsonValue>) -> bool {
 }
 
 fn parse_input(input: &str) -> Result<JsonValue, SimpleError> {
-    let line = match input.lines().next() {
-        Some(line) => line,
-        None => return Err(SimpleError::new(String::from("input is empty"))),
-    };
+    let line = crate::read_single_line(input)?;
 
     parse_json_value(&mut line.chars().peekable())
 }

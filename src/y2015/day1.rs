@@ -26,10 +26,7 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
 }
 
 fn parse_input(input: &str) -> Result<Vec<i32>, SimpleError> {
-    let line = match input.lines().next() {
-        Some(line) => line,
-        None => return Err(SimpleError::new(String::from("input is empty")))
-    };
+    let line = crate::read_single_line(input)?;
 
     line.chars().map(|c| {
         match c {

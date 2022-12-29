@@ -5,10 +5,7 @@ use std::error::Error;
 use crate::SimpleError;
 
 fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
-    let line = match input.lines().next() {
-        Some(line) => line,
-        None => return Err(SimpleError::new(String::from("input is empty"))),
-    };
+    let line = crate::read_single_line(input)?;
 
     let target = line.parse::<u32>()? / 10;
 
@@ -30,10 +27,7 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
 }
 
 fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
-    let line = match input.lines().next() {
-        Some(line) => line,
-        None => return Err(SimpleError::new(String::from("input is empty"))),
-    };
+    let line = crate::read_single_line(input)?;
 
     let target = line.parse::<u32>()?;
 

@@ -6,6 +6,7 @@ use std::fmt::{Debug, Display, Formatter};
 use std::io;
 use std::io::Read;
 use std::num::ParseIntError;
+use std::string::FromUtf8Error;
 
 #[derive(Debug, PartialEq, Eq)]
 struct SimpleError {
@@ -32,6 +33,12 @@ impl From<ParseIntError> for SimpleError {
     }
 }
 
+impl From<FromUtf8Error> for SimpleError {
+    fn from(err: FromUtf8Error) -> Self {
+        Self { msg: err.to_string() }
+    }
+}
+
 pub fn run_solution<T1, T2, F>(solution: F) -> Result<(), Box<dyn Error>>
 where
     T1: Display,
@@ -53,4 +60,11 @@ fn read_input() -> io::Result<String> {
     io::stdin().read_to_string(&mut s)?;
 
     Ok(s)
+}
+
+fn read_single_line(input: &str) -> Result<&str, SimpleError> {
+    match input.lines().next() {
+        Some(line) => Ok(line),
+        None => Err(SimpleError::new(String::from("input is empty, expected a single line"))),
+    }
 }

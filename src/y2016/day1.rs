@@ -70,10 +70,7 @@ fn solve_part_2(input: &str) -> Result<i32, SimpleError> {
 }
 
 fn parse_input(input: &str) -> Result<Vec<(Rotation, i32)>, SimpleError> {
-    let line = match input.lines().next() {
-        Some(line) => line,
-        None => return Err(SimpleError::new(String::from("input is empty"))),
-    };
+    let line = crate::read_single_line(input)?;
 
     line.split(", ").map(|word| {
         let direction = match word.chars().next() {
