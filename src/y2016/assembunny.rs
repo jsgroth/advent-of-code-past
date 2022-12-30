@@ -2,21 +2,22 @@ use std::collections::HashMap;
 use crate::SimpleError;
 
 #[derive(Debug, Clone, Copy)]
-pub enum InstructionArg {
+enum InstructionArg {
     Register(char),
     Constant(i64),
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum AssembunnyInstruction {
+enum AssembunnyInstruction {
     Copy(InstructionArg, InstructionArg),
     Increment(char),
     Decrement(char),
     JumpNotZero(InstructionArg, InstructionArg),
+    Toggle(char),
 }
 
 impl AssembunnyInstruction {
-    pub fn from_line(line: &str) -> Result<Self, SimpleError> {
+    fn from_line(line: &str) -> Result<Self, SimpleError> {
         let split: Vec<_> = line.split(' ').collect();
         match split.as_slice() {
             ["cpy", x, y] => {
@@ -27,11 +28,12 @@ impl AssembunnyInstruction {
             ["jnz", x, y] => {
                 Ok(Self::JumpNotZero(parse_argument(*x)?, parse_argument(*y)?))
             },
+            ["tgl", x] => Ok(Self::Toggle(as_register_id(*x)?)),
             _ => Err(SimpleError::new(format!("invalid line: {line}")))
         }
     }
 
-    pub fn execute(&self, registers: &mut HashMap<char, i64>, pc: &mut usize) {
+    fn execute(&self, registers: &mut HashMap<char, i64>, pc: &mut usize, program: &mut Vec<Self>) {
         match *self {
             Self::Copy(x, y) => {
                 match y {
@@ -59,6 +61,40 @@ impl AssembunnyInstruction {
                     *pc += 1;
                 }
             }
+            Self::Toggle(x) => {
+                let value = *registers.get_mut(&x).unwrap() + (*pc as i64);
+                if value >= 0 && value < program.len() as i64 {
+                    let new_instruction = match program[value as usize] {
+                        Self::Copy(x, y) => Self::JumpNotZero(x, y),
+                        Self::JumpNotZero(x, y) => Self::Copy(x, y),
+                        Self::Increment(x) => Self::Decrement(x),
+                        Self::Decrement(x) | Self::Toggle(x) => Self::Increment(x),
+                    };
+                    program[value as usize] = new_instruction;
+                }
+
+                *pc += 1;
+            }
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct AssembunnyProgram {
+    instructions: Vec<AssembunnyInstruction>,
+}
+
+impl AssembunnyProgram {
+    pub fn from_lines(input: &str) -> Result<AssembunnyProgram, SimpleError> {
+        let instructions: Result<Vec<_>, _> = input.lines().map(AssembunnyInstruction::from_line).collect();
+        Ok(AssembunnyProgram { instructions: instructions? })
+    }
+
+    pub fn execute(&mut self, registers: &mut HashMap<char, i64>) {
+        let mut pc = 0;
+        while pc < self.instructions.len() {
+            let instruction = self.instructions[pc];
+            instruction.execute(registers, &mut pc, &mut self.instructions);
         }
     }
 }
