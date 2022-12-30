@@ -9,7 +9,7 @@ use std::num::ParseIntError;
 use std::string::FromUtf8Error;
 
 #[derive(Debug, PartialEq, Eq)]
-struct SimpleError {
+pub struct SimpleError {
     msg: String,
 }
 
