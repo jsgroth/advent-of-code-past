@@ -2,14 +2,17 @@ use std::collections::HashMap;
 use crate::SimpleError;
 
 #[derive(Debug, Clone, Copy)]
+pub enum InstructionArg {
+    Register(char),
+    Constant(i64),
+}
+
+#[derive(Debug, Clone, Copy)]
 pub enum AssembunnyInstruction {
-    CopyConstant(i64, char),
-    CopyRegister(char, char),
+    Copy(InstructionArg, InstructionArg),
     Increment(char),
     Decrement(char),
-    JumpNotZero(char, i64),
-    Jump(i64),
-    Nop,
+    JumpNotZero(InstructionArg, InstructionArg),
 }
 
 impl AssembunnyInstruction {
@@ -17,24 +20,12 @@ impl AssembunnyInstruction {
         let split: Vec<_> = line.split(' ').collect();
         match split.as_slice() {
             ["cpy", x, y] => {
-                match x.parse::<i64>() {
-                    Ok(x) => Ok(Self::CopyConstant(x, as_register_id(*y)?)),
-                    Err(_) => Ok(Self::CopyRegister(as_register_id(*x)?, as_register_id(*y)?)),
-                }
+                Ok(Self::Copy(parse_argument(*x)?, parse_argument(*y)?))
             },
             ["inc", x] => Ok(Self::Increment(as_register_id(*x)?)),
             ["dec", x] => Ok(Self::Decrement(as_register_id(*x)?)),
             ["jnz", x, y] => {
-                match x.parse::<i64>() {
-                    Ok(x) => {
-                        if x != 0 {
-                            Ok(Self::Jump(y.parse()?))
-                        } else {
-                            Ok(Self::Nop)
-                        }
-                    }
-                    Err(_) => Ok(Self::JumpNotZero(as_register_id(*x)?, y.parse()?)),
-                }
+                Ok(Self::JumpNotZero(parse_argument(*x)?, parse_argument(*y)?))
             },
             _ => Err(SimpleError::new(format!("invalid line: {line}")))
         }
@@ -42,36 +33,47 @@ impl AssembunnyInstruction {
 
     pub fn execute(&self, registers: &mut HashMap<char, i64>, pc: &mut usize) {
         match *self {
-            Self::CopyConstant(x, y) => {
-                *registers.get_mut(&y).unwrap() = x;
+            Self::Copy(x, y) => {
+                match y {
+                    InstructionArg::Register(y) => {
+                        *registers.get_mut(&y).unwrap() = read_arg_value(x, registers);
+                    }
+                    InstructionArg::Constant(_) => {},
+                }
                 *pc += 1;
             }
-            AssembunnyInstruction::CopyRegister(x, y) => {
-                *registers.get_mut(&y).unwrap() = *registers.get(&x).unwrap();
-                *pc += 1;
-            }
-            AssembunnyInstruction::Increment(x) => {
+            Self::Increment(x) => {
                 *registers.get_mut(&x).unwrap() += 1;
                 *pc += 1;
             }
-            AssembunnyInstruction::Decrement(x) => {
+            Self::Decrement(x) => {
                 *registers.get_mut(&x).unwrap() -= 1;
                 *pc += 1;
             }
-            AssembunnyInstruction::JumpNotZero(x, y) => {
-                if *registers.get(&x).unwrap() != 0 {
+            Self::JumpNotZero(x, y) => {
+                let x = read_arg_value(x, registers);
+                let y = read_arg_value(y, registers);
+                if x != 0 {
                     *pc = ((*pc as i64) + y) as usize;
                 } else {
                     *pc += 1;
                 }
             }
-            AssembunnyInstruction::Jump(y) => {
-                *pc = ((*pc as i64) + y) as usize;
-            }
-            AssembunnyInstruction::Nop => {
-                *pc += 1;
-            }
         }
+    }
+}
+
+fn read_arg_value(arg: InstructionArg, registers: &HashMap<char, i64>) -> i64 {
+    match arg {
+        InstructionArg::Constant(n) => n,
+        InstructionArg::Register(r) => *registers.get(&r).unwrap(),
+    }
+}
+
+fn parse_argument(s: &str) -> Result<InstructionArg, SimpleError> {
+    match s.parse::<i64>() {
+        Ok(n) => Ok(InstructionArg::Constant(n)),
+        Err(_) => Ok(InstructionArg::Register(as_register_id(s)?)),
     }
 }
 
