@@ -1,6 +1,3 @@
-use std::error::Error;
-use crate::SimpleError;
-
 mod day1;
 mod day2;
 mod day3;
@@ -26,6 +23,9 @@ mod day22;
 mod day23;
 mod day24;
 mod day25;
+
+use std::error::Error;
+use crate::SimpleError;
 
 pub fn run_day(day: usize) -> Result<(), Box<dyn Error>> {
     match day {
