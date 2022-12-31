@@ -14,6 +14,9 @@ enum AssembunnyInstruction {
     Decrement(char),
     JumpNotZero(InstructionArg, InstructionArg),
     Toggle(char),
+    Add(char, char),
+    MultiplyAdd(char, char, char),
+    Nop,
 }
 
 impl AssembunnyInstruction {
@@ -69,10 +72,22 @@ impl AssembunnyInstruction {
                         Self::JumpNotZero(x, y) => Self::Copy(x, y),
                         Self::Increment(x) => Self::Decrement(x),
                         Self::Decrement(x) | Self::Toggle(x) => Self::Increment(x),
+                        Self::Add(..) | Self::MultiplyAdd(..) | Self::Nop => panic!("cannot toggle {:?}, optimizations failed", program[value as usize]),
                     };
                     program[value as usize] = new_instruction;
                 }
 
+                *pc += 1;
+            }
+            Self::Add(x, y) => {
+                *registers.get_mut(&x).unwrap() += *registers.get(&y).unwrap();
+                *pc += 1;
+            }
+            Self::MultiplyAdd(x, y, z) => {
+                *registers.get_mut(&x).unwrap() += *registers.get(&y).unwrap() * *registers.get(&z).unwrap();
+                *pc += 1;
+            }
+            Self::Nop => {
                 *pc += 1;
             }
         }
@@ -88,6 +103,51 @@ impl AssembunnyProgram {
     pub fn from_lines(input: &str) -> Result<AssembunnyProgram, SimpleError> {
         let instructions: Result<Vec<_>, _> = input.lines().map(AssembunnyInstruction::from_line).collect();
         Ok(AssembunnyProgram { instructions: instructions? })
+    }
+
+    pub fn optimize_multiplies(&mut self) {
+        let mut add_instructions = Vec::new();
+        for (i, window) in self.instructions.windows(4).enumerate() {
+            if let AssembunnyInstruction::Copy(InstructionArg::Register(cp_x), InstructionArg::Register(cp_y)) = window[0] {
+                if let AssembunnyInstruction::JumpNotZero(InstructionArg::Register(jnz_x), InstructionArg::Constant(-2)) = window[3] {
+                    match (window[1], window[2]) {
+                        (AssembunnyInstruction::Increment(inc_x), AssembunnyInstruction::Decrement(dec_x)) |
+                        (AssembunnyInstruction::Decrement(dec_x), AssembunnyInstruction::Increment(inc_x)) => {
+                            if cp_y == jnz_x && jnz_x == dec_x && inc_x != dec_x {
+                                add_instructions.push((i, inc_x, cp_x));
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+            }
+        }
+
+        for &(i, x, y) in &add_instructions {
+            self.instructions[i] = AssembunnyInstruction::Add(x, y);
+            self.instructions[i + 1] = AssembunnyInstruction::Nop;
+            self.instructions[i + 2] = AssembunnyInstruction::Nop;
+            self.instructions[i + 3] = AssembunnyInstruction::Nop;
+        }
+
+        let mut multiply_instructions = Vec::new();
+        for (i, window) in self.instructions.windows(6).enumerate() {
+            if let AssembunnyInstruction::Add(add_x, add_y) = window[0] {
+                if let AssembunnyInstruction::JumpNotZero(InstructionArg::Register(jnz_x), InstructionArg::Constant(-5)) = window[5] {
+                    if let AssembunnyInstruction::Decrement(dec_x) = window[4] {
+                        if dec_x == jnz_x && dec_x != add_x && dec_x != add_y {
+                            multiply_instructions.push((i, add_x, add_y, dec_x));
+                        }
+                    }
+                }
+            }
+        }
+
+        for &(i, x, y, z) in &multiply_instructions {
+            self.instructions[i] = AssembunnyInstruction::MultiplyAdd(x, y, z);
+            self.instructions[i + 4] = AssembunnyInstruction::Nop;
+            self.instructions[i + 5] = AssembunnyInstruction::Nop;
+        }
     }
 
     pub fn execute(&mut self, registers: &mut HashMap<char, i64>) {

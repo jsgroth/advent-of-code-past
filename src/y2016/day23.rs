@@ -12,6 +12,7 @@ fn solve_part(input: &str, initial_a_value: i64) -> Result<i64, SimpleError> {
     let mut registers: HashMap<_, _> =
         [('a', initial_a_value), ('b', 0), ('c', 0), ('d', 0)].into_iter().collect();
 
+    program.optimize_multiplies();
     program.execute(&mut registers);
 
     Ok(*registers.get(&'a').unwrap())
