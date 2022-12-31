@@ -36,11 +36,3 @@ pub fn solve(input: &str) -> Result<(usize, usize), Box<dyn Error>> {
 
     Ok((solution1, solution2))
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_sample_input_part_1() {}
-}
