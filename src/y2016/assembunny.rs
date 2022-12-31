@@ -14,6 +14,7 @@ enum AssembunnyInstruction {
     Decrement(char),
     JumpNotZero(InstructionArg, InstructionArg),
     Toggle(char),
+    Out(char),
     Add(char, char),
     MultiplyAdd(char, char, char),
     Nop,
@@ -32,11 +33,12 @@ impl AssembunnyInstruction {
                 Ok(Self::JumpNotZero(parse_argument(*x)?, parse_argument(*y)?))
             },
             ["tgl", x] => Ok(Self::Toggle(as_register_id(*x)?)),
+            ["out", x] => Ok(Self::Out(as_register_id(*x)?)),
             _ => Err(SimpleError::new(format!("invalid line: {line}")))
         }
     }
 
-    fn execute(&self, registers: &mut HashMap<char, i64>, pc: &mut usize, program: &mut Vec<Self>) {
+    fn execute(&self, registers: &mut HashMap<char, i64>, pc: &mut usize, program: &mut Vec<Self>) -> Option<i64> {
         match *self {
             Self::Copy(x, y) => {
                 match y {
@@ -72,12 +74,17 @@ impl AssembunnyInstruction {
                         Self::JumpNotZero(x, y) => Self::Copy(x, y),
                         Self::Increment(x) => Self::Decrement(x),
                         Self::Decrement(x) | Self::Toggle(x) => Self::Increment(x),
+                        Self::Out(..) => panic!("cannot toggle out"),
                         Self::Add(..) | Self::MultiplyAdd(..) | Self::Nop => panic!("cannot toggle {:?}, optimizations failed", program[value as usize]),
                     };
                     program[value as usize] = new_instruction;
                 }
 
                 *pc += 1;
+            }
+            Self::Out(x) => {
+                *pc += 1;
+                return Some(*registers.get(&x).unwrap());
             }
             Self::Add(x, y) => {
                 *registers.get_mut(&x).unwrap() += *registers.get(&y).unwrap();
@@ -91,6 +98,8 @@ impl AssembunnyInstruction {
                 *pc += 1;
             }
         }
+
+        None
     }
 }
 
@@ -156,6 +165,27 @@ impl AssembunnyProgram {
             let instruction = self.instructions[pc];
             instruction.execute(registers, &mut pc, &mut self.instructions);
         }
+    }
+
+    pub fn outputs_pattern(&mut self, registers: &mut HashMap<char, i64>, mut pattern: impl Iterator<Item = i64>) -> bool {
+        let mut pc = 0;
+        while pc < self.instructions.len() {
+            let instruction = self.instructions[pc];
+            if let Some(value) = instruction.execute(registers, &mut pc, &mut self.instructions) {
+                match pattern.next() {
+                    Some(pattern_value) => {
+                        if value != pattern_value {
+                            return false;
+                        }
+                    }
+                    None => {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return pattern.next().is_none();
     }
 }
 
