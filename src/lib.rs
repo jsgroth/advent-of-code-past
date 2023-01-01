@@ -2,6 +2,7 @@ pub mod y2015;
 pub mod y2016;
 pub mod y2017;
 
+use std::char::ParseCharError;
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
 use std::io;
@@ -30,6 +31,12 @@ impl Error for SimpleError {}
 
 impl From<ParseIntError> for SimpleError {
     fn from(err: ParseIntError) -> Self {
+        Self { msg: err.to_string() }
+    }
+}
+
+impl From<ParseCharError> for SimpleError {
+    fn from(err: ParseCharError) -> Self {
         Self { msg: err.to_string() }
     }
 }
