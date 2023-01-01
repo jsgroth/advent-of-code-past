@@ -31,21 +31,17 @@ impl Display for SimpleError {
 
 impl Error for SimpleError {}
 
-impl From<ParseIntError> for SimpleError {
-    fn from(err: ParseIntError) -> Self {
-        Self { msg: err.to_string() }
-    }
-}
+trait ErrorWrapper : Error {}
 
-impl From<ParseCharError> for SimpleError {
-    fn from(err: ParseCharError) -> Self {
-        Self { msg: err.to_string() }
-    }
-}
+impl ErrorWrapper for ParseIntError {}
 
-impl From<FromUtf8Error> for SimpleError {
-    fn from(err: FromUtf8Error) -> Self {
-        Self { msg: err.to_string() }
+impl ErrorWrapper for ParseCharError {}
+
+impl ErrorWrapper for FromUtf8Error {}
+
+impl<T: ErrorWrapper> From<T> for SimpleError {
+    fn from(t: T) -> Self {
+        Self { msg: t.to_string() }
     }
 }
 
