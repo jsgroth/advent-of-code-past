@@ -90,6 +90,7 @@ impl Program {
                 if get_register_value(&self.registers, x) != 0 {
                     return self.send_queue.borrow().back().copied();
                 }
+                self.pc += 1;
                 continue;
             }
 
