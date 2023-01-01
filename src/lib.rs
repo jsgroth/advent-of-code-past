@@ -5,6 +5,7 @@ pub mod simpleerror;
 pub mod y2015;
 pub mod y2016;
 pub mod y2017;
+pub mod y2018;
 
 use std::error::Error;
 use std::fmt::Display;
