@@ -147,7 +147,7 @@ fn check_for_solution(
             continue;
         }
 
-        for (j, (other_particle, last_other_particle)) in particles.iter().zip(last_particles).enumerate().skip(i) {
+        for (j, (other_particle, last_other_particle)) in particles.iter().zip(last_particles).enumerate().skip(i + 1) {
             if destroyed_particles[j] {
                 continue;
             }

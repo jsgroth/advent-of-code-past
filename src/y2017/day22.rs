@@ -156,6 +156,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore] // Takes too long without release optimizations
     fn test_sample_input_part_2() {
         assert_eq!(Ok(2511944), solve_part_2(SAMPLE_INPUT));
     }
