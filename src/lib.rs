@@ -1,49 +1,17 @@
 #![forbid(unsafe_code)]
 
+pub mod simpleerror;
+
 pub mod y2015;
 pub mod y2016;
 pub mod y2017;
 
-use std::char::ParseCharError;
 use std::error::Error;
-use std::fmt::{Debug, Display, Formatter};
+use std::fmt::Display;
 use std::io;
 use std::io::Read;
-use std::num::ParseIntError;
-use std::string::FromUtf8Error;
 
-#[derive(Debug, PartialEq, Eq)]
-pub struct SimpleError {
-    msg: String,
-}
-
-impl SimpleError {
-    fn new(msg: String) -> Self {
-        Self { msg }
-    }
-}
-
-impl Display for SimpleError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.msg)
-    }
-}
-
-impl Error for SimpleError {}
-
-trait ErrorWrapper : Error {}
-
-impl ErrorWrapper for ParseIntError {}
-
-impl ErrorWrapper for ParseCharError {}
-
-impl ErrorWrapper for FromUtf8Error {}
-
-impl<T: ErrorWrapper> From<T> for SimpleError {
-    fn from(t: T) -> Self {
-        Self { msg: t.to_string() }
-    }
-}
+pub use simpleerror::SimpleError;
 
 fn run_solution<T1, T2, F>(solution: F) -> Result<(), Box<dyn Error>>
 where
