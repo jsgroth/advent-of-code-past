@@ -71,11 +71,16 @@ fn solve_part_1(input: &str) -> Result<u32, SimpleError> {
 fn solve_part_2(input: &str) -> Result<u32, SimpleError> {
     let steps_per_turn: usize = crate::read_single_line(input)?.parse()?;
 
-    let mut circular_buffer = CircularBuffer::new();
-    populate_circular_buffer(&mut circular_buffer, steps_per_turn, 1..=50_000_000);
+    let mut value_after_zero = 1;
+    let mut current_pos = 1;
+    for i in 2..=50_000_000 {
+        current_pos = ((current_pos + steps_per_turn) % i) + 1;
+        if current_pos == 1 {
+            value_after_zero = i;
+        }
+    }
 
-    let next_after_0 = circular_buffer.head.borrow().unwrap_next().borrow().val;
-    Ok(next_after_0)
+    Ok(value_after_zero as u32)
 }
 
 fn populate_circular_buffer(
