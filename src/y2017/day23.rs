@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use std::error::Error;
 use crate::SimpleError;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 enum Arg {
     Register(char),
     Constant(i64),
@@ -27,7 +27,7 @@ impl Arg {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 enum Instruction {
     Set(char, Arg),
     Subtract(char, Arg),
@@ -100,11 +100,16 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
         _ => return Err(SimpleError::new(format!("expected 'sub b X', got {:?}", instructions[5])))
     };
 
+    if instructions[6] != Instruction::Set('c', Arg::Register('b')) {
+        return Err(SimpleError::new(format!("expected 'set c b', got {:?}", instructions[6])))
+    }
+
     let c = b - match instructions[7] {
         Instruction::Subtract('c', Arg::Constant(n)) => n,
         _ => return Err(SimpleError::new(format!("expected 'sub c X', got {:?}", instructions[7])))
     };
 
+    // I think this is always 17 but just in case
     let step = match instructions[instructions.len() - 2] {
         Instruction::Subtract('b', Arg::Constant(n)) => -n,
         _ => return Err(SimpleError::new(format!("expected 'sub b X', got {:?}", instructions[instructions.len() - 2])))
