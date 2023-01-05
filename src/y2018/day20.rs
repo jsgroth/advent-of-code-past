@@ -212,8 +212,7 @@ fn solve_both_parts(input: &str) -> Result<(usize, usize), SimpleError> {
 
     fill_map(&mut map, &regex, &vec![Point::new(0, 0)])?;
 
-    let distance_to_farthest_room = find_distance_to_farthest_room(&map);
-    let num_distant_rooms = find_num_distant_rooms(&map, 1000);
+    let (distance_to_farthest_room, num_distant_rooms) = search_rooms(&map, 1000);
 
     Ok((distance_to_farthest_room, num_distant_rooms))
 }
@@ -266,7 +265,7 @@ where
     map.get_mut(k).unwrap()
 }
 
-fn find_distance_to_farthest_room(map: &HashMap<Point, DirectionSet>) -> usize {
+fn search_rooms(map: &HashMap<Point, DirectionSet>, distance_threshold: usize) -> (usize, usize) {
     let mut visited = HashSet::new();
     visited.insert(Point::new(0, 0));
 
@@ -274,35 +273,13 @@ fn find_distance_to_farthest_room(map: &HashMap<Point, DirectionSet>) -> usize {
     queue.push_back((Point::new(0, 0), 0));
 
     let mut last_distance = 0;
+    let mut num_distant_rooms = 0;
     while !queue.is_empty() {
         let (position, distance) = queue.pop_front().unwrap();
 
         last_distance = distance;
-
-        for adjacent_point in position.get_adjacent_points(map.get(&position).unwrap()) {
-            if !visited.contains(&adjacent_point) {
-                visited.insert(adjacent_point);
-                queue.push_back((adjacent_point, distance + 1));
-            }
-        }
-    }
-
-    last_distance
-}
-
-fn find_num_distant_rooms(map: &HashMap<Point, DirectionSet>, distance_threshold: usize) -> usize {
-    let mut visited = HashSet::new();
-    visited.insert(Point::new(0, 0));
-
-    let mut queue = VecDeque::new();
-    queue.push_back((Point::new(0, 0), 0));
-
-    let mut distant_rooms = HashSet::new();
-    while !queue.is_empty() {
-        let (position, distance) = queue.pop_front().unwrap();
-
         if distance >= distance_threshold {
-            distant_rooms.insert(position);
+            num_distant_rooms += 1;
         }
 
         for adjacent_point in position.get_adjacent_points(map.get(&position).unwrap()) {
@@ -313,7 +290,7 @@ fn find_num_distant_rooms(map: &HashMap<Point, DirectionSet>, distance_threshold
         }
     }
 
-    distant_rooms.len()
+    (last_distance, num_distant_rooms)
 }
 
 pub fn solve(input: &str) -> Result<(usize, usize), Box<dyn Error>> {
