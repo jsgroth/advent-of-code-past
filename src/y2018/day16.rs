@@ -8,19 +8,19 @@ use crate::y2018::chronodevice::ChronoOperation;
 
 #[derive(Debug, Clone)]
 struct OpTest {
-    before: [u32; 4],
-    after: [u32; 4],
+    before: [u64; 4],
+    after: [u64; 4],
     opcode: usize,
-    a: u32,
-    b: u32,
+    a: u64,
+    b: u64,
     c: usize,
 }
 
 #[derive(Debug, Clone, Copy)]
 struct TestInstruction {
     opcode: usize,
-    a: u32,
-    b: u32,
+    a: u64,
+    b: u64,
     c: usize,
 }
 
@@ -69,7 +69,7 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
     Ok(result)
 }
 
-fn solve_part_2(input: &str) -> Result<u32, SimpleError> {
+fn solve_part_2(input: &str) -> Result<u64, SimpleError> {
     let (op_tests, test_program) = parse_input(input)?;
 
     let opcode_mapping = solve_for_opcodes(&op_tests);
@@ -144,20 +144,20 @@ fn find_triple_blank_line_index(lines: &[&str]) -> Result<usize, SimpleError> {
     Err(SimpleError::new(String::from("input has no triple blank line")))
 }
 
-fn parse_registers(s: &str) -> Result<[u32; 4], SimpleError> {
+fn parse_registers(s: &str) -> Result<[u64; 4], SimpleError> {
     let numbers: Vec<_> = s[1..s.len() - 1].split(", ").collect();
     if numbers.len() != 4 {
         return Err(SimpleError::new(format!("string does not split into 4 numbers: {s}")));
     }
 
     let numbers: Vec<_> = numbers.into_iter()
-        .map(|n| n.parse::<u32>().map_err(SimpleError::from))
+        .map(|n| n.parse::<u64>().map_err(SimpleError::from))
         .collect::<Result<_, _>>()?;
 
     Ok([numbers[0], numbers[1], numbers[2], numbers[3]])
 }
 
-pub fn solve(input: &str) -> Result<(usize, u32), Box<dyn Error>> {
+pub fn solve(input: &str) -> Result<(usize, u64), Box<dyn Error>> {
     let solution1 = solve_part_1(input)?;
     let solution2 = solve_part_2(input)?;
 

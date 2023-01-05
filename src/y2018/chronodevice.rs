@@ -64,7 +64,7 @@ impl ChronoOperation {
         Ok(op)
     }
 
-    pub fn execute(&self, registers: &[u32], a: u32, b: u32) -> u32 {
+    pub fn execute(&self, registers: &[u64], a: u64, b: u64) -> u64 {
         let a_us = a as usize;
         let b_us = b as usize;
         match self {
@@ -87,7 +87,31 @@ impl ChronoOperation {
         }
     }
 
-    pub fn can_produce(&self, before: &[u32], after: &[u32], a: u32, b: u32, c: usize) -> bool {
+    pub fn can_produce(&self, before: &[u64], after: &[u64], a: u64, b: u64, c: usize) -> bool {
         after[c] == self.execute(before, a, b)
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct ChronoInstruction {
+    pub op: ChronoOperation,
+    pub a: u64,
+    pub b: u64,
+    pub c: usize,
+}
+
+impl ChronoInstruction {
+    pub fn from_line(line: &str) -> Result<Self, SimpleError> {
+        let split: Vec<_> = line.split(' ').collect();
+        if split.len() != 4 {
+            return Err(SimpleError::new(format!("invalid line format, expected 3 spaces: {line}")));
+        }
+
+        let op = ChronoOperation::from_str(split[0])?;
+        let a = split[1].parse()?;
+        let b = split[2].parse()?;
+        let c = split[3].parse()?;
+
+        Ok(ChronoInstruction { op, a, b, c, })
     }
 }
