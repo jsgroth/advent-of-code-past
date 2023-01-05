@@ -185,12 +185,7 @@ impl Point {
 
     fn get_adjacent_points(&self, direction_set: &DirectionSet) -> impl Iterator<Item = Point> + '_ {
         direction_set.get_directions().into_iter()
-            .map(|direction| match direction {
-                Direction::North => Point::new(self.x, self.y + 1),
-                Direction::South => Point::new(self.x, self.y - 1),
-                Direction::East => Point::new(self.x + 1, self.y),
-                Direction::West => Point::new(self.x - 1, self.y),
-            })
+            .map(|direction| *self + direction)
     }
 }
 
