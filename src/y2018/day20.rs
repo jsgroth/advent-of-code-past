@@ -53,6 +53,13 @@ impl FromStr for Regex {
                     current_parts = Vec::new();
                     current_branches = Vec::new();
                 }
+                '|' => {
+                    current_parts.push(RegexPart::Literal(current_chars));
+                    current_chars = String::new();
+
+                    current_branches.push(Self::new(current_parts));
+                    current_parts = Vec::new();
+                }
                 ')' => {
                     if levels.is_empty() {
                         return Err(SimpleError::new(format!("unbalanced parentheses in string: {s}")));
@@ -69,13 +76,6 @@ impl FromStr for Regex {
                     current_branches = b;
 
                     current_parts.push(new_group);
-                }
-                '|' => {
-                    current_parts.push(RegexPart::Literal(current_chars));
-                    current_chars = String::new();
-
-                    current_branches.push(Self::new(current_parts));
-                    current_parts = Vec::new();
                 }
                 _ => return Err(SimpleError::new(format!("unexpected char '{c}' in string: {s}")))
             }
