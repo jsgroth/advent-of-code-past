@@ -4,6 +4,7 @@
 use std::collections::HashSet;
 use std::error::Error;
 use crate::SimpleError;
+use crate::y2018::chronodevice::ChronoOperation;
 
 #[derive(Debug, Clone)]
 struct OpTest {
@@ -21,74 +22,6 @@ struct TestInstruction {
     a: u32,
     b: u32,
     c: usize,
-}
-
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
-enum Operation {
-    AddRegister,
-    AddImmediate,
-    MultiplyRegister,
-    MultiplyImmediate,
-    AndRegister,
-    AndImmediate,
-    OrRegister,
-    OrImmediate,
-    SetRegister,
-    SetImmediate,
-    GreaterThanImmediateRegister,
-    GreaterThanRegisterImmediate,
-    GreaterThanRegisterRegister,
-    EqualImmediateRegister,
-    EqualRegisterImmediate,
-    EqualRegisterRegister,
-}
-
-impl Operation {
-    const ALL: [Self; 16] = [
-        Self::AddRegister,
-        Self::AddImmediate,
-        Self::MultiplyRegister,
-        Self::MultiplyImmediate,
-        Self::AndRegister,
-        Self::AndImmediate,
-        Self::OrRegister,
-        Self::OrImmediate,
-        Self::SetRegister,
-        Self::SetImmediate,
-        Self::GreaterThanImmediateRegister,
-        Self::GreaterThanRegisterImmediate,
-        Self::GreaterThanRegisterRegister,
-        Self::EqualImmediateRegister,
-        Self::EqualRegisterImmediate,
-        Self::EqualRegisterRegister,
-    ];
-
-    fn execute(&self, registers: &[u32; 4], a: u32, b: u32) -> u32 {
-        let a_us = a as usize;
-        let b_us = b as usize;
-        match self {
-            Self::AddRegister => registers[a_us] + registers[b_us],
-            Self::AddImmediate => registers[a_us] + b,
-            Self::MultiplyRegister => registers[a_us] * registers[b_us],
-            Self::MultiplyImmediate => registers[a_us] * b,
-            Self::AndRegister => registers[a_us] & registers[b_us],
-            Self::AndImmediate => registers[a_us] & b,
-            Self::OrRegister => registers[a_us] | registers[b_us],
-            Self::OrImmediate => registers[a_us] | b,
-            Self::SetRegister => registers[a_us],
-            Self::SetImmediate => a,
-            Self::GreaterThanImmediateRegister => if a > registers[b_us] { 1 } else { 0 },
-            Self::GreaterThanRegisterImmediate => if registers[a_us] > b { 1 } else { 0 },
-            Self::GreaterThanRegisterRegister => if registers[a_us] > registers[b_us] { 1 } else { 0 },
-            Self::EqualImmediateRegister => if a == registers[b_us] { 1 } else { 0 },
-            Self::EqualRegisterImmediate => if registers[a_us] == b { 1 } else { 0 },
-            Self::EqualRegisterRegister => if registers[a_us] == registers[b_us] { 1 } else { 0 },
-        }
-    }
-
-    fn can_produce(&self, before: &[u32; 4], after: &[u32; 4], a: u32, b: u32, c: usize) -> bool {
-        after[c] == self.execute(before, a, b)
-    }
 }
 
 impl OpTest {
@@ -126,7 +59,7 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
 
     let result = op_tests.into_iter()
         .filter(|op_test| {
-            let can_produce_count = Operation::ALL.iter()
+            let can_produce_count = ChronoOperation::ALL.iter()
                 .filter(|op| op.can_produce(&op_test.before, &op_test.after, op_test.a, op_test.b, op_test.c))
                 .count();
             can_produce_count >= 3
@@ -150,13 +83,13 @@ fn solve_part_2(input: &str) -> Result<u32, SimpleError> {
     Ok(registers[0])
 }
 
-fn solve_for_opcodes(op_tests: &[OpTest]) -> Vec<Operation> {
-    let mut opcode_to_operation: Vec<Option<Operation>> = vec![None; Operation::ALL.len()];
+fn solve_for_opcodes(op_tests: &[OpTest]) -> Vec<ChronoOperation> {
+    let mut opcode_to_operation: Vec<Option<ChronoOperation>> = vec![None; ChronoOperation::ALL.len()];
 
     let mut found_operations = HashSet::new();
-    while found_operations.len() < Operation::ALL.len() {
+    while found_operations.len() < ChronoOperation::ALL.len() {
         for op_test in op_tests {
-            let can_produce_ops: Vec<_> = Operation::ALL.iter().copied()
+            let can_produce_ops: Vec<_> = ChronoOperation::ALL.iter().copied()
                 .filter(|&op| !found_operations.contains(&op))
                 .filter(|&op| {
                     op.can_produce(&op_test.before, &op_test.after, op_test.a, op_test.b, op_test.c)
