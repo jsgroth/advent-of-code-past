@@ -1,3 +1,5 @@
+use crate::SimpleError;
+
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum ChronoOperation {
     AddRegister,
@@ -38,7 +40,31 @@ impl ChronoOperation {
         Self::EqualRegisterRegister,
     ];
 
-    pub fn execute(&self, registers: &[u32; 4], a: u32, b: u32) -> u32 {
+    pub fn from_str(s: &str) -> Result<Self, SimpleError> {
+        let op = match s {
+            "addr" => Self::AddRegister,
+            "addi" => Self::AddImmediate,
+            "mulr" => Self::MultiplyRegister,
+            "muli" => Self::MultiplyImmediate,
+            "banr" => Self::AndRegister,
+            "bani" => Self::AndImmediate,
+            "borr" => Self::OrRegister,
+            "bori" => Self::OrImmediate,
+            "setr" => Self::SetRegister,
+            "seti" => Self::SetImmediate,
+            "gtir" => Self::GreaterThanImmediateRegister,
+            "gtri" => Self::GreaterThanRegisterImmediate,
+            "gtrr" => Self::GreaterThanRegisterRegister,
+            "eqir" => Self::EqualImmediateRegister,
+            "eqri" => Self::EqualRegisterImmediate,
+            "eqrr" => Self::EqualRegisterRegister,
+            _ => return Err(SimpleError::new(format!("invalid chrono device operation: {s}")))
+        };
+
+        Ok(op)
+    }
+
+    pub fn execute(&self, registers: &[u32], a: u32, b: u32) -> u32 {
         let a_us = a as usize;
         let b_us = b as usize;
         match self {
@@ -61,7 +87,7 @@ impl ChronoOperation {
         }
     }
 
-    pub fn can_produce(&self, before: &[u32; 4], after: &[u32; 4], a: u32, b: u32, c: usize) -> bool {
+    pub fn can_produce(&self, before: &[u32], after: &[u32], a: u32, b: u32, c: usize) -> bool {
         after[c] == self.execute(before, a, b)
     }
 }
