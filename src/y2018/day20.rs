@@ -247,7 +247,8 @@ fn fill_map(map: &mut HashMap<Point, DirectionSet>, regex: &Regex, positions: &V
             }
             RegexPart::Group(branches) => {
                 for branch in branches {
-                    next_positions.extend(fill_map(map, branch, &positions)?);
+                    let branch_next_positions = fill_map(map, branch, &positions)?;
+                    next_positions.extend(branch_next_positions);
                 }
             }
         }
