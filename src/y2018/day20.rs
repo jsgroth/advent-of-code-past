@@ -15,6 +15,58 @@ enum RegexPart {
     Group { branches: Vec<RegexPart>, next: Option<Box<RegexPart>> },
 }
 
+impl RegexPart {
+    fn parse_group(s: &str) -> Result<Self, SimpleError> {
+        let (group_splits, group_end_index) = Self::find_group_splits(s)?;
+
+        let branches = group_splits.into_iter()
+            .map(|group_split| Self::from_str(group_split))
+            .collect::<Result<_, _>>()?;
+
+        let next = if group_end_index != s.len() {
+            let next_part = Self::from_str(&s[group_end_index..])?;
+            Some(Box::new(next_part))
+        } else {
+            None
+        };
+
+        Ok(Self::Group { branches, next })
+    }
+
+    fn find_group_splits(s: &str) -> Result<(Vec<&str>, usize), SimpleError> {
+        let mut nesting_count = 0;
+        let mut splits = Vec::new();
+        let mut last_split_start = 0;
+        for (i, c) in s.chars().enumerate() {
+            match c {
+                '(' => {
+                    nesting_count += 1;
+                    if nesting_count == 1 {
+                        last_split_start = i + 1;
+                    }
+                }
+                ')' => {
+                    nesting_count -= 1;
+                    if nesting_count == 0 {
+                        splits.push(&s[last_split_start..i]);
+                        return Ok((splits, i + 1));
+                    }
+                }
+                '|' => {
+                    if nesting_count == 1 {
+                        splits.push(&s[last_split_start..i]);
+                        last_split_start = i + 1;
+                    }
+                }
+                'N' | 'S' | 'E' | 'W' => {},
+                _ => return Err(SimpleError::new(format!("invalid char {c} in group string: {s}")))
+            }
+        }
+
+        Err(SimpleError::new(format!("parentheses are not balanced in group string: {s}")))
+    }
+}
+
 impl FromStr for RegexPart {
     type Err = SimpleError;
 
@@ -28,15 +80,15 @@ impl FromStr for RegexPart {
                 let end = s.chars().position(|c| c == '(').unwrap_or(s.len());
                 let chars = String::from(&s[..end]);
                 let next = if end != s.len() {
-                    let next_part = s[end..].parse()?;
+                    let next_part = Self::from_str(&s[end..])?;
                     Some(Box::new(next_part))
                 } else {
                     None
                 };
-                RegexPart::Literal { chars, next }
+                Self::Literal { chars, next }
             }
             Some('(') => {
-                parse_group(s)?
+                Self::parse_group(s)?
             }
             _ => return Err(SimpleError::new(format!("invalid regex part string: {s}")))
         };
@@ -268,56 +320,6 @@ fn find_num_distant_rooms(map: &HashMap<Point, DirectionSet>, distance_threshold
     }
 
     distant_rooms.len()
-}
-
-fn parse_group(s: &str) -> Result<RegexPart, SimpleError> {
-    let (group_splits, group_end_index) = find_group_splits(s)?;
-
-    let branches = group_splits.into_iter()
-        .map(|group_split| group_split.parse())
-        .collect::<Result<_, _>>()?;
-
-    let next = if group_end_index != s.len() {
-        let next_part = s[group_end_index..].parse()?;
-        Some(Box::new(next_part))
-    } else {
-        None
-    };
-
-    Ok(RegexPart::Group { branches, next })
-}
-
-fn find_group_splits(s: &str) -> Result<(Vec<&str>, usize), SimpleError> {
-    let mut nesting_count = 0;
-    let mut splits = Vec::new();
-    let mut last_split_start = 0;
-    for (i, c) in s.chars().enumerate() {
-        match c {
-            '(' => {
-                nesting_count += 1;
-                if nesting_count == 1 {
-                    last_split_start = i + 1;
-                }
-            }
-            ')' => {
-                nesting_count -= 1;
-                if nesting_count == 0 {
-                    splits.push(&s[last_split_start..i]);
-                    return Ok((splits, i + 1));
-                }
-            }
-            '|' => {
-                if nesting_count == 1 {
-                    splits.push(&s[last_split_start..i]);
-                    last_split_start = i + 1;
-                }
-            }
-            'N' | 'S' | 'E' | 'W' => {},
-            _ => return Err(SimpleError::new(format!("invalid char {c} in group string: {s}")))
-        }
-    }
-
-    Err(SimpleError::new(format!("parentheses are not balanced in group string: {s}")))
 }
 
 pub fn solve(input: &str) -> Result<(usize, usize), Box<dyn Error>> {
