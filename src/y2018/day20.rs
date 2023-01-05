@@ -10,90 +10,90 @@ use std::str::FromStr;
 use crate::SimpleError;
 
 #[derive(Debug, Clone)]
+struct Regex {
+    parts: Vec<RegexPart>,
+}
+
+#[derive(Debug, Clone)]
 enum RegexPart {
-    Literal { chars: String, next: Option<Box<RegexPart>> },
-    Group { branches: Vec<RegexPart>, next: Option<Box<RegexPart>> },
+    Literal(String),
+    Group(Vec<Regex>),
 }
 
-impl RegexPart {
-    fn parse_group(s: &str) -> Result<Self, SimpleError> {
-        let (group_splits, group_end_index) = Self::find_group_splits(s)?;
-
-        let branches = group_splits.into_iter()
-            .map(|group_split| Self::from_str(group_split))
-            .collect::<Result<_, _>>()?;
-
-        let next = if group_end_index != s.len() {
-            let next_part = Self::from_str(&s[group_end_index..])?;
-            Some(Box::new(next_part))
-        } else {
-            None
-        };
-
-        Ok(Self::Group { branches, next })
-    }
-
-    fn find_group_splits(s: &str) -> Result<(Vec<&str>, usize), SimpleError> {
-        let mut nesting_count = 0;
-        let mut splits = Vec::new();
-        let mut last_split_start = 0;
-        for (i, c) in s.chars().enumerate() {
-            match c {
-                '(' => {
-                    nesting_count += 1;
-                    if nesting_count == 1 {
-                        last_split_start = i + 1;
-                    }
-                }
-                ')' => {
-                    nesting_count -= 1;
-                    if nesting_count == 0 {
-                        splits.push(&s[last_split_start..i]);
-                        return Ok((splits, i + 1));
-                    }
-                }
-                '|' => {
-                    if nesting_count == 1 {
-                        splits.push(&s[last_split_start..i]);
-                        last_split_start = i + 1;
-                    }
-                }
-                'N' | 'S' | 'E' | 'W' => {},
-                _ => return Err(SimpleError::new(format!("invalid char {c} in group string: {s}")))
-            }
-        }
-
-        Err(SimpleError::new(format!("parentheses are not balanced in group string: {s}")))
+impl Regex {
+    fn new(parts: Vec<RegexPart>) -> Self {
+        Self { parts }
     }
 }
 
-impl FromStr for RegexPart {
+impl FromStr for Regex {
     type Err = SimpleError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s.is_empty() {
-            return Ok(Self::Literal { chars: String::new(), next: None });
+            return Ok(Self::new(Vec::new()));
         }
 
-        let part = match s.chars().next() {
-            Some('N') | Some('S') | Some('E') | Some('W') => {
-                let end = s.chars().position(|c| c == '(').unwrap_or(s.len());
-                let chars = String::from(&s[..end]);
-                let next = if end != s.len() {
-                    let next_part = Self::from_str(&s[end..])?;
-                    Some(Box::new(next_part))
-                } else {
-                    None
-                };
-                Self::Literal { chars, next }
-            }
-            Some('(') => {
-                Self::parse_group(s)?
-            }
-            _ => return Err(SimpleError::new(format!("invalid regex part string: {s}")))
-        };
+        let mut levels = Vec::new();
+        let mut current_branches = Vec::new();
+        let mut current_parts = Vec::new();
+        let mut current_chars = String::new();
+        for c in s.chars() {
+            match c {
+                'N' | 'S' | 'E' | 'W' => {
+                    current_chars.push(c);
+                }
+                '(' => {
+                    if !current_chars.is_empty() {
+                        current_parts.push(RegexPart::Literal(current_chars));
+                        current_chars = String::new();
+                    }
 
-        Ok(part)
+                    levels.push((current_parts, current_branches));
+                    current_parts = Vec::new();
+                    current_branches = Vec::new();
+                }
+                ')' => {
+                    if levels.is_empty() {
+                        return Err(SimpleError::new(format!("unbalanced parentheses in string: {s}")));
+                    }
+
+                    current_parts.push(RegexPart::Literal(current_chars));
+                    current_chars = String::new();
+
+                    current_branches.push(Self::new(current_parts));
+                    let new_group = RegexPart::Group(current_branches);
+
+                    let (p, b) = levels.pop().unwrap();
+                    current_parts = p;
+                    current_branches = b;
+
+                    current_parts.push(new_group);
+                }
+                '|' => {
+                    current_parts.push(RegexPart::Literal(current_chars));
+                    current_chars = String::new();
+
+                    current_branches.push(Self::new(current_parts));
+                    current_parts = Vec::new();
+                }
+                _ => return Err(SimpleError::new(format!("unexpected char '{c}' in string: {s}")))
+            }
+        }
+
+        if !levels.is_empty() {
+            return Err(SimpleError::new(format!("string has too many open parentheses: {s}")));
+        }
+
+        if !current_branches.is_empty() {
+            return Err(SimpleError::new(format!("lowest level should not have any branches: {s}")));
+        }
+
+        if !current_chars.is_empty() {
+            current_parts.push(RegexPart::Literal(current_chars));
+        }
+
+        Ok(Self::new(current_parts))
     }
 }
 
@@ -209,7 +209,7 @@ impl Add<Direction> for Point {
 
 fn solve_both_parts(input: &str) -> Result<(usize, usize), SimpleError> {
     let regex = crate::read_single_line(input)?;
-    let regex: RegexPart = regex[1..regex.len() - 1].parse()?;
+    let regex: Regex = regex[1..regex.len() - 1].parse()?;
 
     let mut map: HashMap<_, _> = iter::once(
         (Point::new(0, 0), DirectionSet::new())
@@ -223,41 +223,39 @@ fn solve_both_parts(input: &str) -> Result<(usize, usize), SimpleError> {
     Ok((distance_to_farthest_room, num_distant_rooms))
 }
 
-fn fill_map(map: &mut HashMap<Point, DirectionSet>, regex: &RegexPart, positions: &Vec<Point>) -> Result<Vec<Point>, SimpleError> {
-    let mut next_positions = HashSet::new();
+fn fill_map(map: &mut HashMap<Point, DirectionSet>, regex: &Regex, positions: &Vec<Point>) -> Result<Vec<Point>, SimpleError> {
+    let mut positions = positions.clone();
 
-    match regex {
-        RegexPart::Literal { chars, .. } => {
-            for &position in positions {
-                let mut current_pos = position;
-                for c in chars.chars() {
-                    let direction = Direction::from_char(c)?;
-                    get_or_insert(map, &current_pos).insert(direction);
+    for regex_part in &regex.parts {
+        let mut next_positions = HashSet::new();
 
-                    let next_pos = current_pos + direction;
-                    get_or_insert(map, &next_pos).insert(direction.invert());
+        match regex_part {
+            RegexPart::Literal(chars) => {
+                for &position in &positions {
+                    let mut current_pos = position;
+                    for c in chars.chars() {
+                        let direction = Direction::from_char(c)?;
+                        get_or_insert(map, &current_pos).insert(direction);
 
-                    current_pos = next_pos;
+                        let next_pos = current_pos + direction;
+                        get_or_insert(map, &next_pos).insert(direction.invert());
+
+                        current_pos = next_pos;
+                    }
+                    next_positions.insert(current_pos);
                 }
-                next_positions.insert(current_pos);
+            }
+            RegexPart::Group(branches) => {
+                for branch in branches {
+                    next_positions.extend(fill_map(map, branch, &positions)?);
+                }
             }
         }
-        RegexPart::Group { branches, .. } => {
-            for branch in branches {
-                next_positions.extend(fill_map(map, branch, positions)?);
-            }
-        }
+
+        positions = next_positions.into_iter().collect();
     }
 
-    let next_positions = next_positions.into_iter().collect();
-    match regex {
-        RegexPart::Literal { next, .. } | RegexPart::Group { next, .. } => {
-            match next {
-                Some(regex_part) => fill_map(map, regex_part, &next_positions),
-                None => Ok(next_positions),
-            }
-        }
-    }
+    Ok(positions)
 }
 
 fn get_or_insert<'a, K, V>(map: &'a mut HashMap<K, V>, k: &K) -> &'a mut V
