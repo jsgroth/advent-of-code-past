@@ -175,7 +175,7 @@ fn find_shortest_path_to_target(mut geologic_indices: Vec<Vec<u64>>, depth: u64,
 
     let mut heap = BinaryHeap::new();
     heap.push(initial_state);
-    
+
     let mut visited = HashSet::new();
 
     while !heap.is_empty() {
