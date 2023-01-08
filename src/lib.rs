@@ -6,6 +6,7 @@ pub mod y2015;
 pub mod y2016;
 pub mod y2017;
 pub mod y2018;
+pub mod y2019;
 
 use std::error::Error;
 use std::fmt::Display;

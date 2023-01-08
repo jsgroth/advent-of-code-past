@@ -1,6 +1,6 @@
 use std::env;
 use std::error::Error;
-use advent_of_code_past::{y2015, y2016, y2017, y2018};
+use advent_of_code_past::{y2015, y2016, y2017, y2018, y2019};
 
 const USAGE: &str = "ARGS: year day\ninput should be passed via stdin";
 
@@ -16,6 +16,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         "2016" => y2016::run_day(day),
         "2017" => y2017::run_day(day),
         "2018" => y2018::run_day(day),
+        "2019" => y2019::run_day(day),
         _ => panic!("unexpected year: {year}")
     }
 }
