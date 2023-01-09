@@ -1,5 +1,8 @@
+use std::cell::RefCell;
+use std::collections::VecDeque;
 use std::error::Error;
 use std::iter;
+use std::rc::Rc;
 
 const ADD_OPCODE: i64 = 1;
 const MULTIPLY_OPCODE: i64 = 2;
@@ -167,6 +170,70 @@ impl<I: InputFn, O: OutputFn> IntcodeProgram<I, O> {
         }
 
         true
+    }
+}
+
+#[derive(Debug)]
+struct InteractiveIntcodeInputFn {
+    inputs: Rc<RefCell<VecDeque<i64>>>,
+}
+
+#[derive(Debug)]
+struct InteractiveIntcodeOutputFn {
+    outputs: Rc<RefCell<VecDeque<i64>>>,
+}
+
+impl InputFn for InteractiveIntcodeInputFn {
+    fn call(&mut self) -> Option<i64> {
+        self.inputs.borrow_mut().pop_front()
+    }
+}
+
+impl OutputFn for InteractiveIntcodeOutputFn {
+    fn call(&mut self, output: i64) {
+        self.outputs.borrow_mut().push_back(output);
+    }
+}
+
+#[derive(Debug)]
+pub struct InteractiveIntcodeProgram {
+    program: IntcodeProgram<InteractiveIntcodeInputFn, InteractiveIntcodeOutputFn>,
+    inputs: Rc<RefCell<VecDeque<i64>>>,
+    outputs: Rc<RefCell<VecDeque<i64>>>,
+}
+
+impl InteractiveIntcodeProgram {
+    pub fn new(program: Vec<i64>) -> Self {
+        let inputs = Rc::new(RefCell::new(VecDeque::new()));
+        let outputs = Rc::new(RefCell::new(VecDeque::new()));
+
+        let input_fn = InteractiveIntcodeInputFn {
+            inputs: Rc::clone(&inputs)
+        };
+        let output_fn = InteractiveIntcodeOutputFn {
+            outputs: Rc::clone(&outputs)
+        };
+
+        let program = IntcodeProgram::new(program, input_fn, output_fn);
+
+        Self { program, inputs, outputs }
+    }
+
+    pub fn push_input(&mut self, input: i64) {
+        self.inputs.borrow_mut().push_back(input);
+    }
+
+    pub fn fetch_outputs(&mut self) -> Vec<i64> {
+        let mut outputs = Vec::new();
+        outputs.extend(self.outputs.borrow().iter().copied());
+
+        self.outputs.borrow_mut().clear();
+
+        outputs
+    }
+
+    pub fn execute(&mut self) -> bool {
+        self.program.execute()
     }
 }
 
