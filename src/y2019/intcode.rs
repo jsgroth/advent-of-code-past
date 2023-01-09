@@ -1,4 +1,5 @@
 use std::error::Error;
+use std::iter;
 
 const ADD_OPCODE: i64 = 1;
 const MULTIPLY_OPCODE: i64 = 2;
@@ -8,10 +9,12 @@ const JUMP_IF_TRUE_OPCODE: i64 = 5;
 const JUMP_IF_FALSE_OPCODE: i64 = 6;
 const LESS_THAN_OPCODE: i64 = 7;
 const EQUAL_OPCODE: i64 = 8;
+const ADJUST_RELATIVE_BASE_OPCODE: i64 = 9;
 const HALT_OPCODE: i64 = 99;
 
 const POSITION_MODE: i64 = 0;
 const IMMEDIATE_MODE: i64 = 1;
+const RELATIVE_MODE: i64 = 2;
 
 pub trait InputFn {
     fn call(&mut self) -> Option<i64>;
@@ -39,6 +42,7 @@ pub struct IntcodeProgram<I: InputFn, O: OutputFn> {
     ip: usize,
     input_fn: I,
     output_fn: O,
+    relative_base: i64,
 }
 
 impl<I: InputFn, O: OutputFn> IntcodeProgram<I, O> {
@@ -48,7 +52,35 @@ impl<I: InputFn, O: OutputFn> IntcodeProgram<I, O> {
             ip: 0,
             input_fn,
             output_fn,
+            relative_base: 0,
         }
+    }
+
+    fn read_value(&self, index: usize, parameter_mode: i64) -> i64 {
+        let address = match parameter_mode % 10 {
+            POSITION_MODE => self.program[index] as usize,
+            IMMEDIATE_MODE => index,
+            RELATIVE_MODE => (self.relative_base + self.program[index]) as usize,
+            _ => panic!("unexpected parameter mode: {}", parameter_mode % 10)
+        };
+
+        self.program.get(address).copied().unwrap_or(0)
+    }
+
+    fn write_value(&mut self, index: usize, value: i64, parameter_mode: i64) {
+        let address = match parameter_mode % 10 {
+            POSITION_MODE => self.program[index] as usize,
+            IMMEDIATE_MODE => panic!("immediate parameter mode not supported for writes"),
+            RELATIVE_MODE => (self.relative_base + self.program[index]) as usize,
+            _ => panic!("unexpected parameter mode: {}", parameter_mode % 10)
+        };
+
+        if address >= self.program.len() {
+            let expansion_size = address - self.program.len() + 1;
+            self.program.extend(iter::once(0).cycle().take(expansion_size));
+        }
+
+        self.program[address] = value;
     }
 
     pub fn execute(&mut self) -> bool {
@@ -57,18 +89,18 @@ impl<I: InputFn, O: OutputFn> IntcodeProgram<I, O> {
             let opcode = self.program[self.ip] % 100;
             match opcode {
                 ADD_OPCODE => {
-                    let a = read_value(&self.program, self.ip + 1, parameter_modes);
-                    let b = read_value(&self.program, self.ip + 2, parameter_modes / 10);
-                    let c = self.program[self.ip + 3] as usize;
-                    self.program[c] = a + b;
+                    let a = self.read_value(self.ip + 1, parameter_modes);
+                    let b = self.read_value(self.ip + 2, parameter_modes / 10);
+
+                    self.write_value(self.ip + 3, a + b, parameter_modes / 100);
 
                     self.ip += 4;
                 }
                 MULTIPLY_OPCODE => {
-                    let a = read_value(&self.program, self.ip + 1, parameter_modes);
-                    let b = read_value(&self.program, self.ip + 2, parameter_modes / 10);
-                    let c = self.program[self.ip + 3] as usize;
-                    self.program[c] = a * b;
+                    let a = self.read_value(self.ip + 1, parameter_modes);
+                    let b = self.read_value(self.ip + 2, parameter_modes / 10);
+
+                    self.write_value(self.ip + 3, a * b, parameter_modes / 100);
 
                     self.ip += 4;
                 }
@@ -78,51 +110,59 @@ impl<I: InputFn, O: OutputFn> IntcodeProgram<I, O> {
                         return false;
                     }
 
-                    let a = self.program[self.ip + 1] as usize;
-                    self.program[a] = input.unwrap();
+                    self.write_value(self.ip + 1, input.unwrap(), parameter_modes);
 
                     self.ip += 2;
                 }
                 OUTPUT_OPCODE => {
-                    let a = read_value(&self.program, self.ip + 1, parameter_modes);
+                    let a = self.read_value(self.ip + 1, parameter_modes);
                     self.output_fn.call(a);
 
                     self.ip += 2;
                 }
                 JUMP_IF_TRUE_OPCODE => {
-                    if read_value(&self.program, self.ip + 1, parameter_modes) != 0 {
-                        self.ip = read_value(&self.program, self.ip + 2, parameter_modes / 10) as usize;
+                    if self.read_value(self.ip + 1, parameter_modes) != 0 {
+                        self.ip = self.read_value(self.ip + 2, parameter_modes / 10) as usize;
                     } else {
                         self.ip += 3;
                     }
                 }
                 JUMP_IF_FALSE_OPCODE => {
-                    if read_value(&self.program, self.ip + 1, parameter_modes) == 0 {
-                        self.ip = read_value(&self.program, self.ip + 2, parameter_modes / 10) as usize;
+                    if self.read_value(self.ip + 1, parameter_modes) == 0 {
+                        self.ip = self.read_value(self.ip + 2, parameter_modes / 10) as usize;
                     } else {
                         self.ip += 3;
                     }
                 }
                 LESS_THAN_OPCODE => {
-                    let a = read_value(&self.program, self.ip + 1, parameter_modes);
-                    let b = read_value(&self.program, self.ip + 2, parameter_modes / 10);
-                    let c = self.program[self.ip + 3] as usize;
-                    self.program[c] = if a < b { 1 } else { 0 };
+                    let a = self.read_value(self.ip + 1, parameter_modes);
+                    let b = self.read_value(self.ip + 2, parameter_modes / 10);
+
+                    let c = if a < b { 1 } else { 0 };
+                    self.write_value(self.ip + 3, c, parameter_modes / 100);
 
                     self.ip += 4;
                 }
                 EQUAL_OPCODE => {
-                    let a = read_value(&self.program, self.ip + 1, parameter_modes);
-                    let b = read_value(&self.program, self.ip + 2, parameter_modes / 10);
-                    let c = self.program[self.ip + 3] as usize;
-                    self.program[c] = if a == b { 1 } else { 0 };
+                    let a = self.read_value(self.ip + 1, parameter_modes);
+                    let b = self.read_value(self.ip + 2, parameter_modes / 10);
+
+                    let c = if a == b { 1 } else { 0 };
+                    self.write_value(self.ip + 3, c, parameter_modes / 100);
 
                     self.ip += 4;
+                }
+                ADJUST_RELATIVE_BASE_OPCODE => {
+                    let a = self.read_value(self.ip + 1, parameter_modes);
+
+                    self.relative_base += a;
+
+                    self.ip += 2;
                 }
                 HALT_OPCODE => {
                     return true;
                 }
-                _ => panic!("invalid opcode: {}", self.program[self.ip])
+                _ => panic!("invalid opcode: {opcode}")
             }
         }
 
@@ -160,14 +200,6 @@ pub fn parse_program(input: &str) -> Result<Vec<i64>, Box<dyn Error>> {
     Ok(result?)
 }
 
-fn read_value(program: &[i64], index: usize, parameter_mode: i64) -> i64 {
-    match parameter_mode % 10 {
-        POSITION_MODE => program[program[index] as usize],
-        IMMEDIATE_MODE => program[index],
-        _ => panic!("unexpected parameter mode: {}", parameter_mode % 10)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -177,6 +209,10 @@ mod tests {
         let mut outputs = Vec::new();
         execute(&mut program, input, |output| outputs.push(output));
         outputs
+    }
+
+    fn execute_no_input(program: &Vec<i64>) -> Vec<i64> {
+        execute_with_input(program, || panic!("input fn should not have been called"))
     }
 
     #[test]
@@ -290,6 +326,30 @@ mod tests {
 
         let outputs = execute_with_input(&program, || 55);
         assert_eq!(vec![1], outputs);
+    }
+
+    #[test]
+    fn test_relative_mode() {
+        let program = vec![109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99];
+
+        let outputs = execute_no_input(&program);
+        assert_eq!(program, outputs);
+    }
+
+    #[test]
+    fn test_large_numbers_1() {
+        let program = vec![1102, 34915192, 34915192, 7, 4, 7, 99, 0];
+
+        let outputs = execute_no_input(&program);
+        assert_eq!(vec![1219070632396864], outputs);
+    }
+
+    #[test]
+    fn test_large_numbers_2() {
+        let program = vec![104, 1125899906842624, 99];
+
+        let outputs = execute_no_input(&program);
+        assert_eq!(vec![1125899906842624], outputs);
     }
 
     #[test]
