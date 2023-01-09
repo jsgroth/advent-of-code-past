@@ -13,81 +13,131 @@ const HALT_OPCODE: i64 = 99;
 const POSITION_MODE: i64 = 0;
 const IMMEDIATE_MODE: i64 = 1;
 
-pub fn execute(
-    program: &mut Vec<i64>,
-    mut input_fn: impl FnMut() -> i64,
-    mut output_fn: impl FnMut(i64) -> (),
-) {
-    let mut ip = 0;
-    while ip < program.len() {
-        let parameter_modes = program[ip] / 100;
-        let opcode = program[ip] % 100;
-        match opcode {
-            ADD_OPCODE => {
-                let a = read_value(program, ip + 1, parameter_modes);
-                let b = read_value(program, ip + 2, parameter_modes / 10);
-                let c = program[ip + 3] as usize;
-                program[c] = a + b;
+pub trait InputFn {
+    fn call(&mut self) -> Option<i64>;
+}
 
-                ip += 4;
-            }
-            MULTIPLY_OPCODE => {
-                let a = read_value(program, ip + 1, parameter_modes);
-                let b = read_value(program, ip + 2, parameter_modes / 10);
-                let c = program[ip + 3] as usize;
-                program[c] = a * b;
+pub trait OutputFn {
+    fn call(&mut self, output: i64);
+}
 
-                ip += 4;
-            }
-            INPUT_OPCODE => {
-                let input = input_fn();
-                let a = program[ip + 1] as usize;
-                program[a] = input;
+impl<T: FnMut() -> i64> InputFn for T {
+    fn call(&mut self) -> Option<i64> {
+        Some(self())
+    }
+}
 
-                ip += 2;
-            }
-            OUTPUT_OPCODE => {
-                let a = read_value(program, ip + 1, parameter_modes);
-                output_fn(a);
+impl<T: FnMut(i64) -> ()> OutputFn for T {
+    fn call(&mut self, output: i64) {
+        self(output)
+    }
+}
 
-                ip += 2;
-            }
-            JUMP_IF_TRUE_OPCODE => {
-                if read_value(program, ip + 1, parameter_modes) != 0 {
-                    ip = read_value(program, ip + 2, parameter_modes / 10) as usize;
-                } else {
-                    ip += 3;
-                }
-            }
-            JUMP_IF_FALSE_OPCODE => {
-                if read_value(program, ip + 1, parameter_modes) == 0 {
-                    ip = read_value(program, ip + 2, parameter_modes / 10) as usize;
-                } else {
-                    ip += 3;
-                }
-            }
-            LESS_THAN_OPCODE => {
-                let a = read_value(program, ip + 1, parameter_modes);
-                let b = read_value(program, ip + 2, parameter_modes / 10);
-                let c = program[ip + 3] as usize;
-                program[c] = if a < b { 1 } else { 0 };
+#[derive(Debug, Clone)]
+pub struct IntcodeProgram<I: InputFn, O: OutputFn> {
+    program: Vec<i64>,
+    ip: usize,
+    input_fn: I,
+    output_fn: O,
+}
 
-                ip += 4;
-            }
-            EQUAL_OPCODE => {
-                let a = read_value(program, ip + 1, parameter_modes);
-                let b = read_value(program, ip + 2, parameter_modes / 10);
-                let c = program[ip + 3] as usize;
-                program[c] = if a == b { 1 } else { 0 };
-
-                ip += 4;
-            }
-            HALT_OPCODE => {
-                break;
-            }
-            _ => panic!("invalid opcode: {}", program[ip])
+impl<I: InputFn, O: OutputFn> IntcodeProgram<I, O> {
+    pub fn new(program: Vec<i64>, input_fn: I, output_fn: O) -> Self {
+        Self {
+            program,
+            ip: 0,
+            input_fn,
+            output_fn,
         }
     }
+
+    pub fn execute(&mut self) -> bool {
+        while self.ip < self.program.len() {
+            let parameter_modes = self.program[self.ip] / 100;
+            let opcode = self.program[self.ip] % 100;
+            match opcode {
+                ADD_OPCODE => {
+                    let a = read_value(&self.program, self.ip + 1, parameter_modes);
+                    let b = read_value(&self.program, self.ip + 2, parameter_modes / 10);
+                    let c = self.program[self.ip + 3] as usize;
+                    self.program[c] = a + b;
+
+                    self.ip += 4;
+                }
+                MULTIPLY_OPCODE => {
+                    let a = read_value(&self.program, self.ip + 1, parameter_modes);
+                    let b = read_value(&self.program, self.ip + 2, parameter_modes / 10);
+                    let c = self.program[self.ip + 3] as usize;
+                    self.program[c] = a * b;
+
+                    self.ip += 4;
+                }
+                INPUT_OPCODE => {
+                    let input = self.input_fn.call();
+                    if input.is_none() {
+                        return false;
+                    }
+
+                    let a = self.program[self.ip + 1] as usize;
+                    self.program[a] = input.unwrap();
+
+                    self.ip += 2;
+                }
+                OUTPUT_OPCODE => {
+                    let a = read_value(&self.program, self.ip + 1, parameter_modes);
+                    self.output_fn.call(a);
+
+                    self.ip += 2;
+                }
+                JUMP_IF_TRUE_OPCODE => {
+                    if read_value(&self.program, self.ip + 1, parameter_modes) != 0 {
+                        self.ip = read_value(&self.program, self.ip + 2, parameter_modes / 10) as usize;
+                    } else {
+                        self.ip += 3;
+                    }
+                }
+                JUMP_IF_FALSE_OPCODE => {
+                    if read_value(&self.program, self.ip + 1, parameter_modes) == 0 {
+                        self.ip = read_value(&self.program, self.ip + 2, parameter_modes / 10) as usize;
+                    } else {
+                        self.ip += 3;
+                    }
+                }
+                LESS_THAN_OPCODE => {
+                    let a = read_value(&self.program, self.ip + 1, parameter_modes);
+                    let b = read_value(&self.program, self.ip + 2, parameter_modes / 10);
+                    let c = self.program[self.ip + 3] as usize;
+                    self.program[c] = if a < b { 1 } else { 0 };
+
+                    self.ip += 4;
+                }
+                EQUAL_OPCODE => {
+                    let a = read_value(&self.program, self.ip + 1, parameter_modes);
+                    let b = read_value(&self.program, self.ip + 2, parameter_modes / 10);
+                    let c = self.program[self.ip + 3] as usize;
+                    self.program[c] = if a == b { 1 } else { 0 };
+
+                    self.ip += 4;
+                }
+                HALT_OPCODE => {
+                    return true;
+                }
+                _ => panic!("invalid opcode: {}", self.program[self.ip])
+            }
+        }
+
+        true
+    }
+}
+
+pub fn execute(
+    program: &mut Vec<i64>,
+    input_fn: impl InputFn,
+    output_fn: impl OutputFn,
+) {
+    let mut intcode_program = IntcodeProgram::new(program.clone(), input_fn, output_fn);
+    intcode_program.execute();
+    *program = intcode_program.program;
 }
 
 pub fn execute_no_io(program: &mut Vec<i64>) {
@@ -96,6 +146,10 @@ pub fn execute_no_io(program: &mut Vec<i64>) {
         || panic!("did not expect input fn to get called"),
         |_| panic!("did not expect output fn to get called"),
     );
+}
+
+pub fn iterator_input_fn(mut iter: impl Iterator<Item = i64>) -> impl InputFn {
+    move || iter.next().expect("input fn called after iterator was exhausted")
 }
 
 pub fn parse_program(input: &str) -> Result<Vec<i64>, Box<dyn Error>> {
