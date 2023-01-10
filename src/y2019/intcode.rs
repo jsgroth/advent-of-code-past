@@ -195,6 +195,22 @@ impl OutputFn for InteractiveIntcodeOutputFn {
     }
 }
 
+impl Clone for InteractiveIntcodeInputFn {
+    fn clone(&self) -> Self {
+        Self {
+            inputs: Rc::new(RefCell::new(self.inputs.borrow().clone()))
+        }
+    }
+}
+
+impl Clone for InteractiveIntcodeOutputFn {
+    fn clone(&self) -> Self {
+        Self {
+            outputs: Rc::new(RefCell::new(self.outputs.borrow().clone()))
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct InteractiveIntcodeProgram {
     program: IntcodeProgram<InteractiveIntcodeInputFn, InteractiveIntcodeOutputFn>,
@@ -234,6 +250,16 @@ impl InteractiveIntcodeProgram {
 
     pub fn execute(&mut self) -> bool {
         self.program.execute()
+    }
+}
+
+impl Clone for InteractiveIntcodeProgram {
+    fn clone(&self) -> Self {
+        let program = self.program.clone();
+        let inputs = Rc::clone(&program.input_fn.inputs);
+        let outputs = Rc::clone(&program.output_fn.outputs);
+
+        Self { program, inputs, outputs }
     }
 }
 
