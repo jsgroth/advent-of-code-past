@@ -78,7 +78,7 @@ impl<I: InputFn, O: OutputFn> IntcodeProgram<I, O> {
 
         if address >= self.program.len() {
             let expansion_size = address - self.program.len() + 1;
-            self.program.extend(iter::once(0).cycle().take(expansion_size));
+            self.program.extend(iter::repeat(0).take(expansion_size));
         }
 
         self.program[address] = value;
