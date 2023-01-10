@@ -12,6 +12,7 @@ mod day9;
 mod day10;
 mod day11;
 mod day12;
+mod day13;
 
 use std::error::Error;
 use crate::SimpleError;
@@ -30,6 +31,7 @@ pub fn run_day(day: usize) -> Result<(), Box<dyn Error>> {
         10 => crate::run_solution(day10::solve),
         11 => crate::run_solution(day11::solve),
         12 => crate::run_solution(day12::solve),
+        13 => crate::run_solution(day13::solve),
         _ => Err(Box::new(SimpleError::new(format!("unexpected day: {day}"))))
     }
 }
