@@ -146,12 +146,12 @@ fn solve_part_2(input: &str) -> Result<i64, Box<dyn Error>> {
 
     let mut intcode_program = InteractiveIntcodeProgram::new(program);
 
-    push_str_as_ascii(&mut intcode_program, &join_chars(&movement_program.main_routine));
-    push_str_as_ascii(&mut intcode_program, &movement_program.function_a.to_string());
-    push_str_as_ascii(&mut intcode_program, &movement_program.function_b.to_string());
-    push_str_as_ascii(&mut intcode_program, &movement_program.function_c.to_string());
+    intcode_program.push_line_as_ascii(&join_chars(&movement_program.main_routine));
+    intcode_program.push_line_as_ascii(&movement_program.function_a.to_string());
+    intcode_program.push_line_as_ascii(&movement_program.function_b.to_string());
+    intcode_program.push_line_as_ascii(&movement_program.function_c.to_string());
 
-    push_str_as_ascii(&mut intcode_program, "n");
+    intcode_program.push_line_as_ascii("n");
 
     intcode_program.execute();
 
@@ -330,13 +330,6 @@ fn is_scaffold(map: &Vec<Vec<bool>>, p: Point) -> bool {
     let i = p.i;
     let j = p.j;
     i >= 0 && j >= 0 && i < map.len() as i32 && j < map[0].len() as i32 && map[i as usize][j as usize]
-}
-
-fn push_str_as_ascii(intcode_program: &mut InteractiveIntcodeProgram, s: &str) {
-    for c in s.chars() {
-        intcode_program.push_input(c as i64);
-    }
-    intcode_program.push_input('\n' as i64);
 }
 
 fn build_map_from_program(mut program: Vec<i64>) -> Result<(Vec<Vec<bool>>, Robot), SimpleError> {

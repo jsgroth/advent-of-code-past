@@ -216,6 +216,13 @@ impl InteractiveIntcodeProgram {
         self.program.input_fn.inputs.push_back(input);
     }
 
+    pub fn push_line_as_ascii(&mut self, line: &str) {
+        for c in line.chars() {
+            self.push_input(c as i64);
+        }
+        self.push_input('\n' as i64);
+    }
+
     pub fn fetch_outputs(&mut self) -> Vec<i64> {
         let mut outputs = Vec::with_capacity(self.program.output_fn.outputs.len());
         outputs.extend(&self.program.output_fn.outputs);
