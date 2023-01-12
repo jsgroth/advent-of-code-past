@@ -217,6 +217,10 @@ impl InteractiveIntcodeProgram {
     }
 
     pub fn push_line_as_ascii(&mut self, line: &str) {
+        if line.chars().any(|c| !c.is_ascii()) {
+            panic!("unexpected non-ASCII char in line: {line}");
+        }
+
         for c in line.chars() {
             self.push_input(c as i64);
         }
