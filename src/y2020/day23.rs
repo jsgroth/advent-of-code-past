@@ -1,93 +1,69 @@
 //! Day 23: Crab Cups
 //! https://adventofcode.com/2020/day/23
 
-use std::cell::RefCell;
-use std::collections::{HashMap, VecDeque};
+use std::collections::VecDeque;
 use std::error::Error;
 use std::fmt::Debug;
-use std::hash::Hash;
-use std::rc::{Rc, Weak};
 use crate::SimpleError;
 
 #[derive(Debug, Clone)]
-struct Node<T> {
-    val: T,
-    next: Weak<RefCell<Node<T>>>,
+struct Node {
+    val: u32,
+    next: usize,
 }
 
 #[derive(Debug, Clone)]
-struct CircularLinkedHashMap<T: Eq + Hash> {
-    nodes: HashMap<T, Rc<RefCell<Node<T>>>>,
+struct CircularLinkedHashMap {
+    nodes: Vec<Node>,
+    label_to_index: Vec<usize>,
 }
 
-impl<T: Debug + Eq + Hash + Clone> CircularLinkedHashMap<T> {
-    fn contains_key(&self, value: &T) -> bool {
-        self.nodes.contains_key(value)
+impl CircularLinkedHashMap {
+    fn get(&self, label: u32) -> &Node {
+        &self.nodes[self.label_to_index[label as usize]]
     }
 
-    fn get(&self, value: &T) -> Option<Rc<RefCell<Node<T>>>> {
-        self.nodes.get(value).map(|rc| Rc::clone(rc))
+    fn remove_after(&mut self, label: u32) -> u32 {
+        let index = self.label_to_index[label as usize];
+        let next_index = self.nodes[index].next;
+        let next_value = self.nodes[next_index].val;
+
+        self.nodes[index].next = self.nodes[next_index].next;
+
+        next_value
     }
 
-    fn remove_after(&mut self, value: &T) -> Option<T> {
-        match self.nodes.get(value) {
-            Some(node) => {
-                let next = node.borrow().next.upgrade().unwrap();
-                node.borrow_mut().next = Weak::clone(&next.borrow().next);
+    fn insert_after(&mut self, label: u32, new_value: u32) {
+        let index = self.label_to_index[label as usize];
+        let next_index = self.nodes[index].next;
 
-                let next_value = next.borrow().val.clone();
-                self.nodes.remove(&next_value);
-                Some(next_value)
+        let new_value_index = self.label_to_index[new_value as usize];
+        self.nodes[new_value_index].next = next_index;
+        self.nodes[index].next = new_value_index;
+    }
+}
+
+impl From<Vec<u32>> for CircularLinkedHashMap {
+    fn from(value: Vec<u32>) -> Self {
+        if value.is_empty() {
+            return Self { nodes: Vec::new(), label_to_index: Vec::new() };
+        }
+
+        let max_value = *value.iter().max().unwrap();
+
+        let mut nodes = Vec::with_capacity(value.len());
+        let mut label_to_index = vec![usize::MAX; max_value as usize + 1];
+        for number in value {
+            label_to_index[number as usize] = nodes.len();
+            nodes.push(Node { val: number, next: 0 });
+
+            if nodes.len() > 1 {
+                let nodes_len = nodes.len();
+                nodes[nodes_len - 2].next = nodes_len - 1;
             }
-            None => None
-        }
-    }
-
-    fn insert_after(&mut self, value: &T, new_value: T) {
-        if let Some(node) = self.nodes.get(value) {
-            let new_node = Rc::new(RefCell::new(Node {
-                val: new_value.clone(),
-                next: Weak::clone(&node.borrow().next),
-            }));
-
-            node.borrow_mut().next = Rc::downgrade(&new_node);
-            self.nodes.insert(new_value, new_node);
-        }
-    }
-}
-
-impl<T: Debug + Eq + Hash + Clone, I: IntoIterator<Item = T>> From<I> for CircularLinkedHashMap<T> {
-    fn from(value: I) -> Self {
-        let mut iter = value.into_iter().peekable();
-        if iter.peek().is_none() {
-            return Self { nodes: HashMap::new() };
         }
 
-        let first = iter.next().unwrap();
-        let head = Rc::new_cyclic(|me| {
-            RefCell::new(Node {
-                val: first.clone(),
-                next: Weak::clone(me),
-            })
-        });
-
-        let mut nodes = HashMap::new();
-        nodes.insert(first, Rc::clone(&head));
-
-        let mut tail = Rc::clone(&head);
-        while let Some(value) = iter.next() {
-            let node = Rc::new(RefCell::new(Node {
-                val: value.clone(),
-                next: Weak::clone(&tail.borrow().next),
-            }));
-
-            nodes.insert(value.clone(), Rc::clone(&node));
-            tail.borrow_mut().next = Rc::downgrade(&node);
-
-            tail = node;
-        }
-
-        Self { nodes }
+        Self { nodes, label_to_index }
     }
 }
 
@@ -158,7 +134,7 @@ fn solve_part_2(input: &str) -> Result<u64, SimpleError> {
     for _ in 0..10_000_000 {
         let mut removed = Vec::new();
         for _ in 0..3 {
-            removed.push(circular_linked_hash.remove_after(&current_cup).unwrap());
+            removed.push(circular_linked_hash.remove_after(current_cup));
         }
 
         let mut destination_cup = if current_cup == min {
@@ -167,7 +143,7 @@ fn solve_part_2(input: &str) -> Result<u64, SimpleError> {
             current_cup - 1
         };
 
-        while !circular_linked_hash.contains_key(&destination_cup) {
+        while removed.contains(&destination_cup) {
             destination_cup = if destination_cup == min {
                 max
             } else {
@@ -176,21 +152,18 @@ fn solve_part_2(input: &str) -> Result<u64, SimpleError> {
         }
 
         for removed_value in removed.into_iter().rev() {
-            circular_linked_hash.insert_after(&destination_cup, removed_value);
+            circular_linked_hash.insert_after(destination_cup, removed_value);
         }
 
-        let current_node = circular_linked_hash.get(&current_cup).unwrap();
-        let next_node = current_node.borrow().next.upgrade().unwrap();
-        current_cup = next_node.borrow().val;
+        let current_node = circular_linked_hash.get(current_cup);
+        current_cup = circular_linked_hash.nodes[current_node.next].val;
     }
 
-    let node_after_1 = circular_linked_hash.get(&1).unwrap().borrow().next.upgrade().unwrap();
-    let a = node_after_1.borrow().val as u64;
-    let b = node_after_1.borrow().next.upgrade().unwrap().borrow().val as u64;
+    let one_node = circular_linked_hash.get(1);
+    let a_node = &circular_linked_hash.nodes[one_node.next];
+    let b_node = &circular_linked_hash.nodes[a_node.next];
 
-    println!("{a} {b}");
-
-    Ok(a * b)
+    Ok(a_node.val as u64 * b_node.val as u64)
 }
 
 pub fn solve(input: &str) -> Result<(String, u64), Box<dyn Error>> {
