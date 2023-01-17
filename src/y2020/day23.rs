@@ -7,63 +7,52 @@ use std::fmt::Debug;
 use crate::SimpleError;
 
 #[derive(Debug, Clone)]
-struct Node {
-    val: u32,
-    next: usize,
-}
-
-#[derive(Debug, Clone)]
 struct CircularLinkedHashMap {
-    nodes: Vec<Node>,
-    label_to_index: Vec<usize>,
+    nexts: Vec<usize>,
 }
 
 impl CircularLinkedHashMap {
-    fn get(&self, label: u32) -> &Node {
-        &self.nodes[self.label_to_index[label as usize]]
-    }
-
     fn remove_after(&mut self, label: u32) -> u32 {
-        let index = self.label_to_index[label as usize];
-        let next_index = self.nodes[index].next;
-        let next_value = self.nodes[next_index].val;
+        let index = label as usize;
+        let next_index = self.nexts[index];
 
-        self.nodes[index].next = self.nodes[next_index].next;
+        self.nexts[index] = self.nexts[next_index];
 
-        next_value
+        next_index as u32
     }
 
     fn insert_after(&mut self, label: u32, new_value: u32) {
-        let index = self.label_to_index[label as usize];
-        let next_index = self.nodes[index].next;
+        let index = label as usize;
+        let next_index = self.nexts[index];
 
-        let new_value_index = self.label_to_index[new_value as usize];
-        self.nodes[new_value_index].next = next_index;
-        self.nodes[index].next = new_value_index;
+        let new_value_index = new_value as usize;
+        self.nexts[new_value_index] = next_index;
+        self.nexts[index] = new_value_index;
     }
 }
 
 impl From<Vec<u32>> for CircularLinkedHashMap {
     fn from(value: Vec<u32>) -> Self {
         if value.is_empty() {
-            return Self { nodes: Vec::new(), label_to_index: Vec::new() };
+            return Self { nexts: Vec::new() };
         }
 
         let max_value = *value.iter().max().unwrap();
 
-        let mut nodes = Vec::with_capacity(value.len());
-        let mut label_to_index = vec![usize::MAX; max_value as usize + 1];
-        for number in value {
-            label_to_index[number as usize] = nodes.len();
-            nodes.push(Node { val: number, next: 0 });
+        let head = value[0] as usize;
 
-            if nodes.len() > 1 {
-                let nodes_len = nodes.len();
-                nodes[nodes_len - 2].next = nodes_len - 1;
+        let mut nexts = vec![usize::MAX; max_value as usize + 1];
+        let mut last_label = 0;
+        for number in value {
+            nexts[number as usize] = head;
+            if last_label > 0 {
+                nexts[last_label] = number as usize;
             }
+
+            last_label = number as usize;
         }
 
-        Self { nodes, label_to_index }
+        Self { nexts }
     }
 }
 
@@ -155,15 +144,13 @@ fn solve_part_2(input: &str) -> Result<u64, SimpleError> {
             circular_linked_hash.insert_after(destination_cup, removed_value);
         }
 
-        let current_node = circular_linked_hash.get(current_cup);
-        current_cup = circular_linked_hash.nodes[current_node.next].val;
+        current_cup = circular_linked_hash.nexts[current_cup as usize] as u32;
     }
 
-    let one_node = circular_linked_hash.get(1);
-    let a_node = &circular_linked_hash.nodes[one_node.next];
-    let b_node = &circular_linked_hash.nodes[a_node.next];
+    let a = circular_linked_hash.nexts[1];
+    let b = circular_linked_hash.nexts[a];
 
-    Ok(a_node.val as u64 * b_node.val as u64)
+    Ok(a as u64 * b as u64)
 }
 
 pub fn solve(input: &str) -> Result<(String, u64), Box<dyn Error>> {
