@@ -73,8 +73,8 @@ fn solve_both_parts(input: &str) -> Result<(usize, String), SimpleError> {
 
 fn parse_input(input: &str) -> Result<Vec<FoodItem>, SimpleError> {
     input.lines().map(|line| {
-        let open_paren_index = line.chars().position(|c| c == '(').ok_or(
-            SimpleError::new(format!("line does not contain '(': {line}"))
+        let open_paren_index = line.chars().position(|c| c == '(').ok_or_else(
+            || SimpleError::new(format!("line does not contain '(': {line}"))
         )?;
 
         let ingredients = line[..open_paren_index - 1].split(' ').collect();

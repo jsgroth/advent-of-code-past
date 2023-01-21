@@ -92,9 +92,7 @@ fn build_touched_points(path: &[PathPart]) -> HashMap<Point, usize> {
 
             steps += 1;
 
-            if !touched_points.contains_key(&position) {
-                touched_points.insert(position, steps);
-            }
+            touched_points.entry(position).or_insert(steps);
         }
     }
 
@@ -110,8 +108,8 @@ pub fn solve(input: &str) -> Result<(i64, usize), Box<dyn Error>> {
 
 fn parse_input(input: &str) -> Result<(Vec<PathPart>, Vec<PathPart>), SimpleError> {
     let first_line = crate::read_single_line(input)?;
-    let second_line = input.lines().skip(1).next().ok_or(
-        SimpleError::new(String::from("input only has one line"))
+    let second_line = input.lines().nth(1).ok_or_else(
+        || SimpleError::new(String::from("input only has one line"))
     )?;
 
     let first_path = parse_path(first_line)?;

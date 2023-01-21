@@ -32,14 +32,14 @@ fn solve_part_2(input: &str) -> Result<String, SimpleError> {
     let chars: Vec<_> = line.chars().collect();
 
     let mut image = vec![vec![false; 25]; 6];
-    for row in 0..6 {
-        for col in 0..25 {
+    for (row, image_row) in image.iter_mut().enumerate() {
+        for (col, value) in image_row.iter_mut().enumerate(){
             let c = chars.iter().copied()
                 .skip(25 * row + col)
                 .step_by(25 * 6)
                 .find(|&c| c != '2')
-                .ok_or(SimpleError::new(format!("no visible pixel at row={row}, col={col}")))?;
-            image[row][col] = c == '1';
+                .ok_or_else(|| SimpleError::new(format!("no visible pixel at row={row}, col={col}")))?;
+            *value = c == '1';
         }
     }
 

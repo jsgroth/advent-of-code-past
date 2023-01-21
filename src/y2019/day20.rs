@@ -139,7 +139,7 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
     Err(SimpleError::new(String::from("no solution found")))
 }
 
-fn find_start_and_end(grid: &Vec<Vec<Space>>) -> Result<(Point, Point), SimpleError> {
+fn find_start_and_end(grid: &[Vec<Space>]) -> Result<(Point, Point), SimpleError> {
     let mut start: Option<Point> = None;
     let mut end: Option<Point> = None;
 
@@ -161,7 +161,7 @@ fn find_start_and_end(grid: &Vec<Vec<Space>>) -> Result<(Point, Point), SimpleEr
     }
 }
 
-fn build_portal_connection_map(maze: &Vec<Vec<Space>>) -> Result<HashMap<Point, Point>, SimpleError> {
+fn build_portal_connection_map(maze: &[Vec<Space>]) -> Result<HashMap<Point, Point>, SimpleError> {
     let mut portal_to_points: HashMap<String, Vec<Point>> = HashMap::new();
 
     for (i, row) in maze.iter().enumerate() {
@@ -190,7 +190,7 @@ fn build_portal_connection_map(maze: &Vec<Vec<Space>>) -> Result<HashMap<Point, 
                 let connected_point = portal_to_points.get(label).unwrap().iter()
                     .find(|&&other_p| other_p != p)
                     .copied()
-                    .ok_or(SimpleError::new(format!("label {label} only has one portal in map")))?;
+                    .ok_or_else(|| SimpleError::new(format!("label {label} only has one portal in map")))?;
 
                 point_to_connected.insert(p, connected_point);
             }
@@ -213,29 +213,17 @@ fn locate_portals(raw_maze: &Vec<Vec<RawSpace>>) -> Vec<Vec<Space>> {
                 _ => continue,
             }
 
-            match (raw_maze[i - 1][j], raw_maze[i - 2][j]) {
-                (RawSpace::HalfPortal(lower), RawSpace::HalfPortal(upper)) => {
-                    maze[i][j] = Space::Portal(String::from_iter([upper, lower].into_iter()))
-                }
-                _ => {}
+            if let (RawSpace::HalfPortal(lower), RawSpace::HalfPortal(upper)) = (raw_maze[i - 1][j], raw_maze[i - 2][j]) {
+                maze[i][j] = Space::Portal(String::from_iter([upper, lower].into_iter()));
             }
-            match (raw_maze[i + 1][j], raw_maze[i + 2][j]) {
-                (RawSpace::HalfPortal(upper), RawSpace::HalfPortal(lower)) => {
-                    maze[i][j] = Space::Portal(String::from_iter([upper, lower].into_iter()))
-                }
-                _ => {}
+            if let (RawSpace::HalfPortal(upper), RawSpace::HalfPortal(lower)) = (raw_maze[i + 1][j], raw_maze[i + 2][j]) {
+                maze[i][j] = Space::Portal(String::from_iter([upper, lower].into_iter()));
             }
-            match (raw_maze[i][j - 1], raw_maze[i][j - 2]) {
-                (RawSpace::HalfPortal(right), RawSpace::HalfPortal(left)) => {
-                    maze[i][j] = Space::Portal(String::from_iter([left, right].into_iter()))
-                }
-                _ => {}
+            if let (RawSpace::HalfPortal(right), RawSpace::HalfPortal(left)) = (raw_maze[i][j - 1], raw_maze[i][j - 2]) {
+                maze[i][j] = Space::Portal(String::from_iter([left, right].into_iter()));
             }
-            match (raw_maze[i][j + 1], raw_maze[i][j + 2]) {
-                (RawSpace::HalfPortal(left), RawSpace::HalfPortal(right)) => {
-                    maze[i][j] = Space::Portal(String::from_iter([left, right].into_iter()))
-                }
-                _ => {}
+            if let (RawSpace::HalfPortal(left), RawSpace::HalfPortal(right)) = (raw_maze[i][j + 1], raw_maze[i][j + 2]) {
+                maze[i][j] = Space::Portal(String::from_iter([left, right].into_iter()));
             }
         }
     }

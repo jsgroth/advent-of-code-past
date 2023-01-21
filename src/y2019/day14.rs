@@ -16,8 +16,8 @@ impl FromStr for Chemical {
     type Err = SimpleError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (amount, name) = s.split_once(' ').ok_or(
-            SimpleError::new(format!("invalid chemical string, expected one space: {s}"))
+        let (amount, name) = s.split_once(' ').ok_or_else(
+||             SimpleError::new(format!("invalid chemical string, expected one space: {s}"))
         )?;
 
         let name = String::from(name);
@@ -98,7 +98,7 @@ fn solve_part_2(input: &str) -> Result<u64, SimpleError> {
 
         let reaction = name_to_reaction.get(chem_name.as_str()).copied().unwrap();
 
-        let amount_to_produce = required as f64 / reaction.output.amount as f64;
+        let amount_to_produce = required / reaction.output.amount as f64;
 
         for input_reaction in &reaction.inputs {
             let input_required = amount_to_produce * input_reaction.amount as f64;
@@ -155,8 +155,8 @@ fn topological_sort_visit(name: &str, reactions_dag: &HashMap<String, Vec<String
 
 fn parse_input(input: &str) -> Result<Vec<Reaction>, SimpleError> {
     input.lines().map(|line| {
-        let (inputs, output) = line.split_once(" => ").ok_or(
-            SimpleError::new(format!("invalid line format, no ' => ': {line}"))
+        let (inputs, output) = line.split_once(" => ").ok_or_else(
+            || SimpleError::new(format!("invalid line format, no ' => ': {line}"))
         )?;
 
         let inputs: Vec<_> = inputs.split(", ")

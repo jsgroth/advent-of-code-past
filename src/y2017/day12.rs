@@ -91,8 +91,8 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
 
 fn parse_input(input: &str) -> Result<Vec<(usize, Vec<usize>)>, SimpleError> {
     input.lines().map(|line| {
-        let (l, r) = line.split_once(" <-> ").ok_or(
-            SimpleError::new(format!("invalid line, missing <->: {line}"))
+        let (l, r) = line.split_once(" <-> ").ok_or_else(
+            || SimpleError::new(format!("invalid line, missing <->: {line}"))
         )?;
 
         let l: usize = l.parse()?;

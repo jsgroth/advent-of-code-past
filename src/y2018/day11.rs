@@ -68,9 +68,8 @@ fn solve_part_2(input: &str) -> Result<Part2Solution, SimpleError> {
 
     let mut max_power_level = i32::MIN;
     let mut max_power_level_soln = Part2Solution { point: Point::new(0, 0), size: 0 };
-    for i in 0..300 {
-        for j in 0..300 {
-            let power_level = power_levels[i][j];
+    for (i, row) in power_levels.iter().enumerate() {
+        for (j, &power_level) in row.iter().enumerate() {
             if power_level > max_power_level {
                 max_power_level = power_level;
                 max_power_level_soln = Part2Solution {
@@ -81,7 +80,7 @@ fn solve_part_2(input: &str) -> Result<Part2Solution, SimpleError> {
         }
     }
 
-    let mut square_power_levels = power_levels.clone();
+    let mut square_power_levels = power_levels;
 
     for side_len in 2..=300 {
         for i in 0..300 - side_len {

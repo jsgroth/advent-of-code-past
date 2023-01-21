@@ -69,14 +69,14 @@ fn combine_ranges(mut ranges: Vec<IpRange>) -> Vec<IpRange> {
 
     let mut combined_ranges = Vec::new();
     let mut prev_range = ranges[0];
-    for i in 1..ranges.len() {
-        match prev_range.combine(&ranges[i]) {
+    for &range in ranges.iter().skip(1) {
+        match prev_range.combine(&range) {
             Some(combined) => {
                 prev_range = combined;
             },
             None => {
                 combined_ranges.push(prev_range);
-                prev_range = ranges[i];
+                prev_range = range;
             }
         }
     }
@@ -87,8 +87,8 @@ fn combine_ranges(mut ranges: Vec<IpRange>) -> Vec<IpRange> {
 
 fn parse_input(input: &str) -> Result<Vec<IpRange>, SimpleError> {
     let ranges: Result<Vec<_>, _> = input.lines().map(|line| {
-        let (l, r) = line.split_once('-').ok_or(
-            SimpleError::new(format!("invalid line format: {line}"))
+        let (l, r) = line.split_once('-').ok_or_else(
+            || SimpleError::new(format!("invalid line format: {line}"))
         )?;
 
         Ok(IpRange::new(l.parse()?, r.parse()?))

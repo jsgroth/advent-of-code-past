@@ -23,8 +23,8 @@ impl FromStr for Range {
     type Err = SimpleError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (start, end) = s.split_once('-').ok_or(
-            SimpleError::new(format!("range string has no '-': {s}"))
+        let (start, end) = s.split_once('-').ok_or_else(
+            || SimpleError::new(format!("range string has no '-': {s}"))
         )?;
 
         let start = start.parse()?;
@@ -51,14 +51,14 @@ impl FromStr for TicketField {
     type Err = SimpleError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (name, ranges) = s.split_once(": ").ok_or(
-            SimpleError::new(format!("no ': ' in ticket field string: {s}"))
+        let (name, ranges) = s.split_once(": ").ok_or_else(
+            || SimpleError::new(format!("no ': ' in ticket field string: {s}"))
         )?;
 
         let name = String::from(name);
 
-        let (range_a, range_b) = ranges.split_once(" or ").ok_or(
-            SimpleError::new(format!("no ' or ' in ticket field string: {s}"))
+        let (range_a, range_b) = ranges.split_once(" or ").ok_or_else(
+            || SimpleError::new(format!("no ' or ' in ticket field string: {s}"))
         )?;
 
         let range_a = range_a.parse()?;

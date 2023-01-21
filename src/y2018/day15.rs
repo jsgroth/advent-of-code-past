@@ -81,7 +81,7 @@ impl Clone for Space {
             Space::Empty => Space::Empty,
             Space::Wall => Space::Wall,
             Space::Warrior(warrior) => {
-                Space::Warrior(Rc::new(RefCell::new(warrior.borrow().clone())))
+                Space::Warrior(Rc::new(RefCell::new(*warrior.borrow())))
             }
         }
     }
@@ -90,6 +90,13 @@ impl Clone for Space {
 #[derive(Debug)]
 struct SimulationInput {
     map: Vec<Vec<Space>>,
+    goblins: Vec<Rc<RefCell<Warrior>>>,
+    elves: Vec<Rc<RefCell<Warrior>>>,
+}
+
+#[derive(Debug)]
+struct SimulationOutput {
+    final_full_round: i32,
     goblins: Vec<Rc<RefCell<Warrior>>>,
     elves: Vec<Rc<RefCell<Warrior>>>,
 }
@@ -122,7 +129,7 @@ impl Clone for SimulationInput {
 fn solve_part_1(input: &str) -> Result<i32, SimpleError> {
     let simulation_input = parse_input(input)?;
 
-    let (final_full_round, goblins, elves) = run_combat_simulation(simulation_input);
+    let SimulationOutput { final_full_round, goblins, elves } = run_combat_simulation(simulation_input);
 
     if goblins.is_empty() {
         return Ok(compute_score(final_full_round, &elves));
@@ -143,17 +150,17 @@ fn solve_part_2(input: &str) -> Result<i32, SimpleError> {
             elf.borrow_mut().attack_power = elf_attack_power;
         }
 
-        let (final_full_round, _, end_elves) = run_combat_simulation(simulation_input.clone());
+        let SimulationOutput { final_full_round, elves, .. } = run_combat_simulation(simulation_input.clone());
 
-        if end_elves.len() == simulation_input.elves.len() {
-            return Ok(compute_score(final_full_round, &end_elves));
+        if elves.len() == simulation_input.elves.len() {
+            return Ok(compute_score(final_full_round, &elves));
         }
     }
 
     Err(SimpleError::new(String::from("no solution found")))
 }
 
-fn run_combat_simulation(input: SimulationInput) -> (i32, Vec<Rc<RefCell<Warrior>>>, Vec<Rc<RefCell<Warrior>>>) {
+fn run_combat_simulation(input: SimulationInput) -> SimulationOutput {
     let SimulationInput {
         mut map,
         mut goblins,
@@ -162,9 +169,9 @@ fn run_combat_simulation(input: SimulationInput) -> (i32, Vec<Rc<RefCell<Warrior
 
     for round in 1.. {
         let mut all_warriors: Vec<_> = goblins.iter()
-            .map(|goblin| Rc::clone(goblin))
+            .map(Rc::clone)
             .chain(
-                elves.iter().map(|elf| Rc::clone(elf))
+                elves.iter().map(Rc::clone)
             )
             .collect();
         all_warriors.sort_by_key(|warrior| warrior.borrow().position);
@@ -179,7 +186,7 @@ fn run_combat_simulation(input: SimulationInput) -> (i32, Vec<Rc<RefCell<Warrior
             let warrior_race = warrior.borrow().race;
             if (warrior_race == WarriorRace::Goblin && elves.is_empty()) ||
                 (warrior_race == WarriorRace::Elf && goblins.is_empty()) {
-                return (round - 1, goblins, elves);
+                return SimulationOutput { final_full_round: round - 1, goblins, elves };
             }
 
             // Move if not adjacent to an enemy and a target is reachable
@@ -213,14 +220,10 @@ fn run_combat_simulation(input: SimulationInput) -> (i32, Vec<Rc<RefCell<Warrior
 
                     match other_warrior.race {
                         WarriorRace::Goblin => {
-                            goblins = goblins.into_iter()
-                                .filter(|goblin| goblin.borrow().position != attack_target)
-                                .collect();
+                            goblins.retain(|goblin| goblin.borrow().position != attack_target);
                         }
                         WarriorRace::Elf => {
-                            elves = elves.into_iter()
-                                .filter(|elf| elf.borrow().position != attack_target)
-                                .collect();
+                            elves.retain(|elf| elf.borrow().position != attack_target);
                         }
                     }
                 }
@@ -343,7 +346,7 @@ fn find_distance_to(
     None
 }
 
-fn find_attack_target(map: &Vec<Vec<Space>>, warrior: &Warrior) -> Option<Point> {
+fn find_attack_target(map: &[Vec<Space>], warrior: &Warrior) -> Option<Point> {
     let mut target_hp = i32::MAX;
     let mut target_location: Option<Point> = None;
     for point in warrior.position.adjacent_points() {
@@ -359,7 +362,7 @@ fn find_attack_target(map: &Vec<Vec<Space>>, warrior: &Warrior) -> Option<Point>
     target_location
 }
 
-fn compute_score(final_full_round: i32, remaining_warriors: &Vec<Rc<RefCell<Warrior>>>) -> i32 {
+fn compute_score(final_full_round: i32, remaining_warriors: &[Rc<RefCell<Warrior>>]) -> i32 {
     let total_hit_points: i32 = remaining_warriors.iter()
         .map(|warrior| warrior.borrow().hit_points)
         .sum();

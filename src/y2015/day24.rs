@@ -33,14 +33,14 @@ fn solve_part_2(input: &str) -> Result<u64, SimpleError> {
     Ok(min_qe)
 }
 
-fn find_qe_for_best_grouping(groupings: &Vec<Vec<u64>>) -> u64 {
+fn find_qe_for_best_grouping(groupings: &[Vec<u64>]) -> u64 {
     groupings.iter()
         .map(|a| a.iter().product::<u64>())
         .min()
         .unwrap_or(0)
 }
 
-fn find_valid_shortest_groupings(groupings: &Vec<Vec<u64>>, weights: &[u64], total_weight: u64, target_groups: usize) -> Vec<Vec<u64>> {
+fn find_valid_shortest_groupings(groupings: &[Vec<u64>], weights: &[u64], total_weight: u64, target_groups: usize) -> Vec<Vec<u64>> {
     let min_grouping_len = groupings.iter()
         .map(|grouping| grouping.len())
         .min()
@@ -91,7 +91,7 @@ fn find_all_shortest_groupings(
 
     let weight = weights[index];
     if weight + group_sum <= target_weight {
-        let mut new_group_so_far = group_so_far.clone();
+        let mut new_group_so_far = group_so_far;
         new_group_so_far.push(weight);
         groupings.extend(find_all_shortest_groupings(weights, index + 1, target_weight, new_group_so_far, min_group_len));
     }
@@ -113,7 +113,7 @@ fn grouping_exists(
 
     let group_sum: u64 = group_so_far.iter().copied().sum();
     if group_sum == target_weight {
-        let mut new_visited = visited.clone();
+        let mut new_visited = visited;
         new_visited.extend(group_so_far);
         return grouping_exists(weights, 0, target_weight, new_visited, Vec::new(), target_groups - 1);
     }
@@ -128,9 +128,9 @@ fn grouping_exists(
 
     let weight = weights[index];
     if !visited.contains(&weight) && group_sum + weight <= target_weight {
-        let mut new_group_so_far = group_so_far.clone();
+        let mut new_group_so_far = group_so_far;
         new_group_so_far.push(weight);
-        if grouping_exists(weights, index + 1, target_weight, visited.clone(), new_group_so_far, target_groups) {
+        if grouping_exists(weights, index + 1, target_weight, visited, new_group_so_far, target_groups) {
             return true;
         }
     }

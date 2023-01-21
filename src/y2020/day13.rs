@@ -7,8 +7,8 @@ use crate::SimpleError;
 fn solve_part_1(input: &str) -> Result<u64, SimpleError> {
     let earliest_departure: u64 = crate::read_single_line(input)?.parse()?;
 
-    let second_line = input.lines().skip(1).next().ok_or(
-        SimpleError::new(String::from("input should have 2 lines"))
+    let second_line = input.lines().nth(1).ok_or_else(
+        || SimpleError::new(String::from("input should have 2 lines"))
     )?;
 
     let buses: Vec<_> = second_line.split(',')
@@ -28,8 +28,8 @@ fn solve_part_1(input: &str) -> Result<u64, SimpleError> {
 }
 
 fn solve_part_2(input: &str) -> Result<i128, SimpleError> {
-    let second_line = input.lines().skip(1).next().ok_or(
-        SimpleError::new(String::from("input should have 2 lines"))
+    let second_line = input.lines().nth(1).ok_or_else(
+        || SimpleError::new(String::from("input should have 2 lines"))
     )?;
 
     let buses_with_indices: Vec<_> = second_line.split(',').enumerate()
@@ -43,9 +43,8 @@ fn solve_part_2(input: &str) -> Result<i128, SimpleError> {
     // Or equivalently:
     //     x ≡ bus_id - index (mod bus_id)
     // Rewrite the list as (a, N) pairs such that x ≡ a (mod N) and 0 <= a < N
-    let linear_congruences: Vec<_> = buses_with_indices.into_iter()
-        .map(|(index, bus)| ((bus - index) as i128, bus as i128))
-        .collect();
+    let linear_congruences = buses_with_indices.into_iter()
+        .map(|(index, bus)| ((bus - index) as i128, bus as i128));
 
     // https://en.wikipedia.org/wiki/Chinese_remainder_theorem
     //
@@ -64,7 +63,7 @@ fn solve_part_2(input: &str) -> Result<i128, SimpleError> {
     // This can be generalized to a set of N linear congruences as long as each pair of divisors is
     // coprime. If m, n, and p are pairwise coprime, then mn and p are also coprime, and thus we
     // can apply the theorem by reducing over the system of congruences.
-    let (solution, _) = linear_congruences.into_iter()
+    let (solution, _) = linear_congruences
         .reduce(|(a, m), (b, n)| {
             let (m_mod_n_inv, n_mod_m_inv) = extended_euclidean_algorithm(m, n);
 

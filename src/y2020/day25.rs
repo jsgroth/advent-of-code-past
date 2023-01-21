@@ -7,12 +7,12 @@ use crate::SimpleError;
 fn solve_part_1(input: &str) -> Result<u64, SimpleError> {
     let mut lines = input.lines();
 
-    let public_key_1: u64 = lines.next().ok_or(
-        SimpleError::new(String::from("input is empty"))
+    let public_key_1: u64 = lines.next().ok_or_else(
+        || SimpleError::new(String::from("input is empty"))
     )?.parse()?;
 
-    let public_key_2: u64 = lines.next().ok_or(
-        SimpleError::new(String::from("input only has one line, expected two"))
+    let public_key_2: u64 = lines.next().ok_or_else(
+        || SimpleError::new(String::from("input only has one line, expected two"))
     )?.parse()?;
 
     let loop_size_1 = find_loop_size(public_key_1)?;

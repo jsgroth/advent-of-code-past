@@ -12,18 +12,18 @@ fn solve_part(input: &str) -> Result<String, SimpleError> {
         return Err(SimpleError::new(format!("invalid line format: {line}")));
     }
 
-    let mut s: Vec<_> = line.as_bytes().iter().copied().collect();
+    let mut s = line.as_bytes().to_vec();
     loop {
         *s.last_mut().unwrap() += 1;
 
         let mut i = s.len() - 1;
-        while s[i] == ('z' as u8) + 1 {
-            s[i] = 'a' as u8;
+        while s[i] == b'z' + 1 {
+            s[i] = b'a';
 
             i -= 1;
             s[i] += 1;
 
-            if s[i] == ('i' as u8) || s[i] == ('o' as u8) || s[i] == ('l' as u8) {
+            if s[i] == b'i' || s[i] == b'o' || s[i] == b'l' {
                 s[i] += 1;
             }
         }
@@ -43,7 +43,7 @@ fn is_valid(s: &[u8]) -> bool {
         return false;
     }
 
-    if s.iter().any(|&c| c == ('i' as u8) || c == ('o' as u8) || c == ('l' as u8)) {
+    if s.iter().any(|&c| c == b'i' || c == b'o' || c == b'l') {
         return false;
     }
 

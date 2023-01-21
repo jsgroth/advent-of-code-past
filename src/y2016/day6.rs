@@ -14,8 +14,8 @@ fn solve_part(input: &str, find_min: bool) -> Result<String, SimpleError> {
     let mut result = String::new();
     for j in 0..chars[0].len() {
         let mut char_counts = HashMap::new();
-        for i in 0..chars.len() {
-            let c = chars[i][j];
+        for row in &chars {
+            let c = row[j];
             if let Some(count) = char_counts.get_mut(&c) {
                 *count += 1;
             } else {

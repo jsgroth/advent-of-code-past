@@ -25,15 +25,15 @@ impl AssembunnyInstruction {
         let split: Vec<_> = line.split(' ').collect();
         match split.as_slice() {
             ["cpy", x, y] => {
-                Ok(Self::Copy(parse_argument(*x)?, parse_argument(*y)?))
+                Ok(Self::Copy(parse_argument(x)?, parse_argument(y)?))
             },
-            ["inc", x] => Ok(Self::Increment(as_register_id(*x)?)),
-            ["dec", x] => Ok(Self::Decrement(as_register_id(*x)?)),
+            ["inc", x] => Ok(Self::Increment(as_register_id(x)?)),
+            ["dec", x] => Ok(Self::Decrement(as_register_id(x)?)),
             ["jnz", x, y] => {
-                Ok(Self::JumpNotZero(parse_argument(*x)?, parse_argument(*y)?))
+                Ok(Self::JumpNotZero(parse_argument(x)?, parse_argument(y)?))
             },
-            ["tgl", x] => Ok(Self::Toggle(as_register_id(*x)?)),
-            ["out", x] => Ok(Self::Out(as_register_id(*x)?)),
+            ["tgl", x] => Ok(Self::Toggle(as_register_id(x)?)),
+            ["out", x] => Ok(Self::Out(as_register_id(x)?)),
             _ => Err(SimpleError::new(format!("invalid line: {line}")))
         }
     }
@@ -185,7 +185,7 @@ impl AssembunnyProgram {
             }
         }
 
-        return pattern.next().is_none();
+        pattern.next().is_none()
     }
 }
 

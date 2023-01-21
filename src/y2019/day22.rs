@@ -36,7 +36,7 @@ fn bigint_multiply(a: i64, b: i64, modulo: i64) -> i64 {
 
 impl Shuffle {
     fn from_line(line: &str) -> Result<Self, SimpleError> {
-        let split: Vec<_> = line.split(" ").collect();
+        let split: Vec<_> = line.split(' ').collect();
         match split.as_slice() {
             ["deal", "into", "new", "stack"] => Ok(Self::DealIntoNewStack),
             ["cut", n] => {
@@ -104,7 +104,7 @@ fn solve_part_2(input: &str) -> Result<i64, SimpleError> {
     let number_in_2020 = bigint_multiply(coefficient_modular_inverse, target, PART_2_DECK_SIZE)
         .rem_euclid(PART_2_DECK_SIZE);
 
-    return Ok(number_in_2020);
+    Ok(number_in_2020)
 }
 
 fn modular_inverse(a: i64, b: i64) -> i64 {

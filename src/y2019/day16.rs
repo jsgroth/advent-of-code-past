@@ -88,7 +88,7 @@ fn to_digits(s: &str) -> Result<Vec<i32>, SimpleError> {
         .map(|c| {
             c.to_digit(10)
                 .map(|digit| digit as i32)
-                .ok_or(SimpleError::new(format!("{c} is not a digit")))
+                .ok_or_else(|| SimpleError::new(format!("{c} is not a digit")))
         })
         .collect()
 }

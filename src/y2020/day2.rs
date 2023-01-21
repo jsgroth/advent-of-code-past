@@ -47,16 +47,16 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
 
 fn parse_input(input: &str) -> Result<Vec<Password>, SimpleError> {
     input.lines().map(|line| {
-        let (rule, password_text) = line.split_once(": ").ok_or(
-            SimpleError::new(format!("line contains no ': ': {line}"))
+        let (rule, password_text) = line.split_once(": ").ok_or_else(
+            || SimpleError::new(format!("line contains no ': ': {line}"))
         )?;
 
-        let (rule_range, rule_char) = rule.split_once(' ').ok_or(
-            SimpleError::new(format!("rule in line contains no space: {line}"))
+        let (rule_range, rule_char) = rule.split_once(' ').ok_or_else(
+            || SimpleError::new(format!("rule in line contains no space: {line}"))
         )?;
 
-        let (min_allowed, max_allowed) = rule_range.split_once('-').ok_or(
-            SimpleError::new(format!("rule range in line contains no dash: {line}"))
+        let (min_allowed, max_allowed) = rule_range.split_once('-').ok_or_else(
+            || SimpleError::new(format!("rule range in line contains no dash: {line}"))
         )?;
 
         let rule_char = rule_char.parse()?;

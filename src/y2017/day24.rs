@@ -88,8 +88,8 @@ fn search(
 
 fn parse_input(input: &str) -> Result<Vec<(u32, u32)>, SimpleError> {
     input.lines().map(|line| {
-        let (l, r) = line.split_once('/').ok_or(
-            SimpleError::new(format!("line has no '/': {line}"))
+        let (l, r) = line.split_once('/').ok_or_else(
+            || SimpleError::new(format!("line has no '/': {line}"))
         )?;
         Ok((l.parse()?, r.parse()?))
     })

@@ -152,7 +152,7 @@ where I: Iterator<Item = char>
     iter.next();
 
     let mut s = String::new();
-    while let Some(c) = iter.next() {
+    for c in iter.by_ref() {
         if c == '"' {
             break;
         }

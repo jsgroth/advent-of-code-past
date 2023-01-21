@@ -35,7 +35,7 @@ fn solve_part_1(input: &str) -> Result<String, SimpleError> {
 
 fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
     let target_sequence: Vec<_> = crate::read_single_line(input)?.chars()
-        .map(|c| c.to_digit(10).ok_or(SimpleError::new(format!("not a digit: {c}"))))
+        .map(|c| c.to_digit(10).ok_or_else(|| SimpleError::new(format!("not a digit: {c}"))))
         .collect::<Result<_, _>>()?;
 
     let mut list = Vec::from(INITIAL_STATE);
@@ -55,11 +55,7 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
             if new_value == target_sequence[target_index] {
                 target_index += 1;
             } else {
-                target_index = if new_value == target_sequence[0] {
-                    1
-                } else {
-                    0
-                };
+                target_index = usize::from(new_value == target_sequence[0]);
             }
 
             if target_index == target_sequence.len() {

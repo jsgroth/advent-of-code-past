@@ -130,13 +130,8 @@ fn run_simulation(mut immune_system: Vec<UnitGroup>, mut infection: Vec<UnitGrou
         infection = next_infection;
     }
 
-    immune_system = immune_system.into_iter()
-        .filter(|unit_group| !unit_group.is_eliminated())
-        .collect();
-
-    infection = infection.into_iter()
-        .filter(|unit_group| !unit_group.is_eliminated())
-        .collect();
+    immune_system.retain(|unit_group| !unit_group.is_eliminated());
+    infection.retain(|unit_group| !unit_group.is_eliminated());
 
     (immune_system, infection)
 }
@@ -268,8 +263,8 @@ fn parse_unit_group(lines: &[&str], unit_type: UnitType) -> Result<Vec<UnitGroup
         let mut immunities = Vec::new();
         let mut rest = split[7];
         if rest.starts_with('(') {
-            let close_paren_index = rest.chars().position(|c| c == ')').ok_or(
-                SimpleError::new(format!("line has open paren but no close paren: {line}"))
+            let close_paren_index = rest.chars().position(|c| c == ')').ok_or_else(
+                || SimpleError::new(format!("line has open paren but no close paren: {line}"))
             )?;
 
             let (parsed_weaknesses, parsed_immunities) =

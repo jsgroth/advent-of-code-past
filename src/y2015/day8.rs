@@ -11,7 +11,7 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
         let mut removed_chars = 2;
 
         let mut chars = line[1..original_len - 1].chars().peekable();
-        while let Some(_) = chars.peek() {
+        while chars.peek().is_some() {
             let c = chars.next().unwrap();
             if c == '\\' {
                 error_if_exhausted(&mut chars, line)?;

@@ -78,12 +78,12 @@ impl ChronoOperation {
             Self::OrImmediate => registers[a_us] | b,
             Self::SetRegister => registers[a_us],
             Self::SetImmediate => a,
-            Self::GreaterThanImmediateRegister => if a > registers[b_us] { 1 } else { 0 },
-            Self::GreaterThanRegisterImmediate => if registers[a_us] > b { 1 } else { 0 },
-            Self::GreaterThanRegisterRegister => if registers[a_us] > registers[b_us] { 1 } else { 0 },
-            Self::EqualImmediateRegister => if a == registers[b_us] { 1 } else { 0 },
-            Self::EqualRegisterImmediate => if registers[a_us] == b { 1 } else { 0 },
-            Self::EqualRegisterRegister => if registers[a_us] == registers[b_us] { 1 } else { 0 },
+            Self::GreaterThanImmediateRegister => u64::from(a > registers[b_us]),
+            Self::GreaterThanRegisterImmediate => u64::from(registers[a_us] > b),
+            Self::GreaterThanRegisterRegister => u64::from(registers[a_us] > registers[b_us]),
+            Self::EqualImmediateRegister => u64::from(a == registers[b_us]),
+            Self::EqualRegisterImmediate => u64::from(registers[a_us] == b),
+            Self::EqualRegisterRegister => u64::from(registers[a_us] == registers[b_us]),
         }
     }
 

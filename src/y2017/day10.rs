@@ -12,11 +12,9 @@ fn solve_part_1(input: &str, list_len: usize) -> Result<usize, SimpleError> {
     let mut list: Vec<_> = (0..=list_end).into_iter().collect();
 
     let mut position = 0;
-    let mut skip_size = 0;
-    for &length in &lengths {
+    for (skip_size, &length) in lengths.iter().enumerate() {
         knothash::circular_reverse(&mut list, position, length);
         position = (position + length + skip_size) % list.len();
-        skip_size += 1;
     }
 
     Ok(list[0] as usize * list[1] as usize)

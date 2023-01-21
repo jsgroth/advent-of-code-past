@@ -3,6 +3,7 @@
 
 use std::cmp::Ordering;
 use std::error::Error;
+use std::ops::Not;
 use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq)]
@@ -58,12 +59,12 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
     let mut grid = vec![vec![false; 1000]; 1000];
 
     for action in &actions {
-        for x in action.p1.x..=action.p2.x {
-            for y in action.p1.y..=action.p2.y {
-                match action.action_type {
-                    ActionType::TurnOn => grid[x][y] = true,
-                    ActionType::TurnOff => grid[x][y] = false,
-                    ActionType::Toggle => grid[x][y] = !grid[x][y],
+        for row in &mut grid[action.p1.x..=action.p2.x] {
+            for value in &mut row[action.p1.y..=action.p2.y] {
+                *value = match action.action_type {
+                    ActionType::TurnOn => true,
+                    ActionType::TurnOff => false,
+                    ActionType::Toggle => value.not(),
                 }
             }
         }
@@ -83,12 +84,12 @@ fn solve_part_2(input: &str) -> Result<u32, SimpleError> {
     let mut grid = vec![vec![0_u32; 1000]; 1000];
 
     for action in &actions {
-        for x in action.p1.x..=action.p2.x {
-            for y in action.p1.y..=action.p2.y {
+        for row in &mut grid[action.p1.x..=action.p2.x] {
+            for value in &mut row[action.p1.y..=action.p2.y] {
                 match action.action_type {
-                    ActionType::TurnOn => grid[x][y] += 1,
-                    ActionType::TurnOff => grid[x][y] = grid[x][y].saturating_sub(1),
-                    ActionType::Toggle => grid[x][y] += 2,
+                    ActionType::TurnOn => *value += 1,
+                    ActionType::TurnOff => *value = value.saturating_sub(1),
+                    ActionType::Toggle => *value += 2,
                 }
             }
         }

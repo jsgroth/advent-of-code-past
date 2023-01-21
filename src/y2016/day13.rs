@@ -82,7 +82,7 @@ fn solve_part_1(input: &str, target_x: i64, target_y: i64) -> Result<usize, Simp
     let start = Point::new(1, 1);
 
     let mut visited = HashSet::new();
-    visited.insert(start.clone());
+    visited.insert(start);
 
     let mut heap = BinaryHeap::new();
     heap.push(AStarHeapEntry::new(start, 0, &target));
@@ -96,7 +96,7 @@ fn solve_part_1(input: &str, target_x: i64, target_y: i64) -> Result<usize, Simp
             }
 
             if !visited.contains(&adjacent_point) {
-                visited.insert(adjacent_point.clone());
+                visited.insert(adjacent_point);
                 heap.push(AStarHeapEntry::new(adjacent_point, steps + 1, &target));
             }
         }
@@ -111,7 +111,7 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
     let start = Point::new(1, 1);
 
     let mut visited = HashSet::new();
-    visited.insert(start.clone());
+    visited.insert(start);
 
     let mut queue = VecDeque::new();
     queue.push_back((start, 0));
@@ -125,7 +125,7 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
 
         for adjacent_point in p.adjacent_points(favorite_number) {
             if !visited.contains(&adjacent_point) {
-                visited.insert(adjacent_point.clone());
+                visited.insert(adjacent_point);
                 queue.push_back((adjacent_point, steps + 1));
             }
         }

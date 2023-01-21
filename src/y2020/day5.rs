@@ -6,7 +6,7 @@ use crate::SimpleError;
 
 fn solve_part_1(input: &str) -> Result<u32, SimpleError> {
     let seat_ids: Vec<_> = input.lines()
-        .map(|line| seat_id(line))
+        .map(seat_id)
         .collect::<Result<_, _>>()?;
 
     Ok(seat_ids.into_iter().max().unwrap())
@@ -14,7 +14,7 @@ fn solve_part_1(input: &str) -> Result<u32, SimpleError> {
 
 fn solve_part_2(input: &str) -> Result<u32, SimpleError> {
     let mut seat_ids: Vec<_> = input.lines()
-        .map(|line| seat_id(line))
+        .map(seat_id)
         .collect::<Result<_, _>>()?;
 
     seat_ids.sort();

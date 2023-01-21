@@ -69,8 +69,8 @@ fn solve_part(input: &str, find_max_ever: bool) -> Result<i64, SimpleError> {
         return Ok(max_ever);
     }
 
-    let max = registers.into_values().max().ok_or(
-        SimpleError::new(String::from("no registers were set"))
+    let max = registers.into_values().max().ok_or_else(
+        || SimpleError::new(String::from("no registers were set"))
     )?;
 
     Ok(max)

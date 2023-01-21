@@ -26,7 +26,7 @@ fn solve_part_2(input: &str) -> Result<u32, SimpleError> {
 
 fn parse_input(input: &str) -> Result<Vec<(u32, u32, u32)>, SimpleError> {
     let dimensions: Result<Vec<_>, _> = input.lines().map(|line| {
-        let split: Vec<_> = line.split("x").collect();
+        let split: Vec<_> = line.split('x').collect();
         match split.as_slice() {
             [l, w, h] => {
                 Ok((l.parse::<u32>()?, w.parse::<u32>()?, h.parse::<u32>()?))

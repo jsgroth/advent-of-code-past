@@ -83,7 +83,7 @@ fn solve_part(input: &str, replace_8_11_rules: bool) -> Result<usize, SimpleErro
     Ok(valid_count)
 }
 
-fn replace_rules_for_part_two(rules: &mut Vec<Rule>) {
+fn replace_rules_for_part_two(rules: &mut [Rule]) {
     rules[8] = Rule {
         index: 8,
         branches: vec![
@@ -162,8 +162,8 @@ fn parse_input(input: &str) -> Result<Input, SimpleError> {
     let mut a_rule_index: Option<usize> = None;
     let mut b_rule_index: Option<usize> = None;
     for rule_line in &rule_lines {
-        let (index, branches) = rule_line.split_once(": ").ok_or(
-            SimpleError::new(format!("line did not contain a ': ': {rule_line}"))
+        let (index, branches) = rule_line.split_once(": ").ok_or_else(
+            || SimpleError::new(format!("line did not contain a ': ': {rule_line}"))
         )?;
 
         let index = index.parse()?;

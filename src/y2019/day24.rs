@@ -23,10 +23,11 @@ fn solve_part_1(input: &str) -> Result<u64, SimpleError> {
 fn solve_part_2(input: &str, minutes: usize) -> Result<usize, SimpleError> {
     let initial_grid = parse_input(input)?;
 
-    let mut grids = Vec::new();
-    grids.push(vec![vec![false; initial_grid[0].len()]; initial_grid.len()]);
-    grids.push(initial_grid.clone());
-    grids.push(vec![vec![false; initial_grid[0].len()]; initial_grid.len()]);
+    let mut grids = vec![
+        vec![vec![false; initial_grid[0].len()]; initial_grid.len()],
+        initial_grid.clone(),
+        vec![vec![false; initial_grid[0].len()]; initial_grid.len()],
+    ];
 
     for _ in 0..minutes {
         grids = simulate_iteration_recursive(&grids);
@@ -43,7 +44,7 @@ fn solve_part_2(input: &str, minutes: usize) -> Result<usize, SimpleError> {
     Ok(bugs)
 }
 
-fn biodiversity_rating(grid: &Vec<Vec<bool>>) -> u64 {
+fn biodiversity_rating(grid: &[Vec<bool>]) -> u64 {
     let mut total_rating = 0;
     for (i, row) in grid.iter().enumerate() {
         for (j, &bug) in row.iter().enumerate() {
@@ -122,10 +123,8 @@ fn simulate_iteration_recursive(grids: &Vec<Vec<Vec<bool>>>) -> Vec<Vec<Vec<bool
                         if grid_index < grids.len() - 1 {
                             neighbor_count += count_from_direction(&grids[grid_index + 1], di, dj);
                         }
-                    } else {
-                        if grid[adj_i as usize][adj_j as usize] {
-                            neighbor_count += 1;
-                        }
+                    } else if grid[adj_i as usize][adj_j as usize] {
+                        neighbor_count += 1;
                     }
                 }
 
@@ -146,7 +145,7 @@ fn simulate_iteration_recursive(grids: &Vec<Vec<Vec<bool>>>) -> Vec<Vec<Vec<bool
     new_grids
 }
 
-fn count_from_direction(grid: &Vec<Vec<bool>>, di: i32, dj: i32) -> usize {
+fn count_from_direction(grid: &[Vec<bool>], di: i32, dj: i32) -> usize {
     match (di, dj) {
         (-1, 0) => {
             grid[4].iter().filter(|&&b| b).count()
@@ -164,7 +163,7 @@ fn count_from_direction(grid: &Vec<Vec<bool>>, di: i32, dj: i32) -> usize {
     }
 }
 
-fn should_prepend(first_grid: &Vec<Vec<bool>>) -> bool {
+fn should_prepend(first_grid: &[Vec<bool>]) -> bool {
     if first_grid[0].iter().any(|&b| b) {
         return true;
     }
@@ -176,16 +175,12 @@ fn should_prepend(first_grid: &Vec<Vec<bool>>) -> bool {
     (1..4).any(|i| first_grid[i][0] || first_grid[i][4])
 }
 
-fn should_append(last_grid: &Vec<Vec<bool>>) -> bool {
-    for i in 1..4 {
-        for j in 1..4 {
-            if last_grid[i][j] {
-                return true;
-            }
-        }
-    }
-
-    false
+fn should_append(last_grid: &[Vec<bool>]) -> bool {
+    (1..4).any(|i| {
+        (1..4).any(|j| {
+            last_grid[i][j]
+        })
+    })
 }
 
 fn parse_input(input: &str) -> Result<Vec<Vec<bool>>, SimpleError> {

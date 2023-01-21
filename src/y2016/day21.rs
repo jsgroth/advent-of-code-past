@@ -62,7 +62,7 @@ impl Instruction {
             }
             Self::RotatePositionOf(x) => {
                 let x = find_letter(password, x)?;
-                let rotate_right_x = 1 + x + if x >= 4 { 1 } else { 0 };
+                let rotate_right_x = 1 + x + usize::from(x >= 4);
                 *password = rotate_right(password, rotate_right_x);
             }
             Self::Reverse(x, y) => {
@@ -117,7 +117,7 @@ impl Instruction {
 }
 
 fn first_letter(s: &str) -> Result<char, SimpleError> {
-    s.chars().next().ok_or(SimpleError::new(String::from("unexpected empty string")))
+    s.chars().next().ok_or_else(|| SimpleError::new(String::from("unexpected empty string")))
 }
 
 fn solve_part_1(input: &str, starting_password: &str) -> Result<String, SimpleError> {
@@ -155,8 +155,8 @@ fn rotate_right(password: &Vec<char>, n: usize) -> Vec<char> {
 }
 
 fn find_letter(password: &Vec<char>, letter: char) -> Result<usize, SimpleError> {
-    password.iter().position(|&c| c == letter).ok_or(
-        SimpleError::new(format!("password does not contain letter '{letter}': {password:?}"))
+    password.iter().position(|&c| c == letter).ok_or_else(
+        || SimpleError::new(format!("password does not contain letter '{letter}': {password:?}"))
     )
 }
 

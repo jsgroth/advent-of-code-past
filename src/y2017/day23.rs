@@ -39,10 +39,10 @@ impl Instruction {
     fn from_line(line: &str) -> Result<Self, SimpleError> {
         let split: Vec<_> = line.split(' ').collect();
         match split.as_slice() {
-            ["set", x, y] => Ok(Self::Set(x.parse()?, Arg::from_str(*y)?)),
-            ["sub", x, y] => Ok(Self::Subtract(x.parse()?, Arg::from_str(*y)?)),
-            ["mul", x, y] => Ok(Self::Multiply(x.parse()?, Arg::from_str(*y)?)),
-            ["jnz", x, y] => Ok(Self::JumpNotZero(Arg::from_str(*x)?, Arg::from_str(*y)?)),
+            ["set", x, y] => Ok(Self::Set(x.parse()?, Arg::from_str(y)?)),
+            ["sub", x, y] => Ok(Self::Subtract(x.parse()?, Arg::from_str(y)?)),
+            ["mul", x, y] => Ok(Self::Multiply(x.parse()?, Arg::from_str(y)?)),
+            ["jnz", x, y] => Ok(Self::JumpNotZero(Arg::from_str(x)?, Arg::from_str(y)?)),
             _ => Err(SimpleError::new(format!("invalid line: {line}")))
         }
     }

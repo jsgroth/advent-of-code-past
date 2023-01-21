@@ -14,17 +14,11 @@ enum Space {
 
 impl Space {
     fn is_water(&self) -> bool {
-        match self {
-            Self::RestingWater | Self::RunningWater => true,
-            _ => false
-        }
+        matches!(self, Self::RestingWater | Self::RunningWater)
     }
 
     fn is_solid(&self) -> bool {
-        match self {
-            Self::Clay | Self::RestingWater => true,
-            _ => false
-        }
+        matches!(self, Self::Clay | Self::RestingWater)
     }
 }
 
@@ -60,8 +54,7 @@ fn solve_both_parts(input: &str) -> Result<(usize, usize), SimpleError> {
 
     let mut water_count = 0;
     let mut resting_water_count = 0;
-    for y in min_y..map.len() {
-        let row = &map[y];
+    for row in map.iter().skip(min_y) {
         water_count += row.iter().filter(|&&space| space.is_water()).count();
         resting_water_count += row.iter().filter(|&&space| space == Space::RestingWater).count();
     }
@@ -78,8 +71,8 @@ fn flood(map: &mut Vec<Vec<Space>>, x: usize, y: usize) {
 
     if current_y == map.len() - 1 {
         // Reached the bottom of the map, this is just a downwards stream of running water
-        for running_y in y..=current_y {
-            map[running_y][x] = Space::RunningWater;
+        for row in &mut map[y..=current_y] {
+            row[x] = Space::RunningWater;
         }
         return;
     }
@@ -123,8 +116,8 @@ fn flood(map: &mut Vec<Vec<Space>>, x: usize, y: usize) {
             for running_x in left_x..=right_x {
                 map[current_y][running_x] = Space::RunningWater;
             }
-            for running_y in y..current_y {
-                map[running_y][x] = Space::RunningWater;
+            for row in &mut map[y..current_y] {
+                row[x] = Space::RunningWater;
             }
             return;
         }
@@ -177,16 +170,16 @@ fn build_map(clay_veins: &[ClayVein]) -> Vec<Vec<Space>> {
 
 fn parse_input(input: &str) -> Result<Vec<ClayVein>, SimpleError> {
     input.lines().map(|line| {
-        let (l, r) = line.split_once(", ").ok_or(
-            SimpleError::new(format!("invalid line format: {line}"))
+        let (l, r) = line.split_once(", ").ok_or_else(
+            || SimpleError::new(format!("invalid line format: {line}"))
         )?;
 
         match &line[..2] {
             "x=" => {
                 let x = &l[2..];
 
-                let (y_min, y_max) = r[2..].split_once("..").ok_or(
-                    SimpleError::new(format!("invalid y range format in line: {line}"))
+                let (y_min, y_max) = r[2..].split_once("..").ok_or_else(
+                    || SimpleError::new(format!("invalid y range format in line: {line}"))
                 )?;
 
                 Ok(ClayVein::new_vertical(x.parse()?, y_min.parse()?, y_max.parse()?))
@@ -194,8 +187,8 @@ fn parse_input(input: &str) -> Result<Vec<ClayVein>, SimpleError> {
             "y=" => {
                 let y = &l[2..];
 
-                let (x_min, x_max) = r[2..].split_once("..").ok_or(
-                    SimpleError::new(format!("invalid x range format in line: {line}"))
+                let (x_min, x_max) = r[2..].split_once("..").ok_or_else(
+                    || SimpleError::new(format!("invalid x range format in line: {line}"))
                 )?;
 
                 Ok(ClayVein::new_horizontal(x_min.parse()?, x_max.parse()?, y.parse()?))

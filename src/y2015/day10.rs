@@ -19,7 +19,7 @@ fn solve_part(input: &str, iterations: usize) -> Result<usize, SimpleError> {
         let mut current_char = current_sequence.chars().next().unwrap();
         for c in current_sequence.chars().skip(1) {
             if current_char != c {
-                next_sequence.push((current_run + ('0' as u8)) as char);
+                next_sequence.push((current_run + b'0') as char);
                 next_sequence.push(current_char);
 
                 current_run = 1;
@@ -29,7 +29,7 @@ fn solve_part(input: &str, iterations: usize) -> Result<usize, SimpleError> {
             }
         }
 
-        next_sequence.push((current_run + ('0' as u8)) as char);
+        next_sequence.push((current_run + b'0') as char);
         next_sequence.push(current_char);
 
         current_sequence = next_sequence;

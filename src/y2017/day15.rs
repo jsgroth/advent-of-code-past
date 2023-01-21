@@ -11,8 +11,8 @@ fn solve_part(input: &str, wait_for_multiples: bool, rounds: usize) -> Result<us
     let start_values: Result<Vec<_>, _> = input.lines().map(|line| {
         line.split(' ')
             .last()
-            .ok_or(
-                SimpleError::new(String::from("line is empty"))
+            .ok_or_else(
+                || SimpleError::new(String::from("line is empty"))
             )?
             .parse::<u64>()
             .map_err(SimpleError::from)

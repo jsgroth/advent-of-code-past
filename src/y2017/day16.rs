@@ -19,14 +19,14 @@ impl DanceMove {
                 Ok(Self::Spin(s[1..].parse()?))
             }
             Some('x') => {
-                let (a, b) = s[1..].split_once('/').ok_or(
-                    SimpleError::new(format!("invalid exchange move: {s}"))
+                let (a, b) = s[1..].split_once('/').ok_or_else(
+                    || SimpleError::new(format!("invalid exchange move: {s}"))
                 )?;
                 Ok(Self::Exchange(a.parse()?, b.parse()?))
             }
             Some('p') => {
-                let (a, b) = s[1..].split_once('/').ok_or(
-                    SimpleError::new(format!("invalid exchange move: {s}"))
+                let (a, b) = s[1..].split_once('/').ok_or_else(
+                    || SimpleError::new(format!("invalid exchange move: {s}"))
                 )?;
                 Ok(Self::Partner(a.parse()?, b.parse()?))
             }
@@ -38,7 +38,7 @@ impl DanceMove {
 fn solve_part_1(input: &str, num_programs: u8) -> Result<String, SimpleError> {
     let dance_moves = parse_input(input)?;
 
-    let programs_end = (('a' as u8) + num_programs) as char;
+    let programs_end = (b'a' + num_programs) as char;
     let programs: Vec<_> = ('a'..programs_end).collect();
 
     let after_dance = simulate_dance(programs, &dance_moves);

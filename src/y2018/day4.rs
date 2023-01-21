@@ -6,16 +6,16 @@ use std::error::Error;
 use crate::SimpleError;
 
 #[derive(Debug, Clone, Copy)]
-enum LogEvent {
-    GuardBeginsShift(usize),
-    GuardFallsAsleep,
-    GuardWakesUp,
+enum GuardLogEvent {
+    BeginsShift(usize),
+    FallsAsleep,
+    WakesUp,
 }
 
 #[derive(Debug, Clone, Copy)]
 struct LogLine {
     minute: usize,
-    event: LogEvent,
+    event: GuardLogEvent,
 }
 
 fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
@@ -62,19 +62,17 @@ fn compute_guard_id_to_minutes_asleep(logs: &Vec<LogLine>) -> HashMap<usize, Vec
     let mut fell_asleep_minute = 0;
     for &log in logs {
         match log.event {
-            LogEvent::GuardBeginsShift(guard_id) => {
+            GuardLogEvent::BeginsShift(guard_id) => {
                 current_guard_id = guard_id;
-                if !minutes_asleep.contains_key(&guard_id) {
-                    minutes_asleep.insert(guard_id, vec![0; 60]);
-                }
+                minutes_asleep.entry(guard_id).or_insert_with(|| vec![0; 60]);
             }
-            LogEvent::GuardFallsAsleep => {
+            GuardLogEvent::FallsAsleep => {
                 fell_asleep_minute = log.minute;
             }
-            LogEvent::GuardWakesUp => {
+            GuardLogEvent::WakesUp => {
                 let guard_minutes_asleep = minutes_asleep.get_mut(&current_guard_id).unwrap();
-                for minute in fell_asleep_minute..log.minute {
-                    guard_minutes_asleep[minute] += 1;
+                for asleep_count in &mut guard_minutes_asleep[fell_asleep_minute..log.minute] {
+                    *asleep_count += 1;
                 }
             }
         }
@@ -97,10 +95,10 @@ fn parse_input(input: &str) -> Result<Vec<LogLine>, SimpleError> {
         let split: Vec<_> = rest_of_line.split(' ').collect();
         let event = match split.as_slice() {
             ["Guard", id, "begins", "shift"] => {
-                LogEvent::GuardBeginsShift(id[1..].parse()?)
+                GuardLogEvent::BeginsShift(id[1..].parse()?)
             }
-            ["falls", "asleep"] => LogEvent::GuardFallsAsleep,
-            ["wakes", "up"] => LogEvent::GuardWakesUp,
+            ["falls", "asleep"] => GuardLogEvent::FallsAsleep,
+            ["wakes", "up"] => GuardLogEvent::WakesUp,
             _ => return Err(SimpleError::new(format!("unknown event in line: {line}")))
         };
 

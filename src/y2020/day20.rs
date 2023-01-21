@@ -148,7 +148,7 @@ impl Image {
     fn without_border(&self) -> Self {
         let image = self.0[1..self.0.len() - 1].iter()
             .map(|row| {
-                row[1..row.len() - 1].iter().copied().collect()
+                row[1..row.len() - 1].to_vec()
             })
             .collect();
 
@@ -377,8 +377,8 @@ fn parse_input(input: &str) -> Result<Vec<Tile>, SimpleError> {
                 return Err(SimpleError::new(format!("found a tile with only {} lines", tile_lines.len())));
             }
 
-            let (_, tile_id) = tile_lines[0].split_once(' ').ok_or(
-                SimpleError::new(format!("tile id line not in expected format: {}", tile_lines[0]))
+            let (_, tile_id) = tile_lines[0].split_once(' ').ok_or_else(
+                || SimpleError::new(format!("tile id line not in expected format: {}", tile_lines[0]))
             )?;
 
             let tile_id = tile_id[..tile_id.len() - 1].parse()?;

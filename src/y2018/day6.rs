@@ -32,8 +32,8 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
 
     let mut grid = vec![vec![0; cols]; rows];
 
-    for x in 0..cols {
-        for y in 0..rows {
+    for (y, row) in grid.iter_mut().enumerate() {
+        for (x, value) in row.iter_mut().enumerate() {
             let p = Point::new(x as i32, y as i32);
             let distances: Vec<_> = points.iter()
                 .map(|other_p| other_p.distance_to(p))
@@ -46,7 +46,7 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
             }
 
             let region = 1 + distances.iter().position(|&n| n == min_distance).unwrap();
-            grid[y as usize][x as usize] = region;
+            *value = region;
         }
     }
 
@@ -59,12 +59,12 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
             regions_touching_edge.insert(grid[rows - 1][x]);
         }
     }
-    for y in 0..rows {
-        if grid[y][0] != 0 {
-            regions_touching_edge.insert(grid[y][0]);
+    for row in &grid {
+        if row[0] != 0 {
+            regions_touching_edge.insert(row[0]);
         }
-        if grid[y][cols - 1] != 0 {
-            regions_touching_edge.insert(grid[y][cols - 1]);
+        if row[cols - 1] != 0 {
+            regions_touching_edge.insert(row[cols - 1]);
         }
     }
 
@@ -110,7 +110,7 @@ fn solve_part_2(input: &str, distance_limit: i32) -> Result<usize, SimpleError> 
     Ok(safe_count)
 }
 
-fn get_maximums(points: &Vec<Point>) -> (i32, i32) {
+fn get_maximums(points: &[Point]) -> (i32, i32) {
     points.iter().copied().fold((i32::MIN, i32::MIN), |(max_x, max_y), point| {
         (cmp::max(max_x, point.x), cmp::max(max_y, point.y))
     })
@@ -118,8 +118,8 @@ fn get_maximums(points: &Vec<Point>) -> (i32, i32) {
 
 fn parse_input(input: &str) -> Result<Vec<Point>, SimpleError> {
     input.lines().map(|line| {
-        let (x, y) = line.split_once(", ").ok_or(
-            SimpleError::new(format!("line has no ', ': {line}"))
+        let (x, y) = line.split_once(", ").ok_or_else(
+            || SimpleError::new(format!("line has no ', ': {line}"))
         )?;
 
         Ok(Point::new(x.parse()?, y.parse()?))

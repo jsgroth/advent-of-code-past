@@ -58,7 +58,7 @@ fn solve_part(input: &str, instructions: &str) -> Result<i64, Box<dyn Error>> {
 
     let outputs = program.fetch_outputs();
     let solution = outputs.last().copied().unwrap();
-    if let Ok(_) = <i64 as TryInto<u8>>::try_into(solution) {
+    if <i64 as TryInto<u8>>::try_into(solution).is_ok() {
         // If the number fits in a u8 then the intcode program did not actually output a solution
 
         for &output in &outputs {

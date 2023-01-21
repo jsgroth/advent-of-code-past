@@ -78,8 +78,8 @@ fn parse_input(input: &str) -> Result<Vec<RoomData>, SimpleError> {
             .collect();
 
         let last_word = split.last().unwrap();
-        let bracket_index = last_word.chars().position(|c| c == '[').ok_or(
-            SimpleError::new(format!("line has no opening bracket: {line}"))
+        let bracket_index = last_word.chars().position(|c| c == '[').ok_or_else(
+            || SimpleError::new(format!("line has no opening bracket: {line}"))
         )?;
         let sector_id: u32 = last_word[..bracket_index].parse()?;
 

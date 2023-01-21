@@ -47,7 +47,7 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
     }
 }
 
-fn count_occupied(map: &Vec<Vec<Space>>) -> usize {
+fn count_occupied(map: &[Vec<Space>]) -> usize {
     map.iter()
         .map(|row| row.iter().filter(|&&space| space == Space::OccupiedSeat).count())
         .sum()

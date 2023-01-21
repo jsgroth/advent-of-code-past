@@ -32,9 +32,9 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
 
     for (i, &rectangle) in rectangles.iter().enumerate() {
         let mut overlaps = false;
-        'outer: for x in rectangle.x..(rectangle.x + rectangle.width) {
-            for y in rectangle.y..(rectangle.y + rectangle.height) {
-                if square[x][y] > 1 {
+        'outer: for col in square.iter().skip(rectangle.x).take(rectangle.width) {
+            for &count in col.iter().skip(rectangle.y).take(rectangle.height) {
+                if count > 1 {
                     overlaps = true;
                     break 'outer;
                 }
@@ -52,9 +52,9 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
 fn compute_tile_counts(rectangles: &Vec<Rectangle>) -> Vec<Vec<i32>> {
     let mut square = vec![vec![0; 1000]; 1000];
     for &rectangle in rectangles {
-        for x in rectangle.x..(rectangle.x + rectangle.width) {
-            for y in rectangle.y..(rectangle.y + rectangle.height) {
-                square[x][y] += 1;
+        for col in square.iter_mut().skip(rectangle.x).take(rectangle.width) {
+            for count in col.iter_mut().skip(rectangle.y).take(rectangle.height) {
+                *count += 1;
             }
         }
     }
@@ -64,20 +64,20 @@ fn compute_tile_counts(rectangles: &Vec<Rectangle>) -> Vec<Vec<i32>> {
 
 fn parse_input(input: &str) -> Result<Vec<Rectangle>, SimpleError> {
     input.lines().map(|line| {
-        let (_, line) = line.split_once(" @ ").ok_or(
-            SimpleError::new(format!("line has no ' @ ': {line}"))
+        let (_, line) = line.split_once(" @ ").ok_or_else(
+            || SimpleError::new(format!("line has no ' @ ': {line}"))
         )?;
 
-        let (position, lengths) = line.split_once(": ").ok_or(
-            SimpleError::new(format!("line has no ': ': {line}"))
+        let (position, lengths) = line.split_once(": ").ok_or_else(
+            || SimpleError::new(format!("line has no ': ': {line}"))
         )?;
 
-        let (x, y) = position.split_once(',').ok_or(
-            SimpleError::new(format!("position part of line has no ',': {line}"))
+        let (x, y) = position.split_once(',').ok_or_else(
+            || SimpleError::new(format!("position part of line has no ',': {line}"))
         )?;
 
-        let (w, h) = lengths.split_once('x').ok_or(
-            SimpleError::new(format!("lengths part of line has no 'x': {line}"))
+        let (w, h) = lengths.split_once('x').ok_or_else(
+            || SimpleError::new(format!("lengths part of line has no 'x': {line}"))
         )?;
 
         Ok(Rectangle {

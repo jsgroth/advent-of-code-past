@@ -20,17 +20,14 @@ fn solve_part(input: &str, row_target: usize) -> Result<usize, SimpleError> {
     Ok(safe_count)
 }
 
-fn generate_new_line(line: &Vec<bool>) -> Vec<bool> {
+fn generate_new_line(line: &[bool]) -> Vec<bool> {
     let extended_line: Vec<_> = iter::once(false)
         .chain(line.iter().copied())
         .chain(iter::once(false))
         .collect();
 
     extended_line.windows(3).map(|window| {
-        match window {
-            [true, true, false] | [false, true, true] | [true, false, false] | [false, false, true] => true,
-            _ => false
-        }
+        matches!(window, [true, true, false] | [false, true, true] | [true, false, false] | [false, false, true])
     })
         .collect()
 }

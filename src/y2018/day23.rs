@@ -30,8 +30,8 @@ struct Nanobot {
 
 impl Nanobot {
     fn from_line(line: &str) -> Result<Self, SimpleError> {
-        let (position, radius) = line.split_once(", ").ok_or(
-            SimpleError::new(format!("line has no ', ': {line}"))
+        let (position, radius) = line.split_once(", ").ok_or_else(
+            || SimpleError::new(format!("line has no ', ': {line}"))
         )?;
 
         let position = &position[5..position.len() - 1];
@@ -210,10 +210,8 @@ fn find_optimal_position(cube: Cube, nanobots: &[Nanobot], best_so_far: &mut usi
         if overlap_count > best_overlap_count {
             best_overlap_count = overlap_count;
             best_point = p;
-        } else if overlap_count == best_overlap_count {
-            if p.x.abs() + p.y.abs() + p.z.abs() < best_point.x.abs() + best_point.y.abs() + best_point.z.abs() {
-                best_point = p;
-            }
+        } else if overlap_count == best_overlap_count && p.x.abs() + p.y.abs() + p.z.abs() < best_point.x.abs() + best_point.y.abs() + best_point.z.abs()  {
+            best_point = p;
         }
     }
 

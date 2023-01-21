@@ -106,13 +106,11 @@ fn score_deck(deck: &VecDeque<u32>) -> u32 {
 fn parse_input(input: &str) -> Result<(Vec<u32>, Vec<u32>), SimpleError> {
     let mut lines = input.lines();
 
-    let p1_lines: Vec<_> = lines.by_ref().skip(1).take_while(|s| !s.is_empty()).collect();
-    let p2_lines: Vec<_> = lines.skip(1).collect();
-
-    let p1_deck = p1_lines.into_iter()
+    let p1_deck = lines.by_ref().skip(1).take_while(|s| !s.is_empty())
         .map(|line| line.parse::<u32>())
         .collect::<Result<_, _>>()?;
-    let p2_deck = p2_lines.into_iter()
+
+    let p2_deck = lines.skip(1)
         .map(|line| line.parse::<u32>())
         .collect::<Result<_, _>>()?;
 

@@ -42,21 +42,17 @@ const KEYPAD_2: [[char; 5]; 5] = [
 fn solve_part_1(input: &str) -> Result<String, SimpleError> {
     let instructions = parse_input(input)?;
 
-    let mut i = 1;
-    let mut j = 1;
+    let mut i: usize = 1;
+    let mut j: usize = 1;
     let mut s = String::new();
     for instruction in &instructions {
         for direction in instruction {
             match direction {
                 Direction::Up => {
-                    if i > 0 {
-                        i -= 1;
-                    }
+                    i = i.saturating_sub(1);
                 }
                 Direction::Left => {
-                    if j > 0 {
-                        j -= 1;
-                    }
+                    j = j.saturating_sub(1);
                 }
                 Direction::Right => {
                     if j < 2 {

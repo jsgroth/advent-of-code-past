@@ -62,8 +62,8 @@ fn solve_part(input: &str, find_longest_path: bool) -> Result<String, SimpleErro
     }
 
     if find_longest_path {
-        longest_path_so_far.ok_or(
-            SimpleError::new(String::from("no solution found"))
+        longest_path_so_far.ok_or_else(
+            || SimpleError::new(String::from("no solution found"))
         )
     } else {
         Err(SimpleError::new(String::from("no solution found")))

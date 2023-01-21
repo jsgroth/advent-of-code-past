@@ -42,7 +42,7 @@ impl FloorState {
         new_state
     }
 
-    fn without_floor_items(&self, floor_items: &Vec<FloorItem>) -> FloorState {
+    fn without_floor_items(&self, floor_items: &[FloorItem]) -> FloorState {
         let microchips_to_remove: HashSet<_> = floor_items.iter()
             .filter_map(|floor_item| match floor_item {
                 FloorItem::Microchip(microchip) => Some(microchip),
@@ -181,7 +181,7 @@ fn solve_part(input: &str, add_additional_items: bool) -> Result<usize, SimpleEr
                     steps: state.steps + 1,
                 };
                 new_state.floors[state.elevator_pos] = current_floor.without_floor_items(move_combination);
-                new_state.floors[state.elevator_pos - 1] = state.floors[state.elevator_pos - 1].with_floor_items(&move_combination);
+                new_state.floors[state.elevator_pos - 1] = state.floors[state.elevator_pos - 1].with_floor_items(move_combination);
                 states_to_consider.push(new_state);
 
             }
@@ -193,7 +193,7 @@ fn solve_part(input: &str, add_additional_items: bool) -> Result<usize, SimpleEr
                     steps: state.steps + 1,
                 };
                 new_state.floors[state.elevator_pos] = current_floor.without_floor_items(move_combination);
-                new_state.floors[state.elevator_pos + 1] = state.floors[state.elevator_pos + 1].with_floor_items(&move_combination);
+                new_state.floors[state.elevator_pos + 1] = state.floors[state.elevator_pos + 1].with_floor_items(move_combination);
                 states_to_consider.push(new_state);
             }
 
@@ -216,7 +216,7 @@ fn solve_part(input: &str, add_additional_items: bool) -> Result<usize, SimpleEr
     Err(SimpleError::new(String::from("no solution found")))
 }
 
-fn item_combinations<'a>(microchips: &'a Vec<String>, generators: &'a Vec<String>) -> Vec<Vec<FloorItem<'a>>> {
+fn item_combinations<'a>(microchips: &'a [String], generators: &'a [String]) -> Vec<Vec<FloorItem<'a>>> {
     let (paired, lone_microchips): (Vec<_>, Vec<_>) = microchips.iter()
         .partition(|&microchip| generators.contains(microchip));
 

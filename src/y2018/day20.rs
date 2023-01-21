@@ -210,15 +210,15 @@ fn solve_both_parts(input: &str) -> Result<(usize, usize), SimpleError> {
         (Point::new(0, 0), DirectionSet::new())
     ).collect();
 
-    fill_map(&mut map, &regex, &vec![Point::new(0, 0)])?;
+    fill_map(&mut map, &regex, &[Point::new(0, 0)])?;
 
     let (distance_to_farthest_room, num_distant_rooms) = search_rooms(&map, 1000);
 
     Ok((distance_to_farthest_room, num_distant_rooms))
 }
 
-fn fill_map(map: &mut HashMap<Point, DirectionSet>, regex: &Regex, positions: &Vec<Point>) -> Result<Vec<Point>, SimpleError> {
-    let mut positions = positions.clone();
+fn fill_map(map: &mut HashMap<Point, DirectionSet>, regex: &Regex, positions: &[Point]) -> Result<Vec<Point>, SimpleError> {
+    let mut positions = positions.to_vec();
 
     for regex_part in &regex.parts {
         let mut next_positions = HashSet::new();

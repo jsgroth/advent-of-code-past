@@ -19,14 +19,14 @@ fn solve_part_2(input: &str, preamble_size: usize) -> Result<u64, SimpleError> {
 
     let (first_invalid_index, first_invalid_number) = find_first_invalid_number(&numbers, preamble_size)?;
 
-    for i in 0..first_invalid_index {
-        let mut sum = numbers[i];
-        let mut smallest_in_range = numbers[i];
-        let mut largest_in_range = numbers[i];
-        for j in i + 1..first_invalid_index {
-            sum += numbers[j];
-            smallest_in_range = cmp::min(smallest_in_range, numbers[j]);
-            largest_in_range = cmp::max(largest_in_range, numbers[j]);
+    for (i, &number) in numbers[..first_invalid_index].iter().enumerate() {
+        let mut sum = number;
+        let mut smallest_in_range = number;
+        let mut largest_in_range = number;
+        for &other_number in &numbers[i + 1..first_invalid_index] {
+            sum += other_number;
+            smallest_in_range = cmp::min(smallest_in_range, other_number);
+            largest_in_range = cmp::max(largest_in_range, other_number);
             if sum >= first_invalid_number {
                 break;
             }

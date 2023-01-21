@@ -4,12 +4,17 @@
 use std::error::Error;
 use crate::SimpleError;
 
+struct ParsedIp7String<'a> {
+    outer_strings: Vec<&'a str>,
+    inner_strings: Vec<&'a str>,
+}
+
 fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
     let ip_addresses = parse_input(input)?;
 
     let valid = ip_addresses.into_iter()
-        .filter(|(outer_strings, inner_strings)| {
-            outer_strings.iter().any(|s| has_abba(*s)) && !inner_strings.iter().any(|s| has_abba(*s))
+        .filter(|ParsedIp7String { outer_strings, inner_strings }| {
+            outer_strings.iter().any(|s| has_abba(s)) && !inner_strings.iter().any(|s| has_abba(s))
         })
         .count();
 
@@ -19,8 +24,8 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
 fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
     let ip_addresses = parse_input(input)?;
 
-    let valid: Vec<_> = ip_addresses.into_iter()
-        .filter(|(outer_strings, inner_strings)| {
+    let num_valid = ip_addresses.into_iter()
+        .filter(|ParsedIp7String { outer_strings, inner_strings }| {
             outer_strings.iter().any(|outer_string| {
                 let chars: Vec<_> = outer_string.chars().collect();
                 chars.windows(3).any(|window| {
@@ -31,12 +36,12 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
                 })
             })
         })
-        .collect();
+        .count();
 
-    Ok(valid.len())
+    Ok(num_valid)
 }
 
-fn partition_line(line: &str) -> Result<(Vec<&str>, Vec<&str>), SimpleError> {
+fn partition_line(line: &str) -> Result<ParsedIp7String, SimpleError> {
     let mut outer_strings = Vec::new();
     let mut inner_strings = Vec::new();
 
@@ -63,7 +68,7 @@ fn partition_line(line: &str) -> Result<(Vec<&str>, Vec<&str>), SimpleError> {
         outer_strings.push(&line[i..]);
     }
 
-    Ok((outer_strings, inner_strings))
+    Ok(ParsedIp7String { outer_strings, inner_strings })
 }
 
 fn has_abba(s: &str) -> bool {
@@ -76,8 +81,8 @@ fn has_abba(s: &str) -> bool {
     false
 }
 
-fn parse_input(input: &str) -> Result<Vec<(Vec<&str>, Vec<&str>)>, SimpleError> {
-    input.lines().map(|line| partition_line(line)).collect()
+fn parse_input(input: &str) -> Result<Vec<ParsedIp7String>, SimpleError> {
+    input.lines().map(partition_line).collect()
 }
 
 pub fn solve(input: &str) -> Result<(usize, usize), Box<dyn Error>> {

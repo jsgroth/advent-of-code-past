@@ -72,7 +72,7 @@ fn solve_part_2(input: &str, n: usize) -> Result<usize, SimpleError> {
     Ok(destroyed_j * 100 + destroyed_i)
 }
 
-fn compute_visible_asteroids(grid: &Vec<Vec<bool>>, i: usize, j: usize) -> u32 {
+fn compute_visible_asteroids(grid: &[Vec<bool>], i: usize, j: usize) -> u32 {
     let mut visible_count = 0;
     for (other_i, row) in grid.iter().enumerate() {
         for (other_j, &b) in row.iter().enumerate() {
@@ -121,7 +121,7 @@ fn gcd(a: i32, b: i32) -> i32 {
     gcd(b % a, a)
 }
 
-fn find_nth_destroyed(grid: &Vec<Vec<bool>>, i: usize, j: usize, n: usize) -> Result<(usize, usize), SimpleError> {
+fn find_nth_destroyed(grid: &[Vec<bool>], i: usize, j: usize, n: usize) -> Result<(usize, usize), SimpleError> {
     let total_asteroids: usize = grid.iter().map(|row| {
         row.iter().filter(|&&b| b).count()
     }).sum();

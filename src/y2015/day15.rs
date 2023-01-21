@@ -43,7 +43,7 @@ fn search_for_max(ingredients: &Vec<Ingredient>, teaspoons: Vec<i32>, remaining:
     result
 }
 
-fn score_cookie(ingredients: &Vec<Ingredient>, teaspoons: &Vec<i32>, calorie_req: Option<i32>) -> i32 {
+fn score_cookie(ingredients: &[Ingredient], teaspoons: &Vec<i32>, calorie_req: Option<i32>) -> i32 {
     let mut capacity = 0;
     let mut durability = 0;
     let mut flavor = 0;
@@ -89,11 +89,7 @@ fn parse_input(input: &str) -> Result<Vec<Ingredient>, SimpleError> {
 }
 
 fn parse_int(s: &str) -> Result<i32, ParseIntError> {
-    if s.chars().last() == Some(',') {
-        s[..s.len() - 1].parse()
-    } else {
-        s.parse()
-    }
+    s.strip_suffix(',').unwrap_or(s).parse()
 }
 
 pub fn solve(input: &str) -> Result<(i32, i32), Box<dyn Error>> {

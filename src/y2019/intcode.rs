@@ -31,7 +31,7 @@ impl<T: FnMut() -> i64> InputFn for T {
     }
 }
 
-impl<T: FnMut(i64) -> ()> OutputFn for T {
+impl<T: FnMut(i64)> OutputFn for T {
     fn call(&mut self, output: i64) {
         self(output)
     }
@@ -139,7 +139,7 @@ impl<I: InputFn, O: OutputFn> IntcodeProgram<I, O> {
                     let a = self.read_value(self.ip + 1, parameter_modes);
                     let b = self.read_value(self.ip + 2, parameter_modes / 10);
 
-                    let c = if a < b { 1 } else { 0 };
+                    let c = i64::from(a < b);
                     self.write_value(self.ip + 3, c, parameter_modes / 100);
 
                     self.ip += 4;
@@ -148,7 +148,7 @@ impl<I: InputFn, O: OutputFn> IntcodeProgram<I, O> {
                     let a = self.read_value(self.ip + 1, parameter_modes);
                     let b = self.read_value(self.ip + 2, parameter_modes / 10);
 
-                    let c = if a == b { 1 } else { 0 };
+                    let c = i64::from(a == b);
                     self.write_value(self.ip + 3, c, parameter_modes / 100);
 
                     self.ip += 4;

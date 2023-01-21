@@ -71,8 +71,8 @@ fn has_valid_adjacent_pair(digits: &[u32]) -> bool {
 fn parse_input(input: &str) -> Result<(u32, u32), SimpleError> {
     let line = crate::read_single_line(input)?;
 
-    let (start, end) = line.split_once('-').ok_or(
-        SimpleError::new(format!("invalid range string: {line}"))
+    let (start, end) = line.split_once('-').ok_or_else(
+        || SimpleError::new(format!("invalid range string: {line}"))
     )?;
 
     let start = start.parse()?;

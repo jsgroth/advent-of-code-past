@@ -80,8 +80,8 @@ fn solve_both_parts(input: &str) -> Result<(String, usize), SimpleError> {
 
 fn parse_input(input: &str) -> Result<Vec<Point>, SimpleError> {
     input.lines().map(|line| {
-        let position_end_index = line.chars().position(|c| c == '>').ok_or(
-            SimpleError::new(format!("line has no '>': {line}"))
+        let position_end_index = line.chars().position(|c| c == '>').ok_or_else(
+            || SimpleError::new(format!("line has no '>': {line}"))
         )?;
 
         let position = &line["position=".len()..position_end_index + 1];
@@ -97,8 +97,8 @@ fn parse_input(input: &str) -> Result<Vec<Point>, SimpleError> {
 
 fn parse_coords(s: &str) -> Result<Coords, SimpleError> {
     let stripped: String = s[1..s.len() - 1].chars().filter(|&c| c != ' ').collect();
-    let (x, y) = stripped.split_once(',').ok_or(
-        SimpleError::new(format!("invalid coords string: {s}"))
+    let (x, y) = stripped.split_once(',').ok_or_else(
+        || SimpleError::new(format!("invalid coords string: {s}"))
     )?;
 
     Ok(Coords::new(x.parse()?, y.parse()?))

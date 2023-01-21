@@ -2,7 +2,6 @@
 //! https://adventofcode.com/2015/day/23
 
 use std::error::Error;
-use std::num::ParseIntError;
 use crate::SimpleError;
 
 #[derive(Debug, Clone, Copy)]
@@ -17,8 +16,8 @@ enum Instruction {
 
 impl Instruction {
     fn from_line(line: &str) -> Result<Self, SimpleError> {
-        let (operator, operands) = line.split_once(' ').ok_or(
-            SimpleError::new(format!("invalid line format, missing space: {line}"))
+        let (operator, operands) = line.split_once(' ').ok_or_else(
+            || SimpleError::new(format!("invalid line format, missing space: {line}"))
         )?;
 
         if operands.is_empty() {
@@ -29,7 +28,7 @@ impl Instruction {
             "hlf" => Self::Half(operands.chars().next().unwrap()),
             "tpl" => Self::Triple(operands.chars().next().unwrap()),
             "inc" => Self::Increment(operands.chars().next().unwrap()),
-            "jmp" => Self::Jump(parse_int(operands)?),
+            "jmp" => Self::Jump(operands.parse()?),
             "jie" => {
                 let (register, offset) = parse_jump_if_operands(operands)?;
                 Self::JumpIfEven(register, offset)
@@ -104,23 +103,15 @@ fn solve_part(input: &str, initial_a_value: u64) -> Result<u64, SimpleError> {
 }
 
 fn parse_jump_if_operands(operands: &str) -> Result<(char, i32), SimpleError> {
-    let (register, offset) = operands.split_once(", ").ok_or(
-        SimpleError::new(format!("invalid line format for jie, missing comma: {operands}"))
+    let (register, offset) = operands.split_once(", ").ok_or_else(
+        || SimpleError::new(format!("invalid line format for jie, missing comma: {operands}"))
     )?;
 
     if register.is_empty() {
         return Err(SimpleError::new(format!("invalid line format for jie, missing register: {operands}")));
     }
 
-    Ok((register.chars().next().unwrap(), parse_int(offset)?))
-}
-
-fn parse_int(s: &str) -> Result<i32, ParseIntError> {
-    if s.chars().next() == Some('+') {
-        s[1..].parse()
-    } else {
-        s.parse()
-    }
+    Ok((register.chars().next().unwrap(), offset.parse()?))
 }
 
 fn parse_input(input: &str) -> Result<Vec<Instruction>, SimpleError> {

@@ -26,7 +26,7 @@ fn solve_part(input: &str, reverse: bool) -> Result<u32, SimpleError> {
         .min_by_key(|&distance| {
             if reverse { -(distance as i32) } else { distance as i32 }
         })
-        .ok_or(SimpleError::new(String::from("input should not be empty")))?;
+        .ok_or_else(|| SimpleError::new(String::from("input should not be empty")))?;
 
     Ok(minimum_distance)
 }
@@ -60,8 +60,8 @@ fn parse_input(input: &str) -> Result<HashMap<String, Location>, SimpleError> {
             [a, "to", b, "=", distance] => {
                 let distance: u32 = distance.parse()?;
 
-                update_location(&mut locations, *a, *b, distance);
-                update_location(&mut locations, *b, *a, distance);
+                update_location(&mut locations, a, b, distance);
+                update_location(&mut locations, b, a, distance);
             }
             _ => return Err(SimpleError::new(format!("invalid line: {line}")))
         }

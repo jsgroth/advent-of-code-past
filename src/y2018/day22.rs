@@ -129,7 +129,7 @@ fn solve_part_2(input: &str) -> Result<u32, SimpleError> {
 
     let shortest_path = find_shortest_path_to_target(geologic_indices, depth, target);
 
-    shortest_path.ok_or(SimpleError::new(String::from("no path found to target")))
+    shortest_path.ok_or_else(|| SimpleError::new(String::from("no path found to target")))
 }
 
 fn build_geologic_index_map(depth: u64, target: Point) -> Vec<Vec<u64>> {
@@ -250,14 +250,14 @@ fn get_possible_tool_change(tool: Tool, region_type: RegionType) -> Tool {
 
 fn parse_input(input: &str) -> Result<(u64, Point), SimpleError> {
     let first_line = crate::read_single_line(input)?;
-    let second_line = input.lines().skip(1).next().ok_or(
-        SimpleError::new(String::from("input should have two lines"))
+    let second_line = input.lines().nth(1).ok_or_else(
+        || SimpleError::new(String::from("input should have two lines"))
     )?;
 
     let depth = first_line["depth: ".len()..].parse()?;
 
-    let (target_x, target_y) = second_line["target: ".len()..].split_once(',').ok_or(
-        SimpleError::new(format!("target string should contain one comma: {second_line}"))
+    let (target_x, target_y) = second_line["target: ".len()..].split_once(',').ok_or_else(
+        || SimpleError::new(format!("target string should contain one comma: {second_line}"))
     )?;
 
     let target_x = target_x.parse()?;

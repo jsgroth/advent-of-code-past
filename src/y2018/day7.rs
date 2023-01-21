@@ -106,7 +106,7 @@ fn time_required(letter: char, add_sixty: bool) -> u32 {
     1 + (letter as u32) - ('A' as u32) + if add_sixty { 60 } else { 0 }
 }
 
-fn get_all_letters(requirements: &Vec<(char, char)>) -> Vec<char> {
+fn get_all_letters(requirements: &[(char, char)]) -> Vec<char> {
     requirements.iter()
         .flat_map(|&(before, after)| vec![before, after])
         .collect::<HashSet<_>>()

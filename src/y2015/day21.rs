@@ -96,7 +96,7 @@ fn generate_ring_combinations(rings: &[Ring], remaining: usize) -> Vec<Vec<&Ring
     combinations
 }
 
-fn can_win(boss: &Boss, weapon: &Weapon, armor: &Armor, rings: &Vec<&Ring>) -> bool {
+fn can_win(boss: &Boss, weapon: &Weapon, armor: &Armor, rings: &[&Ring]) -> bool {
     let mut your_hp = 100;
     let mut boss_hp = boss.hit_points;
 
@@ -137,8 +137,8 @@ fn parse_input(input: &str) -> Result<Boss, SimpleError> {
 }
 
 fn parse_number_end_of_line(line: &str) -> Result<i32, SimpleError> {
-    let num = line.split(' ').last().ok_or(
-        SimpleError::new(format!("invalid line format: {line}"))
+    let num = line.split(' ').last().ok_or_else(
+        || SimpleError::new(format!("invalid line format: {line}"))
     )?;
     Ok(num.parse()?)
 }

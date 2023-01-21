@@ -168,18 +168,18 @@ fn create_movement_program(map: &Vec<Vec<bool>>, robot: Robot) -> Result<RobotPr
 
     let program = search_for_movement_program(&full_path, Vec::new(), Vec::new());
 
-    program.ok_or(SimpleError::new(String::from("no solution found")))
+    program.ok_or_else(|| SimpleError::new(String::from("no solution found")))
 }
 
 fn search_for_movement_program(path: &[RobotCommand], existing_functions: Vec<RobotFunction>, main_routine: Vec<usize>) -> Option<RobotProgram> {
-    if path.len() == 0 {
-        let function_a = existing_functions.get(0).cloned().unwrap_or(RobotFunction::new());
-        let function_b = existing_functions.get(1).cloned().unwrap_or(RobotFunction::new());
-        let function_c = existing_functions.get(2).cloned().unwrap_or(RobotFunction::new());
+    if path.is_empty() {
+        let function_a = existing_functions.get(0).cloned().unwrap_or_else(RobotFunction::new);
+        let function_b = existing_functions.get(1).cloned().unwrap_or_else(RobotFunction::new);
+        let function_c = existing_functions.get(2).cloned().unwrap_or_else(RobotFunction::new);
 
         let main_routine: Vec<_> = main_routine.into_iter()
             .map(|i| {
-                ((i as u8) + ('A' as u8)) as char
+                ((i as u8) + b'A') as char
             })
             .collect();
 
@@ -194,7 +194,7 @@ fn search_for_movement_program(path: &[RobotCommand], existing_functions: Vec<Ro
     for (i, existing_function) in existing_functions.iter().enumerate() {
         if is_prefix(path, &existing_function.commands) {
             let new_path = remove_prefix(path, &existing_function.commands);
-            let mut new_main_routine = main_routine.clone();
+            let mut new_main_routine = main_routine;
             new_main_routine.push(i);
 
             return search_for_movement_program(&new_path, existing_functions.clone(), new_main_routine);
@@ -346,8 +346,8 @@ fn build_map_from_program(mut program: Vec<i64>) -> Result<(Vec<Vec<bool>>, Robo
             return Err(SimpleError::new(format!("invalid negative ASCII code output by program: {ascii_code}")));
         }
 
-        let c = char::from_u32(ascii_code as u32).ok_or(
-            SimpleError::new(format!("invalid ASCII code output by program: {ascii_code}"))
+        let c = char::from_u32(ascii_code as u32).ok_or_else(
+            || SimpleError::new(format!("invalid ASCII code output by program: {ascii_code}"))
         )?;
 
         outputs_as_string.push(c);

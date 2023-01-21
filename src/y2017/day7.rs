@@ -77,7 +77,7 @@ fn solve_part_2(input: &str) -> Result<u32, SimpleError> {
     }
 }
 
-fn build_tree(sorted_programs: &Vec<Program>) -> ProgramTreeNode {
+fn build_tree(sorted_programs: &[Program]) -> ProgramTreeNode {
     let mut name_to_node: HashMap<&str, ProgramTreeNode> = HashMap::new();
     for program in sorted_programs.iter().rev() {
         let mut holding = Vec::with_capacity(program.holding.len());
@@ -139,8 +139,8 @@ fn parse_input(input: &str) -> Result<Vec<Program>, SimpleError> {
 }
 
 fn parse_name_and_weight(s: &str) -> Result<(String, u32), SimpleError> {
-    let (name, weight) = s.split_once(' ').ok_or(
-        SimpleError::new(format!("invalid name/weight string: {s}"))
+    let (name, weight) = s.split_once(' ').ok_or_else(
+        || SimpleError::new(format!("invalid name/weight string: {s}"))
     )?;
 
     let weight = weight[1..weight.len() - 1].parse()?;

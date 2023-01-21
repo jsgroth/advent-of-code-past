@@ -30,6 +30,8 @@ struct Bot {
     high_target: BotTarget,
 }
 
+type StartingValues = Vec<(u32, usize)>;
+
 fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
     let (bots, starting_values) = parse_input(input)?;
 
@@ -42,7 +44,7 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
                 None
             }
         })
-        .ok_or(SimpleError::new(String::from("no solution found")))
+        .ok_or_else(|| SimpleError::new(String::from("no solution found")))
 }
 
 fn solve_part_2(input: &str) -> Result<u32, SimpleError> {
@@ -59,7 +61,7 @@ fn solve_part_2(input: &str) -> Result<u32, SimpleError> {
     Ok(outputs.get(&0).unwrap() * outputs.get(&1).unwrap() * outputs.get(&2).unwrap())
 }
 
-fn simulate_bots(bots: Vec<Bot>, starting_values: Vec<(u32, usize)>) -> (HashMap<usize, Vec<u32>>, HashMap<usize, u32>) {
+fn simulate_bots(bots: Vec<Bot>, starting_values: StartingValues) -> (HashMap<usize, Vec<u32>>, HashMap<usize, u32>) {
     let number_to_bot: HashMap<_, _> = bots.iter()
         .map(|bot| (bot.number, bot))
         .collect();
@@ -126,7 +128,7 @@ fn check_bot(bot: &Bot, bots: &HashMap<usize, &Bot>, values: &mut HashMap<usize,
     }
 }
 
-fn parse_input(input: &str) -> Result<(Vec<Bot>, Vec<(u32, usize)>), SimpleError> {
+fn parse_input(input: &str) -> Result<(Vec<Bot>, StartingValues), SimpleError> {
     let mut bots: Vec<Bot> = Vec::new();
     let mut starting_values: Vec<(u32, usize)> = Vec::new();
 
@@ -140,8 +142,8 @@ fn parse_input(input: &str) -> Result<(Vec<Bot>, Vec<(u32, usize)>), SimpleError
             }
             ["bot", bot, "gives", "low", "to", low_type, low_target, "and", "high", "to", high_type, high_target] => {
                 let number: usize = bot.parse()?;
-                let low_target = BotTarget::from_strs(*low_type, *low_target)?;
-                let high_target = BotTarget::from_strs(*high_type, *high_target)?;
+                let low_target = BotTarget::from_strs(low_type, low_target)?;
+                let high_target = BotTarget::from_strs(high_type, high_target)?;
                 bots.push(Bot { number, low_target, high_target });
             }
             _ => return Err(SimpleError::new(format!("invalid line format: {line}")))

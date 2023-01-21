@@ -106,8 +106,8 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
 
     let num_keys = count_keys(&map);
 
-    let (entrance_i, entrance_j) = find_entrance(&map).ok_or(
-        SimpleError::new(String::from("map does not contain an entrance"))
+    let (entrance_i, entrance_j) = find_entrance(&map).ok_or_else(
+        || SimpleError::new(String::from("map does not contain an entrance"))
     )?;
     let entrance = Point::new(entrance_i, entrance_j);
 
@@ -171,8 +171,8 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
 
     let num_keys = count_keys(&map);
 
-    let (entrance_i, entrance_j) = find_entrance(&map).ok_or(
-        SimpleError::new(String::from("map does not contain an entrance"))
+    let (entrance_i, entrance_j) = find_entrance(&map).ok_or_else(
+        || SimpleError::new(String::from("map does not contain an entrance"))
     )?;
 
     let entrances = rewrite_entrance(&mut map, entrance_i, entrance_j);
@@ -316,7 +316,7 @@ fn find_paths_to_keys(map: &Vec<Vec<Space>>, position: Point) -> Vec<PathToKey> 
     paths_to_keys
 }
 
-fn rewrite_entrance(map: &mut Vec<Vec<Space>>, entrance_i: usize, entrance_j: usize) -> Vec<Point> {
+fn rewrite_entrance(map: &mut [Vec<Space>], entrance_i: usize, entrance_j: usize) -> Vec<Point> {
     for (di, dj) in [(0, 0), (-1, 0), (1, 0), (0, -1), (0, 1)] {
         map[(entrance_i as i32 + di) as usize][(entrance_j as i32 + dj) as usize] = Space::Wall;
     }
@@ -335,7 +335,7 @@ fn rewrite_entrance(map: &mut Vec<Vec<Space>>, entrance_i: usize, entrance_j: us
     new_entrances
 }
 
-fn count_keys(map: &Vec<Vec<Space>>) -> u32 {
+fn count_keys(map: &[Vec<Space>]) -> u32 {
     map.iter().flatten()
         .filter_map(|&space| {
             if let Space::Key(key_char) = space {
@@ -348,7 +348,7 @@ fn count_keys(map: &Vec<Vec<Space>>) -> u32 {
         .len() as u32
 }
 
-fn find_entrance(map: &Vec<Vec<Space>>) -> Option<(usize, usize)> {
+fn find_entrance(map: &[Vec<Space>]) -> Option<(usize, usize)> {
     map.iter().enumerate()
         .find_map(|(i, row)| {
             row.iter().enumerate().find_map(|(j, &space)| {

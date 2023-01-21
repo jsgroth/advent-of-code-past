@@ -45,7 +45,7 @@ enum Direction {
 impl Direction {
     const ALL: [Self; 4] = [Self::North, Self::South, Self::West, Self::East];
 
-    fn to_intcode_command(&self) -> i64 {
+    fn to_intcode_command(self) -> i64 {
         match self {
             Self::North => 1,
             Self::South => 2,

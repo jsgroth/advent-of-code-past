@@ -40,7 +40,7 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
 
 fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
     let total_len = input.lines()
-        .map(|line| find_len_recursive(line))
+        .map(find_len_recursive)
         .collect::<Result<Vec<_>, _>>()?
         .into_iter()
         .sum();
@@ -67,8 +67,8 @@ fn find_len_recursive(s: &str) -> Result<usize, SimpleError> {
 }
 
 fn parse_from_parentheses(s: &str) -> Result<(usize, usize), SimpleError> {
-    let (l, r) = s.split_once('x').ok_or(
-        SimpleError::new(format!("no 'x' inside parentheses: {s}"))
+    let (l, r) = s.split_once('x').ok_or_else(
+        || SimpleError::new(format!("no 'x' inside parentheses: {s}"))
     )?;
     let l: usize = l.parse()?;
     let r: usize = r.parse()?;

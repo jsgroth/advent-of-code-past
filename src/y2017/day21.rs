@@ -23,7 +23,7 @@ fn solve_part(input: &str, iterations: usize) -> Result<usize, SimpleError> {
     let rule_map = generate_rule_map(&rules);
 
     let mut pixels: Vec<Vec<_>> = START_PIXELS.iter()
-        .map(|row| row.iter().copied().collect())
+        .map(|row| row.to_vec())
         .collect();
 
     for _ in 1..=iterations {
@@ -46,8 +46,8 @@ fn solve_part(input: &str, iterations: usize) -> Result<usize, SimpleError> {
                     }
                 }
 
-                let enhanced = rule_map.get(&pixel_chunk).ok_or(
-                    SimpleError::new(format!("no enhancement found for chunk: {pixel_chunk:?}"))
+                let enhanced = rule_map.get(&pixel_chunk).ok_or_else(
+                    || SimpleError::new(format!("no enhancement found for chunk: {pixel_chunk:?}"))
                 )?;
 
                 for k in 0..enhanced.len() {
@@ -113,8 +113,8 @@ fn flip(grid: &Vec<Vec<bool>>) -> Vec<Vec<bool>> {
 
 fn parse_input(input: &str) -> Result<Vec<Rule>, SimpleError> {
     input.lines().map(|line| {
-        let (from, to) = line.split_once(" => ").ok_or(
-            SimpleError::new(String::from("line does not have a =>"))
+        let (from, to) = line.split_once(" => ").ok_or_else(
+            || SimpleError::new(String::from("line does not have a =>"))
         )?;
 
         let from = parse_rule_part(from);

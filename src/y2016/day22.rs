@@ -154,7 +154,7 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
     Err(SimpleError::new(String::from("no solution found")))
 }
 
-fn find_initial_empty_location(node_types: &Vec<Vec<NodeType>>) -> Result<(usize, usize), SimpleError> {
+fn find_initial_empty_location(node_types: &[Vec<NodeType>]) -> Result<(usize, usize), SimpleError> {
     for (y, row) in node_types.iter().enumerate() {
         for (x, &node_type) in row.iter().enumerate() {
             if node_type == NodeType::Empty {
@@ -185,7 +185,7 @@ fn gridify_nodes(mut nodes: Vec<Node>) -> Vec<Vec<Node>> {
     grid
 }
 
-fn classify_nodes(nodes: &Vec<Vec<Node>>) -> Vec<Vec<NodeType>> {
+fn classify_nodes(nodes: &[Vec<Node>]) -> Vec<Vec<NodeType>> {
     nodes.iter().map(|row| {
         row.iter().map(|node| {
             if node.used_tb == 0 {
@@ -209,8 +209,8 @@ fn parse_input(input: &str) -> Result<Vec<Node>, SimpleError> {
         }
 
         let node_word = &words[0]["/dev/grid/node-".len()..];
-        let (x, y) = node_word.split_once('-').ok_or(
-            SimpleError::new(format!("invalid line, no '-' in node word: {line}"))
+        let (x, y) = node_word.split_once('-').ok_or_else(
+            || SimpleError::new(format!("invalid line, no '-' in node word: {line}"))
         )?;
         let x: usize = x[1..].parse()?;
         let y: usize = y[1..].parse()?;

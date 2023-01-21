@@ -104,8 +104,8 @@ fn solve_part_2(input: &str) -> Result<i64, Box<dyn Error>> {
             }
         }
 
-        let thruster_signal = queues[0].borrow_mut().pop_front().ok_or(
-            SimpleError::new(String::from("programs did not produce a thruster signal"))
+        let thruster_signal = queues[0].borrow_mut().pop_front().ok_or_else(
+            || SimpleError::new(String::from("programs did not produce a thruster signal"))
         )?;
         max_thruster_signal = cmp::max(max_thruster_signal, thruster_signal);
     }

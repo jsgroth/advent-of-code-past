@@ -59,9 +59,9 @@ fn solve_both_parts(input: &str) -> Result<(usize, String), SimpleError> {
     for &instruction in &instructions {
         match instruction {
             Instruction::Rect(width, height) => {
-                for j in 0..width {
-                    for i in 0..height {
-                        screen[i][j] = true;
+                for row in &mut screen[0..height] {
+                    for value in &mut row[0..width] {
+                        *value = true;
                     }
                 }
             }
@@ -104,7 +104,7 @@ fn shift(v: Vec<bool>, n: usize) -> Vec<bool> {
     shifted
 }
 
-fn print_screen(screen: &Vec<Vec<bool>>) -> String {
+fn print_screen(screen: &[Vec<bool>]) -> String {
     let mut s = String::new();
 
     for (i, row) in screen.iter().enumerate() {

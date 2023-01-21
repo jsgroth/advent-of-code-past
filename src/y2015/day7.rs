@@ -34,7 +34,7 @@ struct EvaluationContext<'a> {
 }
 
 impl<'a> EvaluationContext<'a> {
-    fn new(instructions: &'a Vec<Instruction>) -> Self {
+    fn new(instructions: &'a [Instruction]) -> Self {
         let instruction_map: HashMap<_, _> = instructions.iter()
             .map(|instruction| (instruction.target.as_str(), instruction))
             .collect();
@@ -50,8 +50,8 @@ impl<'a> EvaluationContext<'a> {
             return Ok(*value);
         }
 
-        let instruction = *self.instruction_map.get(target).ok_or(
-            SimpleError::new(format!("no instruction found for '{target}'"))
+        let instruction = *self.instruction_map.get(target).ok_or_else(
+            || SimpleError::new(format!("no instruction found for '{target}'"))
         )?;
 
         let op_result = match &instruction.operation {

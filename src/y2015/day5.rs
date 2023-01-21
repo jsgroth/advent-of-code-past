@@ -22,10 +22,7 @@ fn is_nice(line: &str) -> bool {
     }
 
     !chars.windows(2).any(|window| {
-        match window {
-            ['a', 'b'] | ['c', 'd'] | ['p', 'q'] | ['x', 'y'] => true,
-            _ => false
-        }
+        matches!(window, ['a', 'b'] | ['c', 'd'] | ['p', 'q'] | ['x', 'y'])
     })
 }
 

@@ -93,10 +93,8 @@ fn solve_part(input: &str, robot_must_return: bool) -> Result<usize, SimpleError
                 new_visited_locations.insert(location);
             }
 
-            if new_visited_locations.len() == maze.locations.len() {
-                if !robot_must_return || new_position == maze.start {
-                    return Ok(steps + 1);
-                }
+            if new_visited_locations.len() == maze.locations.len() && (!robot_must_return || new_position == maze.start) {
+                return Ok(steps + 1);
             }
 
             let new_state = SearchState {

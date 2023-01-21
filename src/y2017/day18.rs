@@ -46,12 +46,12 @@ impl Instruction {
         let split: Vec<_> = line.split(' ').collect();
         match split.as_slice() {
             ["snd", x] => Ok(Self::Send(x.parse()?)),
-            ["set", x, y] => Ok(Self::Set(x.parse()?, Arg::from_str(*y)?)),
-            ["add", x, y] => Ok(Self::Add(x.parse()?, Arg::from_str(*y)?)),
-            ["mul", x, y] => Ok(Self::Multiply(x.parse()?, Arg::from_str(*y)?)),
-            ["mod", x, y] => Ok(Self::Modulus(x.parse()?, Arg::from_str(*y)?)),
+            ["set", x, y] => Ok(Self::Set(x.parse()?, Arg::from_str(y)?)),
+            ["add", x, y] => Ok(Self::Add(x.parse()?, Arg::from_str(y)?)),
+            ["mul", x, y] => Ok(Self::Multiply(x.parse()?, Arg::from_str(y)?)),
+            ["mod", x, y] => Ok(Self::Modulus(x.parse()?, Arg::from_str(y)?)),
             ["rcv", x] => Ok(Self::Receive(x.parse()?)),
-            ["jgz", x, y] => Ok(Self::JumpGreaterZero(Arg::from_str(*x)?, Arg::from_str(*y)?)),
+            ["jgz", x, y] => Ok(Self::JumpGreaterZero(Arg::from_str(x)?, Arg::from_str(y)?)),
             _ => Err(SimpleError::new(format!("invalid line: {line}")))
         }
     }
@@ -177,8 +177,8 @@ fn solve_part_1(input: &str) -> Result<i64, SimpleError> {
     let receive_queue = Rc::clone(&send_queue);
     let mut program = Program::new(0, instructions, send_queue, receive_queue);
 
-    program.find_first_received_value().ok_or(
-        SimpleError::new(String::from("no solution found"))
+    program.find_first_received_value().ok_or_else(
+        || SimpleError::new(String::from("no solution found"))
     )
 }
 

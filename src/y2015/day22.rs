@@ -185,16 +185,16 @@ fn parse_input(input: &str) -> Result<Boss, SimpleError> {
     let mut lines = input.lines();
 
     let hit_points = match lines.next() {
-        Some(line) => line.split(' ').last().ok_or(
-            SimpleError::new(String::from("hit points line has no space"))
+        Some(line) => line.split(' ').last().ok_or_else(
+            || SimpleError::new(String::from("hit points line has no space"))
         )?,
         None => return Err(SimpleError::new(String::from("missing hit points line"))),
     };
     let hit_points: i32 = hit_points.parse()?;
 
     let damage = match lines.next() {
-        Some(line) => line.split(' ').last().ok_or(
-            SimpleError::new(String::from("damage line has no space"))
+        Some(line) => line.split(' ').last().ok_or_else(
+            || SimpleError::new(String::from("damage line has no space"))
         )?,
         None => return Err(SimpleError::new(String::from("missing damage line"))),
     };

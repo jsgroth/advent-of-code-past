@@ -105,11 +105,8 @@ fn parse_input(input: &str) -> Result<Vec<AuntSue>, SimpleError> {
             let compound = &compound[..compound.len() - 1];
             let compound = Compound::from_str(compound)?;
 
-            let mut number = chunk[1];
-            if number.chars().last() == Some(',') {
-                number = &number[..number.len() - 1];
-            }
-            let number: u32 = number.parse()?;
+            let number = chunk[1];
+            let number: u32 = number.strip_suffix(',').unwrap_or(number).parse()?;
 
             known_compounds.insert(compound, number);
         }

@@ -24,12 +24,12 @@ fn solve_part_2(input: &str) -> Result<u32, SimpleError> {
 
     let mut used_squares = vec![vec![false; 128]; 128];
 
-    for i in 0..128 {
+    for (i, row) in used_squares.iter_mut().enumerate() {
         let hash = knothash::compute_knot_hash(format!("{key_string}-{i}").as_str());
-        for j in 0..16 {
+        for (j, hash_byte) in hash.into_iter().enumerate() {
             for k in 0..8 {
-                let is_used = (hash[j] & (0x01 << (7 - k))) != 0;
-                used_squares[i][8 * j + k] = is_used;
+                let is_used = (hash_byte & (0x01 << (7 - k))) != 0;
+                row[8 * j + k] = is_used;
             }
         }
     }

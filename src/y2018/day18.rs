@@ -76,7 +76,7 @@ fn simulate_iteration(collection_area: &Vec<Vec<Space>>) -> Vec<Vec<Space>> {
 
     for (i, row) in collection_area.iter().enumerate() {
         for (j, &space) in row.iter().enumerate() {
-            let neighbor_counts = count_neighbors(&collection_area, i, j);
+            let neighbor_counts = count_neighbors(collection_area, i, j);
             next_area[i][j] = match space {
                 Space::Open => {
                     if neighbor_counts[Space::Tree.ordinal()] >= 3 {

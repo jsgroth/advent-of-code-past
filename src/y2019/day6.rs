@@ -114,8 +114,8 @@ fn build_orbit_dag(orbit_relations: &[OrbitRelation]) -> HashMap<String, String>
 
 fn parse_input(input: &str) -> Result<Vec<OrbitRelation>, SimpleError> {
     input.lines().map(|line| {
-        let close_paren_index = line.chars().position(|c| c == ')').ok_or(
-            SimpleError::new(format!("line contains no ')': {line}"))
+        let close_paren_index = line.chars().position(|c| c == ')').ok_or_else(
+            || SimpleError::new(format!("line contains no ')': {line}"))
         )?;
 
         let orbited = &line[..close_paren_index];

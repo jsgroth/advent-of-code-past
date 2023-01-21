@@ -33,19 +33,19 @@ impl PassportFieldType {
     fn validate(&self, value: &str) -> bool {
         match self {
             Self::BirthYear => {
-                value.parse::<u32>().map(|year| year >= 1920 && year <= 2002).unwrap_or(false)
+                value.parse::<u32>().map(|year| (1920..=2002).contains(&year)).unwrap_or(false)
             }
             Self::IssueYear => {
-                value.parse::<u32>().map(|year| year >= 2010 && year <= 2020).unwrap_or(false)
+                value.parse::<u32>().map(|year| (2010..=2020).contains(&year)).unwrap_or(false)
             }
             Self::ExpirationYear => {
-                value.parse::<u32>().map(|year| year >= 2020 && year <= 2030).unwrap_or(false)
+                value.parse::<u32>().map(|year| (2020..=2030).contains(&year)).unwrap_or(false)
             }
             Self::Height => {
-                if value.ends_with("cm") {
-                    value[..value.len() - 2].parse::<u32>().map(|cm| cm >= 150 && cm <= 193).unwrap_or(false)
-                } else if value.ends_with("in") {
-                    value[..value.len() - 2].parse::<u32>().map(|inches| inches >= 59 && inches <= 76).unwrap_or(false)
+                if let Some(cm) = value.strip_suffix("cm") {
+                    cm.parse::<u32>().map(|cm| (150..=193).contains(&cm)).unwrap_or(false)
+                } else if let Some(inches) = value.strip_suffix("in") {
+                    inches.parse::<u32>().map(|inches| (59..=76).contains(&inches)).unwrap_or(false)
                 } else {
                     false
                 }
@@ -53,13 +53,13 @@ impl PassportFieldType {
             Self::HairColor => {
                 let chars: Vec<_> = value.chars().collect();
                 chars.len() == 7 && chars[0] == '#' &&
-                    chars[1..].iter().all(|&c| c.is_digit(10) || ('a'..='f').contains(&c))
+                    chars[1..].iter().all(|&c| c.is_ascii_digit() || ('a'..='f').contains(&c))
             }
             Self::EyeColor => {
                 ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"].contains(&value)
             }
             Self::PassportId => {
-                value.len() == 9 && value.chars().all(|c| c.is_digit(10))
+                value.len() == 9 && value.chars().all(|c| c.is_ascii_digit())
             }
             Self::CountryId => true,
         }
@@ -94,8 +94,8 @@ impl FromStr for PassportField {
     type Err = SimpleError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (field_name, field_value) = s.split_once(':').ok_or(
-            SimpleError::new(format!("passport field does not contain a ':': {s}"))
+        let (field_name, field_value) = s.split_once(':').ok_or_else(
+            || SimpleError::new(format!("passport field does not contain a ':': {s}"))
         )?;
 
         let field_type = PassportFieldType::from_str(field_name)?;

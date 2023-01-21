@@ -27,7 +27,7 @@ impl Direction {
         }
     }
 
-    fn to_str(&self) -> &'static str {
+    fn to_str(self) -> &'static str {
         match self {
             Self::North => "north",
             Self::South => "south",
@@ -262,8 +262,8 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     let year = args.next().unwrap();
     let day = args.next().unwrap();
 
-    let input_filename = args.next().ok_or(
-        SimpleError::new(format!("USAGE: {program_name} {year} {day} <input_filename>"))
+    let input_filename = args.next().ok_or_else(
+        || SimpleError::new(format!("USAGE: {program_name} {year} {day} <input_filename>"))
     )?;
 
     let input = fs::read_to_string(Path::new(&input_filename))?;

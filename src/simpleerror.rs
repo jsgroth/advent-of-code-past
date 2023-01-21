@@ -2,7 +2,6 @@ use std::char::ParseCharError;
 use std::error::Error;
 use std::fmt::{Display, Formatter};
 use std::num::ParseIntError;
-use std::ops::Deref;
 use std::string::FromUtf8Error;
 
 #[derive(Debug)]
@@ -31,7 +30,7 @@ impl Display for SimpleError {
 
 impl Error for SimpleError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
-        self.source.as_ref().map(|t| t.deref())
+        self.source.as_deref()
     }
 }
 

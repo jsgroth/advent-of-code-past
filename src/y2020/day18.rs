@@ -21,7 +21,7 @@ impl Operator {
 
 fn solve_part_1(input: &str) -> Result<u64, SimpleError> {
     let expression_sum = input.lines()
-        .map(|line| evaluate_no_precedence(line))
+        .map(evaluate_no_precedence)
         .collect::<Result<Vec<_>, _>>()?
         .into_iter()
         .sum();
@@ -31,7 +31,7 @@ fn solve_part_1(input: &str) -> Result<u64, SimpleError> {
 
 fn solve_part_2(input: &str) -> Result<u64, SimpleError> {
     let expression_sum = input.lines()
-        .map(|line| evaluate_add_first(line))
+        .map(evaluate_add_first)
         .collect::<Result<Vec<_>, _>>()?
         .into_iter()
         .sum();
@@ -41,7 +41,7 @@ fn solve_part_2(input: &str) -> Result<u64, SimpleError> {
 
 fn evaluate_no_precedence(expression: &str) -> Result<u64, SimpleError> {
     // Insert spaces to make parsing much easier
-    let expression = expression.replace("(", "( ").replace(")", " )");
+    let expression = expression.replace('(', "( ").replace(')', " )");
 
     let mut current_value = 0;
     let mut last_operator = Operator::Add;
@@ -63,8 +63,8 @@ fn evaluate_no_precedence(expression: &str) -> Result<u64, SimpleError> {
                 last_operator = Operator::Add;
             }
             ")" => {
-                let (prev_level_value, prev_level_operator) = levels.pop().ok_or(
-                    SimpleError::new(format!("expression has unbalanced parentheses: {expression}"))
+                let (prev_level_value, prev_level_operator) = levels.pop().ok_or_else(
+                    || SimpleError::new(format!("expression has unbalanced parentheses: {expression}"))
                 )?;
 
                 current_value = prev_level_operator.evaluate(prev_level_value, current_value);
@@ -86,7 +86,7 @@ fn evaluate_no_precedence(expression: &str) -> Result<u64, SimpleError> {
 
 fn evaluate_add_first(expression: &str) -> Result<u64, SimpleError> {
     // Insert spaces to make parsing much easier
-    let expression = expression.replace("(", "( ").replace(")", " )");
+    let expression = expression.replace('(', "( ").replace(')', " )");
 
     let mut operands = Vec::new();
     let mut last_operator = Operator::Multiply;
@@ -110,8 +110,8 @@ fn evaluate_add_first(expression: &str) -> Result<u64, SimpleError> {
             ")" => {
                 let level_product = operands.into_iter().product();
 
-                let (prev_level_operands, prev_level_operator) = levels.pop().ok_or(
-                    SimpleError::new(format!("expression has unbalanced parentheses: {expression}"))
+                let (prev_level_operands, prev_level_operator) = levels.pop().ok_or_else(
+                    || SimpleError::new(format!("expression has unbalanced parentheses: {expression}"))
                 )?;
 
                 operands = prev_level_operands;

@@ -111,7 +111,7 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
 
         update_destroyed_particles(&particles, &mut destroyed_particles);
 
-        if let Some(_) = check_for_solution(&particles, &last_particles, &destroyed_particles) {
+        if check_for_solution(&particles, &last_particles, &destroyed_particles).is_some() {
             let destroyed_count = destroyed_particles.iter().filter(|&&b| b).count();
             return Ok(particles.len() - destroyed_count);
         }
@@ -121,9 +121,9 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
 }
 
 fn check_for_solution(
-    particles: &Vec<Particle>,
-    last_particles: &Vec<Particle>,
-    destroyed_particles: &Vec<bool>,
+    particles: &[Particle],
+    last_particles: &[Particle],
+    destroyed_particles: &[bool],
 ) -> Option<usize> {
     for (i, (particle, last_particle)) in particles.iter().zip(last_particles).enumerate() {
         if destroyed_particles[i] {
@@ -164,7 +164,7 @@ fn check_for_solution(
     Some(min_index)
 }
 
-fn update_destroyed_particles(particles: &Vec<Particle>, destroyed_particles: &mut Vec<bool>) {
+fn update_destroyed_particles(particles: &[Particle], destroyed_particles: &mut [bool]) {
     let mut position_counts = HashMap::new();
     for (i, particle) in particles.iter().enumerate() {
         if destroyed_particles[i] {

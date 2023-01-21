@@ -12,7 +12,7 @@ fn solve_part_1(input: &str) -> Result<String, SimpleError> {
         let digest = md5::compute(format!("{door_id}{i}").as_bytes());
         let hex = format!("{digest:x}");
         if hex.starts_with("00000") {
-            password.push(hex.chars().skip(5).next().unwrap());
+            password.push(hex.chars().nth(5).unwrap());
             if password.len() == 8 {
                 return Ok(password);
             }
@@ -32,9 +32,9 @@ fn solve_part_2(input: &str) -> Result<String, SimpleError> {
         if hex.starts_with("00000") {
             let hex_bytes = hex.as_bytes();
             if ('0'..='7').contains(&(hex_bytes[5] as char)) {
-                let index = (hex_bytes[5] - ('0' as u8)) as usize;
+                let index = (hex_bytes[5] - b'0') as usize;
                 if password[index] == 0xFF {
-                    password[index as usize] = hex_bytes[6];
+                    password[index] = hex_bytes[6];
 
                     if password.iter().all(|&b| b != 0xFF) {
                         return Ok(String::from_utf8(password)?);
