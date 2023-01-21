@@ -1,12 +1,12 @@
 //! Day 17: Set and Forget
 //! https://adventofcode.com/2019/day/17
 
+use crate::y2019::intcode;
+use crate::y2019::intcode::InteractiveIntcodeProgram;
+use crate::SimpleError;
 use std::error::Error;
 use std::fmt::{Display, Formatter};
 use std::ops::{Add, AddAssign};
-use crate::SimpleError;
-use crate::y2019::intcode;
-use crate::y2019::intcode::InteractiveIntcodeProgram;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 struct Point {
@@ -97,15 +97,15 @@ struct RobotFunction {
 
 impl RobotFunction {
     fn new() -> Self {
-        Self { commands: Vec::new() }
+        Self {
+            commands: Vec::new(),
+        }
     }
 }
 
 impl Display for RobotFunction {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let command_strs: Vec<_> = self.commands.iter()
-            .map(RobotCommand::to_string)
-            .collect();
+        let command_strs: Vec<_> = self.commands.iter().map(RobotCommand::to_string).collect();
         write!(f, "{}", command_strs.join(","))
     }
 }
@@ -163,7 +163,10 @@ fn join_chars(chars: &[char]) -> String {
     strings.join(",")
 }
 
-fn create_movement_program(map: &Vec<Vec<bool>>, robot: Robot) -> Result<RobotProgram, SimpleError> {
+fn create_movement_program(
+    map: &Vec<Vec<bool>>,
+    robot: Robot,
+) -> Result<RobotProgram, SimpleError> {
     let full_path = find_full_path(map, robot);
 
     let program = search_for_movement_program(&full_path, Vec::new(), Vec::new());
@@ -171,19 +174,36 @@ fn create_movement_program(map: &Vec<Vec<bool>>, robot: Robot) -> Result<RobotPr
     program.ok_or_else(|| SimpleError::new(String::from("no solution found")))
 }
 
-fn search_for_movement_program(path: &[RobotCommand], existing_functions: Vec<RobotFunction>, main_routine: Vec<usize>) -> Option<RobotProgram> {
+fn search_for_movement_program(
+    path: &[RobotCommand],
+    existing_functions: Vec<RobotFunction>,
+    main_routine: Vec<usize>,
+) -> Option<RobotProgram> {
     if path.is_empty() {
-        let function_a = existing_functions.get(0).cloned().unwrap_or_else(RobotFunction::new);
-        let function_b = existing_functions.get(1).cloned().unwrap_or_else(RobotFunction::new);
-        let function_c = existing_functions.get(2).cloned().unwrap_or_else(RobotFunction::new);
+        let function_a = existing_functions
+            .get(0)
+            .cloned()
+            .unwrap_or_else(RobotFunction::new);
+        let function_b = existing_functions
+            .get(1)
+            .cloned()
+            .unwrap_or_else(RobotFunction::new);
+        let function_c = existing_functions
+            .get(2)
+            .cloned()
+            .unwrap_or_else(RobotFunction::new);
 
-        let main_routine: Vec<_> = main_routine.into_iter()
-            .map(|i| {
-                ((i as u8) + b'A') as char
-            })
+        let main_routine: Vec<_> = main_routine
+            .into_iter()
+            .map(|i| ((i as u8) + b'A') as char)
             .collect();
 
-        return Some(RobotProgram { main_routine, function_a, function_b, function_c })
+        return Some(RobotProgram {
+            main_routine,
+            function_a,
+            function_b,
+            function_c,
+        });
     }
 
     if main_routine.len() == 10 {
@@ -197,7 +217,11 @@ fn search_for_movement_program(path: &[RobotCommand], existing_functions: Vec<Ro
             let mut new_main_routine = main_routine;
             new_main_routine.push(i);
 
-            return search_for_movement_program(&new_path, existing_functions.clone(), new_main_routine);
+            return search_for_movement_program(
+                &new_path,
+                existing_functions.clone(),
+                new_main_routine,
+            );
         }
     }
 
@@ -223,7 +247,9 @@ fn search_for_movement_program(path: &[RobotCommand], existing_functions: Vec<Ro
             let mut new_main_routine = main_routine.clone();
             new_main_routine.push(new_existing_functions.len() - 1);
 
-            if let Some(movement_program) = search_for_movement_program(&new_path, new_existing_functions, new_main_routine) {
+            if let Some(movement_program) =
+                search_for_movement_program(&new_path, new_existing_functions, new_main_routine)
+            {
                 return Some(movement_program);
             }
         }
@@ -244,16 +270,23 @@ fn is_prefix(path: &[RobotCommand], commands: &[RobotCommand]) -> bool {
         return false;
     }
 
-    for (i, (path_command, prefix_command)) in path.iter().copied().zip(commands.iter().copied()).enumerate() {
+    for (i, (path_command, prefix_command)) in path
+        .iter()
+        .copied()
+        .zip(commands.iter().copied())
+        .enumerate()
+    {
         if path_command != prefix_command {
             return if i != commands.len() - 1 {
                 false
             } else {
                 match (path_command, prefix_command) {
-                    (RobotCommand::Move(path_steps), RobotCommand::Move(command_steps)) => command_steps <= path_steps,
-                    _ => false
+                    (RobotCommand::Move(path_steps), RobotCommand::Move(command_steps)) => {
+                        command_steps <= path_steps
+                    }
+                    _ => false,
                 }
-            }
+            };
         }
     }
 
@@ -270,7 +303,11 @@ fn remove_prefix(path: &[RobotCommand], commands: &[RobotCommand]) -> Vec<RobotC
         (RobotCommand::Move(path_steps), RobotCommand::Move(command_steps)) => {
             new_path.push(RobotCommand::Move(path_steps - command_steps));
         }
-        _ => panic!("last elements should both be Move if not equal: {:?} != {:?}", path[commands.len() - 1], commands[commands.len() - 1])
+        _ => panic!(
+            "last elements should both be Move if not equal: {:?} != {:?}",
+            path[commands.len() - 1],
+            commands[commands.len() - 1]
+        ),
     }
 
     new_path.extend_from_slice(&path[commands.len()..]);
@@ -298,7 +335,7 @@ fn find_full_path(map: &Vec<Vec<bool>>, mut robot: Robot) -> Vec<RobotCommand> {
                         RobotCommand::RotateRight => {
                             robot.direction = robot.direction.rotated_right();
                         }
-                        _ => panic!("find_turn_command returned a non-rotate command: {command:?}")
+                        _ => panic!("find_turn_command returned a non-rotate command: {command:?}"),
                     }
 
                     commands.push(command);
@@ -329,7 +366,11 @@ fn find_turn_command(map: &Vec<Vec<bool>>, robot: Robot) -> Option<RobotCommand>
 fn is_scaffold(map: &Vec<Vec<bool>>, p: Point) -> bool {
     let i = p.i;
     let j = p.j;
-    i >= 0 && j >= 0 && i < map.len() as i32 && j < map[0].len() as i32 && map[i as usize][j as usize]
+    i >= 0
+        && j >= 0
+        && i < map.len() as i32
+        && j < map[0].len() as i32
+        && map[i as usize][j as usize]
 }
 
 fn build_map_from_program(mut program: Vec<i64>) -> Result<(Vec<Vec<bool>>, Robot), SimpleError> {
@@ -343,12 +384,16 @@ fn build_map_from_program(mut program: Vec<i64>) -> Result<(Vec<Vec<bool>>, Robo
     let mut outputs_as_string = String::new();
     for &ascii_code in &outputs {
         if ascii_code < 0 {
-            return Err(SimpleError::new(format!("invalid negative ASCII code output by program: {ascii_code}")));
+            return Err(SimpleError::new(format!(
+                "invalid negative ASCII code output by program: {ascii_code}"
+            )));
         }
 
-        let c = char::from_u32(ascii_code as u32).ok_or_else(
-            || SimpleError::new(format!("invalid ASCII code output by program: {ascii_code}"))
-        )?;
+        let c = char::from_u32(ascii_code as u32).ok_or_else(|| {
+            SimpleError::new(format!(
+                "invalid ASCII code output by program: {ascii_code}"
+            ))
+        })?;
 
         outputs_as_string.push(c);
     }
@@ -373,23 +418,32 @@ fn build_map(outputs_as_string: &str) -> Result<(Vec<Vec<bool>>, Robot), SimpleE
                     '>' => Direction::East,
                     'v' => Direction::South,
                     '<' => Direction::West,
-                    _ => panic!("match statements do not match, unexpected char: {c}")
+                    _ => panic!("match statements do not match, unexpected char: {c}"),
                 };
 
-                robot = Some(Robot { position: robot_position, direction: robot_direction })
-            },
+                robot = Some(Robot {
+                    position: robot_position,
+                    direction: robot_direction,
+                })
+            }
             '\n' => {
                 if !current_row.is_empty() {
                     map.push(current_row);
                     current_row = Vec::new();
                 }
             }
-            _ => return Err(SimpleError::new(format!("unexpected char in program output: {c}")))
+            _ => {
+                return Err(SimpleError::new(format!(
+                    "unexpected char in program output: {c}"
+                )))
+            }
         }
     }
 
     if robot.is_none() {
-        return Err(SimpleError::new(String::from("program did not output a robot location")));
+        return Err(SimpleError::new(String::from(
+            "program did not output a robot location",
+        )));
     }
 
     Ok((map, robot.unwrap()))

@@ -1,10 +1,10 @@
 //! Day 12: Rain Risk
 //! https://adventofcode.com/2020/day/12
 
+use crate::SimpleError;
 use std::error::Error;
 use std::mem;
 use std::str::FromStr;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 enum Instruction {
@@ -30,7 +30,7 @@ impl FromStr for Instruction {
             Some('L') => Ok(Self::Left(n)),
             Some('R') => Ok(Self::Right(n)),
             Some('F') => Ok(Self::Forward(n)),
-            _ => Err(SimpleError::new(format!("invalid instruction string: {s}")))
+            _ => Err(SimpleError::new(format!("invalid instruction string: {s}"))),
         }
     }
 }
@@ -81,7 +81,11 @@ fn solve_part_1(input: &str) -> Result<i32, SimpleError> {
                         dx = -dx;
                         mem::swap(&mut dx, &mut dy);
                     }
-                    _ => return Err(SimpleError::new(format!("invalid rotation instruction: {instruction:?}")))
+                    _ => {
+                        return Err(SimpleError::new(format!(
+                            "invalid rotation instruction: {instruction:?}"
+                        )))
+                    }
                 }
             }
         }
@@ -136,7 +140,11 @@ fn solve_part_2(input: &str) -> Result<i32, SimpleError> {
                         dx = -dx;
                         mem::swap(&mut dx, &mut dy);
                     }
-                    _ => return Err(SimpleError::new(format!("invalid rotation instruction: {instruction:?}")))
+                    _ => {
+                        return Err(SimpleError::new(format!(
+                            "invalid rotation instruction: {instruction:?}"
+                        )))
+                    }
                 }
             }
         }

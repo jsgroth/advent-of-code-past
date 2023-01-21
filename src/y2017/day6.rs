@@ -1,10 +1,10 @@
 //! Day 6: Memory Reallocation
 //! https://adventofcode.com/2017/day/6
 
+use crate::SimpleError;
 use std::collections::HashMap;
 use std::error::Error;
 use std::iter;
-use crate::SimpleError;
 
 fn solve_part(input: &str, return_cycle_len: bool) -> Result<usize, SimpleError> {
     let mut banks = parse_input(input)?;
@@ -38,7 +38,8 @@ fn solve_part(input: &str, return_cycle_len: bool) -> Result<usize, SimpleError>
 
 fn parse_input(input: &str) -> Result<Vec<u32>, SimpleError> {
     let line = crate::read_single_line(input)?;
-    let banks: Result<Vec<_>, _> = line.split('\t')
+    let banks: Result<Vec<_>, _> = line
+        .split('\t')
         .map(|blocks| blocks.parse::<u32>())
         .collect();
 

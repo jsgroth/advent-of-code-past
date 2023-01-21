@@ -1,9 +1,9 @@
 //! Day 8: Handheld Halting
 //! https://adventofcode.com/2020/day/8
 
+use crate::SimpleError;
 use std::error::Error;
 use std::str::FromStr;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 enum Instruction {
@@ -30,7 +30,7 @@ impl FromStr for Instruction {
                 let n = n.parse()?;
                 Ok(Self::Jump(n))
             }
-            _ => Err(SimpleError::new(format!("invalid instruction: {s}")))
+            _ => Err(SimpleError::new(format!("invalid instruction: {s}"))),
         }
     }
 }
@@ -89,7 +89,7 @@ fn execute_program(instructions: &[Instruction]) -> ExecutionResult {
         match instructions[pc] {
             Instruction::NoOp(_) => {
                 pc += 1;
-            },
+            }
             Instruction::Accumulate(n) => {
                 accumulator += n;
                 pc += 1;

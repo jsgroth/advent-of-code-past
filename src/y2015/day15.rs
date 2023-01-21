@@ -1,10 +1,10 @@
 //! Day 15: Science for Hungry People
 //! https://adventofcode.com/2015/day/15
 
+use crate::SimpleError;
 use std::cmp;
 use std::error::Error;
 use std::num::ParseIntError;
-use crate::SimpleError;
 
 struct Ingredient {
     capacity: i32,
@@ -26,7 +26,12 @@ fn solve_part_2(input: &str) -> Result<i32, SimpleError> {
     Ok(search_for_max(&ingredients, Vec::new(), 100, Some(500)))
 }
 
-fn search_for_max(ingredients: &Vec<Ingredient>, teaspoons: Vec<i32>, remaining: i32, calorie_req: Option<i32>) -> i32 {
+fn search_for_max(
+    ingredients: &Vec<Ingredient>,
+    teaspoons: Vec<i32>,
+    remaining: i32,
+    calorie_req: Option<i32>,
+) -> i32 {
     if teaspoons.len() == ingredients.len() - 1 {
         let mut teaspoons = teaspoons;
         teaspoons.push(remaining);
@@ -37,7 +42,10 @@ fn search_for_max(ingredients: &Vec<Ingredient>, teaspoons: Vec<i32>, remaining:
     for i in 0..=remaining {
         let mut new_teaspoons = teaspoons.clone();
         new_teaspoons.push(i);
-        result = cmp::max(result, search_for_max(ingredients, new_teaspoons, remaining - i, calorie_req));
+        result = cmp::max(
+            result,
+            search_for_max(ingredients, new_teaspoons, remaining - i, calorie_req),
+        );
     }
 
     result
@@ -70,21 +78,29 @@ fn score_cookie(ingredients: &[Ingredient], teaspoons: &Vec<i32>, calorie_req: O
 }
 
 fn parse_input(input: &str) -> Result<Vec<Ingredient>, SimpleError> {
-    input.lines().map(|line| {
-        let split: Vec<_> = line.split(' ').collect();
+    input
+        .lines()
+        .map(|line| {
+            let split: Vec<_> = line.split(' ').collect();
 
-        if split.len() != 11 {
-            return Err(SimpleError::new(format!("invalid line format: {line}")));
-        }
+            if split.len() != 11 {
+                return Err(SimpleError::new(format!("invalid line format: {line}")));
+            }
 
-        let capacity = parse_int(split[2])?;
-        let durability = parse_int(split[4])?;
-        let flavor = parse_int(split[6])?;
-        let texture = parse_int(split[8])?;
-        let calories = parse_int(split[10])?;
+            let capacity = parse_int(split[2])?;
+            let durability = parse_int(split[4])?;
+            let flavor = parse_int(split[6])?;
+            let texture = parse_int(split[8])?;
+            let calories = parse_int(split[10])?;
 
-        Ok(Ingredient { capacity, durability, flavor, texture, calories })
-    })
+            Ok(Ingredient {
+                capacity,
+                durability,
+                flavor,
+                texture,
+                calories,
+            })
+        })
         .collect()
 }
 

@@ -1,8 +1,8 @@
 //! Day 4: Secure Container
 //! https://adventofcode.com/2019/day/4
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
     let (start, end) = parse_input(input)?;
@@ -47,7 +47,8 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
 }
 
 fn to_digits(n: u32) -> Vec<u32> {
-    n.to_string().chars()
+    n.to_string()
+        .chars()
         .map(|c| c.to_digit(10).unwrap())
         .collect()
 }
@@ -58,7 +59,9 @@ fn has_valid_adjacent_pair(digits: &[u32]) -> bool {
             continue;
         }
 
-        if (i > 0 && digits[i - 1] == digits[i]) || (i < digits.len() - 2 && digits[i + 2] == digits[i]) {
+        if (i > 0 && digits[i - 1] == digits[i])
+            || (i < digits.len() - 2 && digits[i + 2] == digits[i])
+        {
             continue;
         }
 
@@ -71,9 +74,9 @@ fn has_valid_adjacent_pair(digits: &[u32]) -> bool {
 fn parse_input(input: &str) -> Result<(u32, u32), SimpleError> {
     let line = crate::read_single_line(input)?;
 
-    let (start, end) = line.split_once('-').ok_or_else(
-        || SimpleError::new(format!("invalid range string: {line}"))
-    )?;
+    let (start, end) = line
+        .split_once('-')
+        .ok_or_else(|| SimpleError::new(format!("invalid range string: {line}")))?;
 
     let start = start.parse()?;
     let end = end.parse()?;

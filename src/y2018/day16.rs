@@ -1,10 +1,10 @@
 //! Day 16: Chronal Classification
 //! https://adventofcode.com/2018/day/16
 
+use crate::y2018::chronodevice::ChronoOperation;
+use crate::SimpleError;
 use std::collections::HashSet;
 use std::error::Error;
-use crate::SimpleError;
-use crate::y2018::chronodevice::ChronoOperation;
 
 #[derive(Debug, Clone)]
 struct OpTest {
@@ -27,7 +27,10 @@ struct TestInstruction {
 impl OpTest {
     fn from_lines(lines: &[&str]) -> Result<Self, SimpleError> {
         if lines.len() != 3 {
-            return Err(SimpleError::new(format!("expected 3 lines, got {}", lines.len())));
+            return Err(SimpleError::new(format!(
+                "expected 3 lines, got {}",
+                lines.len()
+            )));
         }
 
         let before = parse_registers(&lines[0]["Before: ".len()..])?;
@@ -35,7 +38,10 @@ impl OpTest {
 
         let split: Vec<_> = lines[1].split(' ').collect();
         if split.len() != 4 {
-            return Err(SimpleError::new(format!("op line has incorrect number of spaces: {}", lines[1])));
+            return Err(SimpleError::new(format!(
+                "op line has incorrect number of spaces: {}",
+                lines[1]
+            )));
         }
 
         let opcode = split[0].parse()?;
@@ -57,10 +63,20 @@ impl OpTest {
 fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
     let (op_tests, _) = parse_input(input)?;
 
-    let result = op_tests.into_iter()
+    let result = op_tests
+        .into_iter()
         .filter(|op_test| {
-            let can_produce_count = ChronoOperation::ALL.iter()
-                .filter(|op| op.can_produce(&op_test.before, &op_test.after, op_test.a, op_test.b, op_test.c))
+            let can_produce_count = ChronoOperation::ALL
+                .iter()
+                .filter(|op| {
+                    op.can_produce(
+                        &op_test.before,
+                        &op_test.after,
+                        op_test.a,
+                        op_test.b,
+                        op_test.c,
+                    )
+                })
                 .count();
             can_produce_count >= 3
         })
@@ -84,15 +100,24 @@ fn solve_part_2(input: &str) -> Result<u64, SimpleError> {
 }
 
 fn solve_for_opcodes(op_tests: &[OpTest]) -> Vec<ChronoOperation> {
-    let mut opcode_to_operation: Vec<Option<ChronoOperation>> = vec![None; ChronoOperation::ALL.len()];
+    let mut opcode_to_operation: Vec<Option<ChronoOperation>> =
+        vec![None; ChronoOperation::ALL.len()];
 
     let mut found_operations = HashSet::new();
     while found_operations.len() < ChronoOperation::ALL.len() {
         for op_test in op_tests {
-            let can_produce_ops: Vec<_> = ChronoOperation::ALL.iter().copied()
+            let can_produce_ops: Vec<_> = ChronoOperation::ALL
+                .iter()
+                .copied()
                 .filter(|&op| !found_operations.contains(&op))
                 .filter(|&op| {
-                    op.can_produce(&op_test.before, &op_test.after, op_test.a, op_test.b, op_test.c)
+                    op.can_produce(
+                        &op_test.before,
+                        &op_test.after,
+                        op_test.a,
+                        op_test.b,
+                        op_test.c,
+                    )
                 })
                 .collect();
             if can_produce_ops.len() == 1 {
@@ -102,7 +127,10 @@ fn solve_for_opcodes(op_tests: &[OpTest]) -> Vec<ChronoOperation> {
         }
     }
 
-    opcode_to_operation.into_iter().map(Option::unwrap).collect()
+    opcode_to_operation
+        .into_iter()
+        .map(Option::unwrap)
+        .collect()
 }
 
 fn parse_input(input: &str) -> Result<(Vec<OpTest>, Vec<TestInstruction>), SimpleError> {
@@ -115,11 +143,14 @@ fn parse_input(input: &str) -> Result<(Vec<OpTest>, Vec<TestInstruction>), Simpl
         op_tests.push(OpTest::from_lines(line_group)?);
     }
 
-    let test_instructions: Vec<_> = lines[triple_blank_line_index + 3 ..].iter()
+    let test_instructions: Vec<_> = lines[triple_blank_line_index + 3..]
+        .iter()
         .map(|line| {
             let split: Vec<_> = line.split(' ').collect();
             if split.len() != 4 {
-                return Err(SimpleError::new(format!("invalid instruction line: {line}")));
+                return Err(SimpleError::new(format!(
+                    "invalid instruction line: {line}"
+                )));
             }
 
             Ok(TestInstruction {
@@ -141,16 +172,21 @@ fn find_triple_blank_line_index(lines: &[&str]) -> Result<usize, SimpleError> {
         }
     }
 
-    Err(SimpleError::new(String::from("input has no triple blank line")))
+    Err(SimpleError::new(String::from(
+        "input has no triple blank line",
+    )))
 }
 
 fn parse_registers(s: &str) -> Result<[u64; 4], SimpleError> {
     let numbers: Vec<_> = s[1..s.len() - 1].split(", ").collect();
     if numbers.len() != 4 {
-        return Err(SimpleError::new(format!("string does not split into 4 numbers: {s}")));
+        return Err(SimpleError::new(format!(
+            "string does not split into 4 numbers: {s}"
+        )));
     }
 
-    let numbers: Vec<_> = numbers.into_iter()
+    let numbers: Vec<_> = numbers
+        .into_iter()
         .map(|n| n.parse::<u64>().map_err(SimpleError::from))
         .collect::<Result<_, _>>()?;
 

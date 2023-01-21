@@ -1,8 +1,8 @@
 //! Day 3: Toboggan Trajectory
 //! https://adventofcode.com/2020/day/3
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 fn solve_part_1(input: &str) -> Result<u32, SimpleError> {
     let map = parse_input(input)?;
@@ -46,16 +46,17 @@ fn solve_part_2(input: &str) -> Result<u32, SimpleError> {
 }
 
 fn parse_input(input: &str) -> Result<Vec<Vec<bool>>, SimpleError> {
-    input.lines().map(|line| {
-        line.chars().map(|c| {
-            match c {
-                '#' => Ok(true),
-                '.' => Ok(false),
-                _ => Err(SimpleError::new(format!("unexpected char: {c}")))
-            }
+    input
+        .lines()
+        .map(|line| {
+            line.chars()
+                .map(|c| match c {
+                    '#' => Ok(true),
+                    '.' => Ok(false),
+                    _ => Err(SimpleError::new(format!("unexpected char: {c}"))),
+                })
+                .collect()
         })
-            .collect()
-    })
         .collect()
 }
 

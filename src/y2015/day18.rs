@@ -1,8 +1,8 @@
 //! Day 18: Like a GIF For Your Yard
 //! https://adventofcode.com/2015/day/18
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 fn solve_part(input: &str, steps: usize, locked_corners: bool) -> Result<usize, SimpleError> {
     let mut grid = parse_input(input);
@@ -18,9 +18,9 @@ fn solve_part(input: &str, steps: usize, locked_corners: bool) -> Result<usize, 
         grid = simulate_turn(&grid, locked_corners);
     }
 
-    let final_count = grid.into_iter().map(|row| {
-        row.into_iter().filter(|&b| b).count()
-    })
+    let final_count = grid
+        .into_iter()
+        .map(|row| row.into_iter().filter(|&b| b).count())
         .sum();
 
     Ok(final_count)
@@ -49,7 +49,16 @@ fn simulate_turn(grid: &Vec<Vec<bool>>, locked_corners: bool) -> Vec<Vec<bool>> 
 
 fn count_neighbors(grid: &Vec<Vec<bool>>, i: usize, j: usize) -> usize {
     let mut on_neighbors = 0;
-    for (dx, dy) in [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)] {
+    for (dx, dy) in [
+        (-1, -1),
+        (-1, 0),
+        (-1, 1),
+        (0, -1),
+        (0, 1),
+        (1, -1),
+        (1, 0),
+        (1, 1),
+    ] {
         let ii = (i as i32) + dy;
         let jj = (j as i32) + dx;
 
@@ -75,9 +84,9 @@ fn turn_on_corners(grid: &mut Vec<Vec<bool>>) {
 }
 
 fn parse_input(input: &str) -> Vec<Vec<bool>> {
-    input.lines().map(|line| {
-        line.chars().map(|c| c == '#').collect()
-    })
+    input
+        .lines()
+        .map(|line| line.chars().map(|c| c == '#').collect())
         .collect()
 }
 

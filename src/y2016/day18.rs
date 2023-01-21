@@ -1,9 +1,9 @@
 //! Day 18: Like a Rogue
 //! https://adventofcode.com/2016/day/18
 
+use crate::SimpleError;
 use std::error::Error;
 use std::iter;
-use crate::SimpleError;
 
 fn solve_part(input: &str, row_target: usize) -> Result<usize, SimpleError> {
     let first_line_traps = parse_input(input)?;
@@ -26,21 +26,31 @@ fn generate_new_line(line: &[bool]) -> Vec<bool> {
         .chain(iter::once(false))
         .collect();
 
-    extended_line.windows(3).map(|window| {
-        matches!(window, [true, true, false] | [false, true, true] | [true, false, false] | [false, false, true])
-    })
+    extended_line
+        .windows(3)
+        .map(|window| {
+            matches!(
+                window,
+                [true, true, false]
+                    | [false, true, true]
+                    | [true, false, false]
+                    | [false, false, true]
+            )
+        })
         .collect()
 }
 
 fn parse_input(input: &str) -> Result<Vec<bool>, SimpleError> {
     let first_line = crate::read_single_line(input)?;
-    first_line.chars().map(|c| {
-        match c {
+    first_line
+        .chars()
+        .map(|c| match c {
             '^' => Ok(true),
             '.' => Ok(false),
-            _ => Err(SimpleError::new(format!("invalid char '{c}' in line: {first_line}")))
-        }
-    })
+            _ => Err(SimpleError::new(format!(
+                "invalid char '{c}' in line: {first_line}"
+            ))),
+        })
         .collect()
 }
 

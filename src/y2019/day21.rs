@@ -1,10 +1,10 @@
 //! Day 21: Springdroid Adventure
 //! https://adventofcode.com/2019/day/21
 
-use std::error::Error;
-use crate::SimpleError;
 use crate::y2019::intcode;
 use crate::y2019::intcode::InteractiveIntcodeProgram;
+use crate::SimpleError;
+use std::error::Error;
 
 // J = !A || (!B && D) || (!C && D)
 // When a hole is within 3 spaces, jump as early as possible as long as the robot will land on
@@ -66,7 +66,7 @@ fn solve_part(input: &str, instructions: &str) -> Result<i64, Box<dyn Error>> {
         }
 
         return Err(Box::new(SimpleError::new(String::from(
-            "intcode program did not return a solution, see above output"
+            "intcode program did not return a solution, see above output",
         ))));
     }
 

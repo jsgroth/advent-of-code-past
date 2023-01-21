@@ -1,9 +1,9 @@
 //! Day 24: Immune System Simulator 20XX
 //! https://adventofcode.com/2018/day/24
 
+use crate::SimpleError;
 use std::error::Error;
 use std::str::FromStr;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 enum UnitType {
@@ -30,7 +30,7 @@ impl FromStr for AttackType {
             "radiation" => Ok(Self::Radiation),
             "slashing" => Ok(Self::Slashing),
             "bludgeoning" => Ok(Self::Bludgeoning),
-            _ => Err(SimpleError::new(format!("invalid attack type string: {s}")))
+            _ => Err(SimpleError::new(format!("invalid attack type string: {s}"))),
         }
     }
 }
@@ -79,7 +79,8 @@ fn solve_part_1(input: &str) -> Result<u32, SimpleError> {
         &infection
     };
 
-    let surviving_units = surviving_unit_groups.iter()
+    let surviving_units = surviving_unit_groups
+        .iter()
         .map(|unit_group| unit_group.units)
         .sum();
 
@@ -95,10 +96,12 @@ fn solve_part_2(input: &str) -> Result<u32, SimpleError> {
             unit_group.attack_power += boost;
         }
 
-        let (final_immune_system, final_infection) = run_simulation(boosted_immune_system, infection.clone());
+        let (final_immune_system, final_infection) =
+            run_simulation(boosted_immune_system, infection.clone());
 
         if !final_immune_system.is_empty() && final_infection.is_empty() {
-            let surviving_units = final_immune_system.iter()
+            let surviving_units = final_immune_system
+                .iter()
                 .map(|unit_group| unit_group.units)
                 .sum();
             return Ok(surviving_units);
@@ -108,18 +111,29 @@ fn solve_part_2(input: &str) -> Result<u32, SimpleError> {
     Err(SimpleError::new(String::from("no solution found")))
 }
 
-fn run_simulation(mut immune_system: Vec<UnitGroup>, mut infection: Vec<UnitGroup>) -> (Vec<UnitGroup>, Vec<UnitGroup>) {
-    while !immune_system.iter().all(UnitGroup::is_eliminated) && !infection.iter().all(UnitGroup::is_eliminated) {
+fn run_simulation(
+    mut immune_system: Vec<UnitGroup>,
+    mut infection: Vec<UnitGroup>,
+) -> (Vec<UnitGroup>, Vec<UnitGroup>) {
+    while !immune_system.iter().all(UnitGroup::is_eliminated)
+        && !infection.iter().all(UnitGroup::is_eliminated)
+    {
         let (immune_system_targets, infection_targets) =
             target_selection_phase(&immune_system, &infection);
 
-        if immune_system_targets.iter().all(Option::is_none) && infection_targets.iter().all(Option::is_none) {
+        if immune_system_targets.iter().all(Option::is_none)
+            && infection_targets.iter().all(Option::is_none)
+        {
             // No targets selected, simulation has deadlocked
             break;
         }
 
-        let (next_immune_system, next_infection) =
-            attack_phase(immune_system.clone(), infection.clone(), &immune_system_targets, &infection_targets);
+        let (next_immune_system, next_infection) = attack_phase(
+            immune_system.clone(),
+            infection.clone(),
+            &immune_system_targets,
+            &infection_targets,
+        );
 
         if immune_system == next_immune_system && infection == next_infection {
             // Simulation has deadlocked, neither side can win
@@ -136,14 +150,17 @@ fn run_simulation(mut immune_system: Vec<UnitGroup>, mut infection: Vec<UnitGrou
     (immune_system, infection)
 }
 
-fn target_selection_phase(immune_system: &[UnitGroup], infection: &[UnitGroup]) -> (Vec<Option<usize>>, Vec<Option<usize>>) {
-    let mut all_unit_groups: Vec<_> = immune_system.iter()
-        .chain(infection.iter())
-        .collect();
+fn target_selection_phase(
+    immune_system: &[UnitGroup],
+    infection: &[UnitGroup],
+) -> (Vec<Option<usize>>, Vec<Option<usize>>) {
+    let mut all_unit_groups: Vec<_> = immune_system.iter().chain(infection.iter()).collect();
 
     // Sort all unit groups by effective power desc, initiative desc
     all_unit_groups.sort_by(|&a, &b| {
-        a.effective_power().cmp(&b.effective_power()).reverse()
+        a.effective_power()
+            .cmp(&b.effective_power())
+            .reverse()
             .then(a.initiative.cmp(&b.initiative).reverse())
     });
 
@@ -156,20 +173,26 @@ fn target_selection_phase(immune_system: &[UnitGroup], infection: &[UnitGroup]) 
     for &unit_group in &all_unit_groups {
         let (targets, targeted) = match unit_group.unit_type {
             UnitType::ImmuneSystem => (&infection, &mut infection_targeted),
-            UnitType::Infection => (&immune_system, &mut immune_system_targeted)
+            UnitType::Infection => (&immune_system, &mut immune_system_targeted),
         };
 
         // Sort enemies by damage desc, effective power desc, initiative desc
         let mut targets: Vec<_> = targets.iter().collect();
         targets.sort_by(|&a, &b| {
-            unit_group.damage_amount_to(a).cmp(&unit_group.damage_amount_to(b)).reverse()
+            unit_group
+                .damage_amount_to(a)
+                .cmp(&unit_group.damage_amount_to(b))
+                .reverse()
                 .then(a.effective_power().cmp(&b.effective_power()).reverse())
                 .then(a.initiative.cmp(&b.initiative).reverse())
         });
 
         // Choose the first target that is not already targeted and can deal non-zero damage to
         let target = targets.into_iter().find_map(|enemy_group| {
-            if !enemy_group.is_eliminated() && !targeted[enemy_group.index] && unit_group.damage_amount_to(enemy_group) > 0 {
+            if !enemy_group.is_eliminated()
+                && !targeted[enemy_group.index]
+                && unit_group.damage_amount_to(enemy_group) > 0
+            {
                 Some(enemy_group.index)
             } else {
                 None
@@ -200,10 +223,15 @@ fn attack_phase(
     immune_system_targets: &[Option<usize>],
     infection_targets: &[Option<usize>],
 ) -> (Vec<UnitGroup>, Vec<UnitGroup>) {
-    let mut all_unit_groups: Vec<_> = immune_system.iter()
+    let mut all_unit_groups: Vec<_> = immune_system
+        .iter()
         .chain(infection.iter())
         .map(|unit_group| {
-            (unit_group.unit_type, unit_group.index, unit_group.initiative)
+            (
+                unit_group.unit_type,
+                unit_group.index,
+                unit_group.initiative,
+            )
         })
         .collect();
 
@@ -212,8 +240,16 @@ fn attack_phase(
 
     for &(unit_type, index, _) in &all_unit_groups {
         let (unit_group, targets, target) = match unit_type {
-            UnitType::ImmuneSystem => (&immune_system[index], &mut infection, immune_system_targets[index]),
-            UnitType::Infection => (&infection[index], &mut immune_system, infection_targets[index]),
+            UnitType::ImmuneSystem => (
+                &immune_system[index],
+                &mut infection,
+                immune_system_targets[index],
+            ),
+            UnitType::Infection => (
+                &infection[index],
+                &mut immune_system,
+                infection_targets[index],
+            ),
         };
 
         // Check if unit was eliminated earlier in the simulation
@@ -229,7 +265,6 @@ fn attack_phase(
             }
         };
 
-
         let damage = unit_group.damage_amount_to(target);
         let units_lost = damage / target.hit_points;
         target.units = target.units.saturating_sub(units_lost);
@@ -243,7 +278,9 @@ fn parse_input(input: &str) -> Result<(Vec<UnitGroup>, Vec<UnitGroup>), SimpleEr
 
     let split: Vec<_> = lines.split(|s| s.is_empty()).collect();
     if split.len() != 2 {
-        return Err(SimpleError::new(String::from("input does not have exactly one blank line")));
+        return Err(SimpleError::new(String::from(
+            "input does not have exactly one blank line",
+        )));
     }
 
     let immune_system = parse_unit_group(split[0], UnitType::ImmuneSystem)?;
@@ -253,39 +290,53 @@ fn parse_input(input: &str) -> Result<(Vec<UnitGroup>, Vec<UnitGroup>), SimpleEr
 }
 
 fn parse_unit_group(lines: &[&str], unit_type: UnitType) -> Result<Vec<UnitGroup>, SimpleError> {
-    lines.iter().skip(1).enumerate().map(|(i, &line)| {
-        let split: Vec<_> = line.splitn(8, ' ').collect();
+    lines
+        .iter()
+        .skip(1)
+        .enumerate()
+        .map(|(i, &line)| {
+            let split: Vec<_> = line.splitn(8, ' ').collect();
 
-        let units = split[0].parse()?;
-        let hit_points = split[4].parse()?;
+            let units = split[0].parse()?;
+            let hit_points = split[4].parse()?;
 
-        let mut weaknesses = Vec::new();
-        let mut immunities = Vec::new();
-        let mut rest = split[7];
-        if rest.starts_with('(') {
-            let close_paren_index = rest.chars().position(|c| c == ')').ok_or_else(
-                || SimpleError::new(format!("line has open paren but no close paren: {line}"))
-            )?;
+            let mut weaknesses = Vec::new();
+            let mut immunities = Vec::new();
+            let mut rest = split[7];
+            if rest.starts_with('(') {
+                let close_paren_index = rest.chars().position(|c| c == ')').ok_or_else(|| {
+                    SimpleError::new(format!("line has open paren but no close paren: {line}"))
+                })?;
 
-            let (parsed_weaknesses, parsed_immunities) =
-                parse_resistances(&rest[1..close_paren_index])?;
+                let (parsed_weaknesses, parsed_immunities) =
+                    parse_resistances(&rest[1..close_paren_index])?;
 
-            weaknesses = parsed_weaknesses;
-            immunities = parsed_immunities;
-            rest = &rest[close_paren_index + 2..];
-        }
+                weaknesses = parsed_weaknesses;
+                immunities = parsed_immunities;
+                rest = &rest[close_paren_index + 2..];
+            }
 
-        let rest_split: Vec<_> = rest.split(' ').collect();
-        if rest_split.len() != 11 {
-            return Err(SimpleError::new(format!("malformed line: {line}")));
-        }
+            let rest_split: Vec<_> = rest.split(' ').collect();
+            if rest_split.len() != 11 {
+                return Err(SimpleError::new(format!("malformed line: {line}")));
+            }
 
-        let attack_power = rest_split[5].parse()?;
-        let attack_type = rest_split[6].parse()?;
-        let initiative = rest_split[10].parse()?;
+            let attack_power = rest_split[5].parse()?;
+            let attack_type = rest_split[6].parse()?;
+            let initiative = rest_split[10].parse()?;
 
-        Ok(UnitGroup { index: i, unit_type, units, hit_points, attack_power, attack_type, initiative, weaknesses, immunities })
-    })
+            Ok(UnitGroup {
+                index: i,
+                unit_type,
+                units,
+                hit_points,
+                attack_power,
+                attack_type,
+                initiative,
+                weaknesses,
+                immunities,
+            })
+        })
         .collect()
 }
 
@@ -300,14 +351,15 @@ fn parse_resistances(s: &str) -> Result<(Vec<AttackType>, Vec<AttackType>), Simp
     let mut immunities = Vec::new();
     for &s in &resistance_strings {
         let split: Vec<_> = s.splitn(3, ' ').collect();
-        let attack_types: Vec<_> = split[2].split(", ")
+        let attack_types: Vec<_> = split[2]
+            .split(", ")
             .map(|s| s.parse::<AttackType>())
             .collect::<Result<_, _>>()?;
 
         match split[0] {
             "weak" => weaknesses = attack_types,
             "immune" => immunities = attack_types,
-            _ => return Err(SimpleError::new(format!("expected weak/immune: {s}")))
+            _ => return Err(SimpleError::new(format!("expected weak/immune: {s}"))),
         }
     }
 

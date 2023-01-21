@@ -1,10 +1,10 @@
 //! Day 6: Probably a Fire Hazard
 //! https://adventofcode.com/2015/day/6
 
+use crate::SimpleError;
 use std::cmp::Ordering;
 use std::error::Error;
 use std::ops::Not;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq)]
 struct Point {
@@ -49,7 +49,11 @@ struct Action {
 
 impl Action {
     fn new(action_type: ActionType, p1: Point, p2: Point) -> Self {
-        Self { action_type, p1, p2 }
+        Self {
+            action_type,
+            p1,
+            p2,
+        }
     }
 }
 
@@ -70,9 +74,9 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
         }
     }
 
-    let on = grid.iter().map(|row| {
-        row.iter().filter(|b| **b).count()
-    })
+    let on = grid
+        .iter()
+        .map(|row| row.iter().filter(|b| **b).count())
         .sum();
 
     Ok(on)
@@ -95,38 +99,50 @@ fn solve_part_2(input: &str) -> Result<u32, SimpleError> {
         }
     }
 
-    let total_brightness = grid.into_iter().map(|row| {
-        row.into_iter().sum::<u32>()
-    })
+    let total_brightness = grid
+        .into_iter()
+        .map(|row| row.into_iter().sum::<u32>())
         .sum();
 
     Ok(total_brightness)
 }
 
 fn parse_input(input: &str) -> Result<Vec<Action>, SimpleError> {
-    input.lines().map(|line| {
-        let split: Vec<_> = line.split(' ').collect();
+    input
+        .lines()
+        .map(|line| {
+            let split: Vec<_> = line.split(' ').collect();
 
-        match split.as_slice() {
-            ["turn", "on", p1, "through", p2] => Ok(Action::new(
-                ActionType::TurnOn, parse_point(p1)?, parse_point(p2)?
-            )),
-            ["turn", "off", p1, "through", p2] => Ok(Action::new(
-                ActionType::TurnOff, parse_point(p1)?, parse_point(p2)?
-            )),
-            ["toggle", p1, "through", p2] => Ok(Action::new(
-                ActionType::Toggle, parse_point(p1)?, parse_point(p2)?
-            )),
-            _ => Err(SimpleError::new(format!("unrecognized action: {line}")))
-        }
-    })
+            match split.as_slice() {
+                ["turn", "on", p1, "through", p2] => Ok(Action::new(
+                    ActionType::TurnOn,
+                    parse_point(p1)?,
+                    parse_point(p2)?,
+                )),
+                ["turn", "off", p1, "through", p2] => Ok(Action::new(
+                    ActionType::TurnOff,
+                    parse_point(p1)?,
+                    parse_point(p2)?,
+                )),
+                ["toggle", p1, "through", p2] => Ok(Action::new(
+                    ActionType::Toggle,
+                    parse_point(p1)?,
+                    parse_point(p2)?,
+                )),
+                _ => Err(SimpleError::new(format!("unrecognized action: {line}"))),
+            }
+        })
         .collect()
 }
 
 fn parse_point(s: &str) -> Result<Point, SimpleError> {
     let (x, y) = match s.split_once(',') {
         Some((x, y)) => (x, y),
-        None => return Err(SimpleError::new(format!("point string does not have a comma: {s}")))
+        None => {
+            return Err(SimpleError::new(format!(
+                "point string does not have a comma: {s}"
+            )))
+        }
     };
 
     Ok(Point::new(x.parse()?, y.parse()?))

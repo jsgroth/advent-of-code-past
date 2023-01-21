@@ -1,9 +1,9 @@
 //! Day 21: Fractal Art
 //! https://adventofcode.com/2017/day/21
 
+use crate::SimpleError;
 use std::collections::HashMap;
 use std::error::Error;
-use crate::SimpleError;
 
 #[derive(Debug)]
 struct Rule {
@@ -22,9 +22,7 @@ fn solve_part(input: &str, iterations: usize) -> Result<usize, SimpleError> {
 
     let rule_map = generate_rule_map(&rules);
 
-    let mut pixels: Vec<Vec<_>> = START_PIXELS.iter()
-        .map(|row| row.to_vec())
-        .collect();
+    let mut pixels: Vec<Vec<_>> = START_PIXELS.iter().map(|row| row.to_vec()).collect();
 
     for _ in 1..=iterations {
         let step = 2 + (pixels.len() % 2);
@@ -46,9 +44,9 @@ fn solve_part(input: &str, iterations: usize) -> Result<usize, SimpleError> {
                     }
                 }
 
-                let enhanced = rule_map.get(&pixel_chunk).ok_or_else(
-                    || SimpleError::new(format!("no enhancement found for chunk: {pixel_chunk:?}"))
-                )?;
+                let enhanced = rule_map.get(&pixel_chunk).ok_or_else(|| {
+                    SimpleError::new(format!("no enhancement found for chunk: {pixel_chunk:?}"))
+                })?;
 
                 for k in 0..enhanced.len() {
                     for l in 0..enhanced.len() {
@@ -61,9 +59,9 @@ fn solve_part(input: &str, iterations: usize) -> Result<usize, SimpleError> {
         pixels = new_pixels;
     }
 
-    let pixel_count = pixels.iter().map(|row| {
-        row.iter().filter(|&&b| b).count()
-    })
+    let pixel_count = pixels
+        .iter()
+        .map(|row| row.iter().filter(|&&b| b).count())
         .sum();
     Ok(pixel_count)
 }
@@ -112,22 +110,23 @@ fn flip(grid: &Vec<Vec<bool>>) -> Vec<Vec<bool>> {
 }
 
 fn parse_input(input: &str) -> Result<Vec<Rule>, SimpleError> {
-    input.lines().map(|line| {
-        let (from, to) = line.split_once(" => ").ok_or_else(
-            || SimpleError::new(String::from("line does not have a =>"))
-        )?;
+    input
+        .lines()
+        .map(|line| {
+            let (from, to) = line
+                .split_once(" => ")
+                .ok_or_else(|| SimpleError::new(String::from("line does not have a =>")))?;
 
-        let from = parse_rule_part(from);
-        let to = parse_rule_part(to);
-        Ok(Rule { from, to })
-    })
+            let from = parse_rule_part(from);
+            let to = parse_rule_part(to);
+            Ok(Rule { from, to })
+        })
         .collect()
 }
 
 fn parse_rule_part(s: &str) -> Vec<Vec<bool>> {
-    s.split('/').map(|chunk| {
-        chunk.chars().map(|c| c == '#').collect()
-    })
+    s.split('/')
+        .map(|chunk| chunk.chars().map(|c| c == '#').collect())
         .collect()
 }
 

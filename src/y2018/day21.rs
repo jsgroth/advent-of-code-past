@@ -1,10 +1,10 @@
 //! Day 21: Chronal Conversion
 //! https://adventofcode.com/2018/day/21
 
+use crate::y2018::chronodevice::{ChronoInstruction, ChronoOperation};
+use crate::SimpleError;
 use std::collections::HashSet;
 use std::error::Error;
-use crate::SimpleError;
-use crate::y2018::chronodevice::{ChronoInstruction, ChronoOperation};
 
 fn solve_part_1(input: &str) -> Result<u64, SimpleError> {
     let (ip, program) = parse_input(input)?;
@@ -21,7 +21,9 @@ fn solve_part_1(input: &str) -> Result<u64, SimpleError> {
         let instruction = program[pc];
 
         registers[ip] = pc as u64;
-        registers[instruction.c] = instruction.op.execute(&registers, instruction.a, instruction.b);
+        registers[instruction.c] = instruction
+            .op
+            .execute(&registers, instruction.a, instruction.b);
         pc = registers[ip] as usize;
 
         pc += 1;
@@ -50,7 +52,9 @@ fn solve_part_2(input: &str) -> Result<u64, SimpleError> {
         let instruction = program[pc];
 
         registers[ip] = pc as u64;
-        registers[instruction.c] = instruction.op.execute(&registers, instruction.a, instruction.b);
+        registers[instruction.c] = instruction
+            .op
+            .execute(&registers, instruction.a, instruction.b);
         pc = registers[ip] as usize;
 
         pc += 1;
@@ -63,7 +67,9 @@ fn parse_input(input: &str) -> Result<(usize, Vec<ChronoInstruction>), SimpleErr
     let first_line = crate::read_single_line(input)?;
     let ip: usize = first_line[4..].parse()?;
 
-    let program: Vec<_> = input.lines().skip(1)
+    let program: Vec<_> = input
+        .lines()
+        .skip(1)
         .map(ChronoInstruction::from_line)
         .collect::<Result<_, _>>()?;
 
@@ -73,13 +79,19 @@ fn parse_input(input: &str) -> Result<(usize, Vec<ChronoInstruction>), SimpleErr
 fn determine_target_register(program: &[ChronoInstruction]) -> Result<usize, SimpleError> {
     let check_instruction = program[program.len() - 3];
     if check_instruction.op != ChronoOperation::EqualRegisterRegister {
-        return Err(SimpleError::new(format!("expected third-to-last instruction to be eqrr: {check_instruction:?}")))
+        return Err(SimpleError::new(format!(
+            "expected third-to-last instruction to be eqrr: {check_instruction:?}"
+        )));
     }
 
     let target_register = match (check_instruction.a, check_instruction.b) {
         (0, b) => b as usize,
         (a, 0) => a as usize,
-        _ => return Err(SimpleError::new(format!("expected either a or b to be 0 in instruction: {check_instruction:?}")))
+        _ => {
+            return Err(SimpleError::new(format!(
+                "expected either a or b to be 0 in instruction: {check_instruction:?}"
+            )))
+        }
     };
 
     Ok(target_register)

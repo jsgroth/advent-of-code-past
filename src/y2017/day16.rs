@@ -1,9 +1,9 @@
 //! Day 16: Permutation Promenade
 //! https://adventofcode.com/2017/day/16
 
+use crate::SimpleError;
 use std::collections::HashMap;
 use std::error::Error;
-use crate::SimpleError;
 
 #[derive(Debug, Clone, Copy)]
 enum DanceMove {
@@ -15,22 +15,20 @@ enum DanceMove {
 impl DanceMove {
     fn from_str(s: &str) -> Result<Self, SimpleError> {
         match s.chars().next() {
-            Some('s') => {
-                Ok(Self::Spin(s[1..].parse()?))
-            }
+            Some('s') => Ok(Self::Spin(s[1..].parse()?)),
             Some('x') => {
-                let (a, b) = s[1..].split_once('/').ok_or_else(
-                    || SimpleError::new(format!("invalid exchange move: {s}"))
-                )?;
+                let (a, b) = s[1..]
+                    .split_once('/')
+                    .ok_or_else(|| SimpleError::new(format!("invalid exchange move: {s}")))?;
                 Ok(Self::Exchange(a.parse()?, b.parse()?))
             }
             Some('p') => {
-                let (a, b) = s[1..].split_once('/').ok_or_else(
-                    || SimpleError::new(format!("invalid exchange move: {s}"))
-                )?;
+                let (a, b) = s[1..]
+                    .split_once('/')
+                    .ok_or_else(|| SimpleError::new(format!("invalid exchange move: {s}")))?;
                 Ok(Self::Partner(a.parse()?, b.parse()?))
             }
-            _ => Err(SimpleError::new(format!("invalid dance move string: {s}")))
+            _ => Err(SimpleError::new(format!("invalid dance move string: {s}"))),
         }
     }
 }
@@ -76,7 +74,10 @@ fn simulate_dance(mut programs: Vec<char>, dance_moves: &[DanceMove]) -> Vec<cha
     for &dance_move in dance_moves {
         match dance_move {
             DanceMove::Spin(x) => {
-                programs = programs.iter().copied().skip(programs.len() - x)
+                programs = programs
+                    .iter()
+                    .copied()
+                    .skip(programs.len() - x)
                     .chain(programs.iter().copied().take(programs.len() - x))
                     .collect();
             }

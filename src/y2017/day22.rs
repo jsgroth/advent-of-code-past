@@ -1,10 +1,10 @@
 //! Day 22: Sporifica Virus
 //! https://adventofcode.com/2017/day/22
 
+use crate::SimpleError;
 use std::collections::{HashMap, HashSet};
 use std::error::Error;
 use std::mem;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 enum NodeState {
@@ -68,7 +68,8 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
 }
 
 fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
-    let mut point_states: HashMap<_, _> = parse_input(input)?.into_iter()
+    let mut point_states: HashMap<_, _> = parse_input(input)?
+        .into_iter()
         .map(|point| (point, NodeState::Infected))
         .collect();
 
@@ -94,7 +95,7 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
                 dx = -dx;
                 dy = -dy;
             }
-            NodeState::Weakened => {},
+            NodeState::Weakened => {}
         }
 
         let next_state = node_state.next_state();
@@ -129,7 +130,10 @@ fn parse_input(input: &str) -> Result<Vec<Point>, SimpleError> {
     for (i, line) in input.lines().enumerate() {
         for (j, c) in line.chars().enumerate() {
             if c == '#' {
-                points.push(Point::new((j as i32) - side_len / 2, side_len / 2 - (i as i32)));
+                points.push(Point::new(
+                    (j as i32) - side_len / 2,
+                    side_len / 2 - (i as i32),
+                ));
             }
         }
     }

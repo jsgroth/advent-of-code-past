@@ -1,19 +1,20 @@
 //! Day 14: Disk Defragmentation
 //! https://adventofcode.com/2017/day/14
 
-use std::error::Error;
-use crate::SimpleError;
 use crate::y2017::knothash;
+use crate::SimpleError;
+use std::error::Error;
 
 fn solve_part_1(input: &str) -> Result<u32, SimpleError> {
     let key_string = crate::read_single_line(input)?;
 
-    let total_used = (0..128).map(|i| {
-        knothash::compute_knot_hash(format!("{key_string}-{i}").as_str())
-            .into_iter()
-            .map(|byte| byte.count_ones())
-            .sum::<u32>()
-    })
+    let total_used = (0..128)
+        .map(|i| {
+            knothash::compute_knot_hash(format!("{key_string}-{i}").as_str())
+                .into_iter()
+                .map(|byte| byte.count_ones())
+                .sum::<u32>()
+        })
         .sum();
 
     Ok(total_used)
@@ -48,7 +49,13 @@ fn solve_part_2(input: &str) -> Result<u32, SimpleError> {
     Ok(region_count)
 }
 
-fn fill_region(used_squares: &Vec<Vec<bool>>, i: usize, j: usize, region_markers: &mut Vec<Vec<u32>>, region: u32) {
+fn fill_region(
+    used_squares: &Vec<Vec<bool>>,
+    i: usize,
+    j: usize,
+    region_markers: &mut Vec<Vec<u32>>,
+    region: u32,
+) {
     region_markers[i][j] = region;
 
     for (di, dj) in [(-1, 0), (1, 0), (0, -1), (0, 1)] {

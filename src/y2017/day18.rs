@@ -1,12 +1,12 @@
 //! Day 18: Duet
 //! https://adventofcode.com/2017/day/18
 
+use crate::SimpleError;
 use std::cell::RefCell;
 use std::collections::{HashMap, VecDeque};
 use std::error::Error;
 use std::iter;
 use std::rc::Rc;
-use crate::SimpleError;
 
 #[derive(Debug, Clone, Copy)]
 enum Arg {
@@ -52,7 +52,7 @@ impl Instruction {
             ["mod", x, y] => Ok(Self::Modulus(x.parse()?, Arg::from_str(y)?)),
             ["rcv", x] => Ok(Self::Receive(x.parse()?)),
             ["jgz", x, y] => Ok(Self::JumpGreaterZero(Arg::from_str(x)?, Arg::from_str(y)?)),
-            _ => Err(SimpleError::new(format!("invalid line: {line}")))
+            _ => Err(SimpleError::new(format!("invalid line: {line}"))),
         }
     }
 }
@@ -126,7 +126,9 @@ impl Program {
 
         match instruction {
             Instruction::Send(x) => {
-                send_queue.borrow_mut().push_back(get_register_value(registers, x));
+                send_queue
+                    .borrow_mut()
+                    .push_back(get_register_value(registers, x));
                 *pc += 1;
                 *total_sent += 1;
             }
@@ -177,9 +179,9 @@ fn solve_part_1(input: &str) -> Result<i64, SimpleError> {
     let receive_queue = Rc::clone(&send_queue);
     let mut program = Program::new(0, instructions, send_queue, receive_queue);
 
-    program.find_first_received_value().ok_or_else(
-        || SimpleError::new(String::from("no solution found"))
-    )
+    program
+        .find_first_received_value()
+        .ok_or_else(|| SimpleError::new(String::from("no solution found")))
 }
 
 fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
@@ -194,12 +196,7 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
         Rc::clone(&queue0),
         Rc::clone(&queue1),
     );
-    let mut program1 = Program::new(
-        1,
-        instructions,
-        queue1,
-        queue0,
-    );
+    let mut program1 = Program::new(1, instructions, queue1, queue0);
 
     while program0.execute() || program1.execute() {}
 

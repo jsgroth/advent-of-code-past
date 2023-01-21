@@ -1,36 +1,43 @@
 //! Day 9: Explosives in Cyberspace
 //! https://adventofcode.com/2016/day/9
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
-    let total_len = input.lines().map(|line| {
-        let chars: Vec<_> = line.chars().collect();
+    let total_len = input
+        .lines()
+        .map(|line| {
+            let chars: Vec<_> = line.chars().collect();
 
-        let mut len = 0;
-        let mut i = 0;
-        while i < line.len() {
-            let next_open_paren = match chars[i..].iter().position(|&c| c == '(') {
-                Some(index) => index + i,
-                None => break,
-            };
+            let mut len = 0;
+            let mut i = 0;
+            while i < line.len() {
+                let next_open_paren = match chars[i..].iter().position(|&c| c == '(') {
+                    Some(index) => index + i,
+                    None => break,
+                };
 
-            let next_close_paren = match chars[i..].iter().position(|&c| c == ')') {
-                Some(index) => index + i,
-                None => return Err(SimpleError::new(format!("mismatched parentheses in line: {line}"))),
-            };
+                let next_close_paren = match chars[i..].iter().position(|&c| c == ')') {
+                    Some(index) => index + i,
+                    None => {
+                        return Err(SimpleError::new(format!(
+                            "mismatched parentheses in line: {line}"
+                        )))
+                    }
+                };
 
-            let (to_repeat, repetitions) = parse_from_parentheses(&line[next_open_paren + 1..next_close_paren])?;
+                let (to_repeat, repetitions) =
+                    parse_from_parentheses(&line[next_open_paren + 1..next_close_paren])?;
 
-            len += (next_open_paren - i) + repetitions * to_repeat;
-            i = next_close_paren + 1 + to_repeat;
-        }
+                len += (next_open_paren - i) + repetitions * to_repeat;
+                i = next_close_paren + 1 + to_repeat;
+            }
 
-        len += line.len() - i;
+            len += line.len() - i;
 
-        Ok(len)
-    })
+            Ok(len)
+        })
         .collect::<Result<Vec<_>, _>>()?
         .into_iter()
         .sum();
@@ -39,7 +46,8 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
 }
 
 fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
-    let total_len = input.lines()
+    let total_len = input
+        .lines()
         .map(find_len_recursive)
         .collect::<Result<Vec<_>, _>>()?
         .into_iter()
@@ -56,20 +64,30 @@ fn find_len_recursive(s: &str) -> Result<usize, SimpleError> {
 
     let next_close_paren = match s.chars().position(|c| c == ')') {
         Some(index) => index,
-        None => return Err(SimpleError::new(format!("mismatched parentheses in string: {s}")))
+        None => {
+            return Err(SimpleError::new(format!(
+                "mismatched parentheses in string: {s}"
+            )))
+        }
     };
 
-    let (to_repeat, repetitions) = parse_from_parentheses(&s[next_open_paren + 1..next_close_paren])?;
+    let (to_repeat, repetitions) =
+        parse_from_parentheses(&s[next_open_paren + 1..next_close_paren])?;
 
-    let repeated_len = repetitions * find_len_recursive(&s[next_close_paren + 1..next_close_paren + 1 + to_repeat])?;
+    let repeated_len = repetitions
+        * find_len_recursive(&s[next_close_paren + 1..next_close_paren + 1 + to_repeat])?;
 
-    Ok(next_open_paren + repeated_len + find_len_recursive(&s[next_close_paren + 1 + to_repeat..])?)
+    Ok(
+        next_open_paren
+            + repeated_len
+            + find_len_recursive(&s[next_close_paren + 1 + to_repeat..])?,
+    )
 }
 
 fn parse_from_parentheses(s: &str) -> Result<(usize, usize), SimpleError> {
-    let (l, r) = s.split_once('x').ok_or_else(
-        || SimpleError::new(format!("no 'x' inside parentheses: {s}"))
-    )?;
+    let (l, r) = s
+        .split_once('x')
+        .ok_or_else(|| SimpleError::new(format!("no 'x' inside parentheses: {s}")))?;
     let l: usize = l.parse()?;
     let r: usize = r.parse()?;
 

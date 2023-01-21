@@ -1,10 +1,10 @@
 //! Day 3: Crossed Wires
 //! https://adventofcode.com/2019/day/3
 
+use crate::SimpleError;
 use std::cmp;
 use std::collections::{HashMap, HashSet};
 use std::error::Error;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 enum Direction {
@@ -21,7 +21,7 @@ impl Direction {
             'R' => Ok(Self::Right),
             'U' => Ok(Self::Up),
             'D' => Ok(Self::Down),
-            _ => Err(SimpleError::new(format!("invalid direction char: {c}")))
+            _ => Err(SimpleError::new(format!("invalid direction char: {c}"))),
         }
     }
 }
@@ -47,10 +47,13 @@ struct PathPart {
 fn solve_part_1(input: &str) -> Result<i64, SimpleError> {
     let (first_path, second_path) = parse_input(input)?;
 
-    let first_touched_points: HashSet<_> = build_touched_points(&first_path).keys().copied().collect();
-    let second_touched_points: HashSet<_> = build_touched_points(&second_path).keys().copied().collect();
+    let first_touched_points: HashSet<_> =
+        build_touched_points(&first_path).keys().copied().collect();
+    let second_touched_points: HashSet<_> =
+        build_touched_points(&second_path).keys().copied().collect();
 
-    let min_by_distance = first_touched_points.intersection(&second_touched_points)
+    let min_by_distance = first_touched_points
+        .intersection(&second_touched_points)
         .copied()
         .min_by_key(|&point| point.x.abs() + point.y.abs())
         .unwrap();
@@ -64,13 +67,16 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
     let first_touched_points = build_touched_points(&first_path);
     let second_touched_points = build_touched_points(&second_path);
 
-    let intersection: Vec<_> = first_touched_points.keys().copied()
+    let intersection: Vec<_> = first_touched_points
+        .keys()
+        .copied()
         .filter(|&point| second_touched_points.contains_key(&point))
         .collect();
 
     let mut min_steps = usize::MAX;
     for &point in &intersection {
-        let steps = first_touched_points.get(&point).copied().unwrap() + second_touched_points.get(&point).copied().unwrap();
+        let steps = first_touched_points.get(&point).copied().unwrap()
+            + second_touched_points.get(&point).copied().unwrap();
         min_steps = cmp::min(min_steps, steps);
     }
 
@@ -108,9 +114,10 @@ pub fn solve(input: &str) -> Result<(i64, usize), Box<dyn Error>> {
 
 fn parse_input(input: &str) -> Result<(Vec<PathPart>, Vec<PathPart>), SimpleError> {
     let first_line = crate::read_single_line(input)?;
-    let second_line = input.lines().nth(1).ok_or_else(
-        || SimpleError::new(String::from("input only has one line"))
-    )?;
+    let second_line = input
+        .lines()
+        .nth(1)
+        .ok_or_else(|| SimpleError::new(String::from("input only has one line")))?;
 
     let first_path = parse_path(first_line)?;
     let second_path = parse_path(second_line)?;
@@ -119,16 +126,20 @@ fn parse_input(input: &str) -> Result<(Vec<PathPart>, Vec<PathPart>), SimpleErro
 }
 
 fn parse_path(line: &str) -> Result<Vec<PathPart>, SimpleError> {
-    line.split(',').map(|part| {
-        if part.len() < 2 {
-            return Err(SimpleError::new(format!("path part is too short: {part}")));
-        }
+    line.split(',')
+        .map(|part| {
+            if part.len() < 2 {
+                return Err(SimpleError::new(format!("path part is too short: {part}")));
+            }
 
-        let direction = Direction::from_char(part.chars().next().unwrap())?;
-        let distance = part[1..].parse()?;
+            let direction = Direction::from_char(part.chars().next().unwrap())?;
+            let distance = part[1..].parse()?;
 
-        Ok(PathPart { direction, distance })
-    })
+            Ok(PathPart {
+                direction,
+                distance,
+            })
+        })
         .collect()
 }
 

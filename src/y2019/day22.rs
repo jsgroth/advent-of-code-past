@@ -1,8 +1,8 @@
 //! Day 22: Slam Shuffle
 //! https://adventofcode.com/2019/day/22
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 enum Shuffle {
@@ -20,13 +20,20 @@ struct LinearFunction {
 
 impl LinearFunction {
     fn identity() -> Self {
-        Self { coefficient: 1, intercept: 0 }
+        Self {
+            coefficient: 1,
+            intercept: 0,
+        }
     }
 
     fn compose(&self, other: Self, modulo: i64) -> Self {
         let coefficient = bigint_multiply(self.coefficient, other.coefficient, modulo);
-        let intercept = (bigint_multiply(self.coefficient, other.intercept, modulo) + self.intercept) % modulo;
-        Self { coefficient, intercept }
+        let intercept =
+            (bigint_multiply(self.coefficient, other.intercept, modulo) + self.intercept) % modulo;
+        Self {
+            coefficient,
+            intercept,
+        }
     }
 }
 
@@ -51,7 +58,7 @@ impl Shuffle {
                 let n: usize = n.parse()?;
                 Ok(Self::DealWithIncrement(n))
             }
-            _ => Err(SimpleError::new(format!("invalid shuffle line: {line}")))
+            _ => Err(SimpleError::new(format!("invalid shuffle line: {line}"))),
         }
     }
 }
@@ -63,7 +70,8 @@ fn solve_part_1(input: &str) -> Result<i64, SimpleError> {
 
     let shuffle_function = reduce_to_function(&shuffles, PART_1_DECK_SIZE);
 
-    let pos_2019 = (shuffle_function.coefficient * 2019 + shuffle_function.intercept).rem_euclid(PART_1_DECK_SIZE);
+    let pos_2019 = (shuffle_function.coefficient * 2019 + shuffle_function.intercept)
+        .rem_euclid(PART_1_DECK_SIZE);
 
     Ok(pos_2019)
 }
@@ -150,7 +158,10 @@ fn reduce_to_function(shuffles: &[Shuffle], deck_size: i64) -> LinearFunction {
         }
     }
 
-    LinearFunction { coefficient, intercept }
+    LinearFunction {
+        coefficient,
+        intercept,
+    }
 }
 
 fn compose_function_n_times(function: LinearFunction, n: u64, modulo: i64) -> LinearFunction {

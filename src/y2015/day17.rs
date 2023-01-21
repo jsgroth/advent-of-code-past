@@ -1,10 +1,10 @@
 //! Day 17: No Such Thing as Too Much
 //! https://adventofcode.com/2015/day/17
 
+use crate::SimpleError;
 use std::cmp;
 use std::error::Error;
 use std::num::ParseIntError;
-use crate::SimpleError;
 
 fn solve_part_1(input: &str, target: u32) -> Result<usize, SimpleError> {
     let container_sizes = parse_input(input)?;
@@ -17,7 +17,13 @@ fn solve_part_2(input: &str, target: u32) -> Result<usize, SimpleError> {
 
     let min_containers = find_min_containers(&container_sizes, target, 0, 0);
 
-    Ok(search_combinations(&container_sizes, target, 0, 0, Some(min_containers)))
+    Ok(search_combinations(
+        &container_sizes,
+        target,
+        0,
+        0,
+        Some(min_containers),
+    ))
 }
 
 fn search_combinations(
@@ -31,15 +37,34 @@ fn search_combinations(
         return 1;
     }
 
-    if current_total > target || container_sizes.is_empty() || (target_containers.is_some() && containers >= target_containers.unwrap()) {
+    if current_total > target
+        || container_sizes.is_empty()
+        || (target_containers.is_some() && containers >= target_containers.unwrap())
+    {
         return 0;
     }
 
-    search_combinations(&container_sizes[1..], target, current_total, containers, target_containers) +
-        search_combinations(&container_sizes[1..], target, current_total + container_sizes[0], containers + 1, target_containers)
+    search_combinations(
+        &container_sizes[1..],
+        target,
+        current_total,
+        containers,
+        target_containers,
+    ) + search_combinations(
+        &container_sizes[1..],
+        target,
+        current_total + container_sizes[0],
+        containers + 1,
+        target_containers,
+    )
 }
 
-fn find_min_containers(container_sizes: &[u32], target: u32, current_total: u32, containers: usize) -> usize {
+fn find_min_containers(
+    container_sizes: &[u32],
+    target: u32,
+    current_total: u32,
+    containers: usize,
+) -> usize {
     if current_total == target {
         return containers;
     }
@@ -50,18 +75,25 @@ fn find_min_containers(container_sizes: &[u32], target: u32, current_total: u32,
 
     let mut result = usize::MAX;
 
-    result = cmp::min(result, find_min_containers(&container_sizes[1..], target, current_total, containers));
-    result = cmp::min(result, find_min_containers(
-        &container_sizes[1..], target, current_total + container_sizes[0], containers + 1
-    ));
+    result = cmp::min(
+        result,
+        find_min_containers(&container_sizes[1..], target, current_total, containers),
+    );
+    result = cmp::min(
+        result,
+        find_min_containers(
+            &container_sizes[1..],
+            target,
+            current_total + container_sizes[0],
+            containers + 1,
+        ),
+    );
 
     result
 }
 
 fn parse_input(input: &str) -> Result<Vec<u32>, ParseIntError> {
-    input.lines()
-        .map(|line| line.parse::<u32>())
-        .collect()
+    input.lines().map(|line| line.parse::<u32>()).collect()
 }
 
 pub fn solve(input: &str) -> Result<(usize, usize), Box<dyn Error>> {

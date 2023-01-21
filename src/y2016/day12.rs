@@ -1,16 +1,17 @@
 //! Day 12: Leonardo's Monorail
 //! https://adventofcode.com/2016/day/12
 
+use crate::y2016::assembunny::AssembunnyProgram;
+use crate::SimpleError;
 use std::collections::HashMap;
 use std::error::Error;
-use crate::SimpleError;
-use crate::y2016::assembunny::AssembunnyProgram;
 
 fn solve_part(input: &str, initial_c_value: i64) -> Result<i64, SimpleError> {
     let mut program = AssembunnyProgram::from_lines(input)?;
 
-    let mut registers: HashMap<_, i64> =
-        [('a', 0), ('b', 0), ('c', initial_c_value), ('d', 0)].into_iter().collect();
+    let mut registers: HashMap<_, i64> = [('a', 0), ('b', 0), ('c', initial_c_value), ('d', 0)]
+        .into_iter()
+        .collect();
 
     program.execute(&mut registers);
 

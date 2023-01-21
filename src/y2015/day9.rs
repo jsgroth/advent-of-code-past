@@ -1,9 +1,9 @@
 //! Day 9: All in a Single Night
 //! https://adventofcode.com/2015/day/9
 
+use crate::SimpleError;
 use std::collections::{HashMap, HashSet};
 use std::error::Error;
-use crate::SimpleError;
 
 struct Location {
     distances: HashMap<String, u32>,
@@ -11,34 +11,49 @@ struct Location {
 
 impl Location {
     fn new() -> Self {
-        Self { distances: HashMap::new() }
+        Self {
+            distances: HashMap::new(),
+        }
     }
 }
 
 fn solve_part(input: &str, reverse: bool) -> Result<u32, SimpleError> {
     let locations = parse_input(input)?;
 
-    let minimum_distance = locations.keys().map(|start| {
-        let mut visited: HashSet<String> = HashSet::new();
-        visited.insert(start.clone());
-        find_minimum_distance(&locations, visited, start, reverse)
-    })
+    let minimum_distance = locations
+        .keys()
+        .map(|start| {
+            let mut visited: HashSet<String> = HashSet::new();
+            visited.insert(start.clone());
+            find_minimum_distance(&locations, visited, start, reverse)
+        })
         .min_by_key(|&distance| {
-            if reverse { -(distance as i32) } else { distance as i32 }
+            if reverse {
+                -(distance as i32)
+            } else {
+                distance as i32
+            }
         })
         .ok_or_else(|| SimpleError::new(String::from("input should not be empty")))?;
 
     Ok(minimum_distance)
 }
 
-fn find_minimum_distance(locations: &HashMap<String, Location>, visited: HashSet<String>, current_location: &str, reverse: bool) -> u32 {
+fn find_minimum_distance(
+    locations: &HashMap<String, Location>,
+    visited: HashSet<String>,
+    current_location: &str,
+    reverse: bool,
+) -> u32 {
     if visited.len() == locations.len() {
         return 0;
     }
 
     let location = locations.get(current_location).unwrap();
 
-    location.distances.iter()
+    location
+        .distances
+        .iter()
         .filter(|(name, _)| !visited.contains(*name))
         .map(|(name, distance)| {
             let mut new_visited = visited.clone();
@@ -46,7 +61,11 @@ fn find_minimum_distance(locations: &HashMap<String, Location>, visited: HashSet
             *distance + find_minimum_distance(locations, new_visited, name, reverse)
         })
         .min_by_key(|&distance| {
-            if reverse { -(distance as i32) } else { distance as i32 }
+            if reverse {
+                -(distance as i32)
+            } else {
+                distance as i32
+            }
         })
         .unwrap()
 }
@@ -63,7 +82,7 @@ fn parse_input(input: &str) -> Result<HashMap<String, Location>, SimpleError> {
                 update_location(&mut locations, a, b, distance);
                 update_location(&mut locations, b, a, distance);
             }
-            _ => return Err(SimpleError::new(format!("invalid line: {line}")))
+            _ => return Err(SimpleError::new(format!("invalid line: {line}"))),
         }
     }
 

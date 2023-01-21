@@ -1,13 +1,13 @@
 //! Day 20: A Regular Map
 //! https://adventofcode.com/2018/day/20
 
+use crate::SimpleError;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::error::Error;
 use std::hash::Hash;
 use std::iter;
 use std::ops::Add;
 use std::str::FromStr;
-use crate::SimpleError;
 
 #[derive(Debug, Clone)]
 struct Regex {
@@ -62,7 +62,9 @@ impl FromStr for Regex {
                 }
                 ')' => {
                     if levels.is_empty() {
-                        return Err(SimpleError::new(format!("unbalanced parentheses in string: {s}")));
+                        return Err(SimpleError::new(format!(
+                            "unbalanced parentheses in string: {s}"
+                        )));
                     }
 
                     current_parts.push(RegexPart::Literal(current_chars));
@@ -77,16 +79,24 @@ impl FromStr for Regex {
 
                     current_parts.push(new_group);
                 }
-                _ => return Err(SimpleError::new(format!("unexpected char '{c}' in string: {s}")))
+                _ => {
+                    return Err(SimpleError::new(format!(
+                        "unexpected char '{c}' in string: {s}"
+                    )))
+                }
             }
         }
 
         if !levels.is_empty() {
-            return Err(SimpleError::new(format!("string has too many open parentheses: {s}")));
+            return Err(SimpleError::new(format!(
+                "string has too many open parentheses: {s}"
+            )));
         }
 
         if !current_branches.is_empty() {
-            return Err(SimpleError::new(format!("lowest level should not have any branches: {s}")));
+            return Err(SimpleError::new(format!(
+                "lowest level should not have any branches: {s}"
+            )));
         }
 
         if !current_chars.is_empty() {
@@ -112,7 +122,7 @@ impl Direction {
             'S' => Self::South,
             'E' => Self::East,
             'W' => Self::West,
-            _ => return Err(SimpleError::new(format!("invalid direction char: {c}")))
+            _ => return Err(SimpleError::new(format!("invalid direction char: {c}"))),
         };
 
         Ok(direction)
@@ -135,7 +145,9 @@ struct DirectionSet {
 
 impl DirectionSet {
     fn new() -> Self {
-        Self { directions_bits: 0x00 }
+        Self {
+            directions_bits: 0x00,
+        }
     }
 
     fn get_directions(&self) -> Vec<Direction> {
@@ -183,8 +195,13 @@ impl Point {
         Self { x, y }
     }
 
-    fn get_adjacent_points(&self, direction_set: &DirectionSet) -> impl Iterator<Item = Point> + '_ {
-        direction_set.get_directions().into_iter()
+    fn get_adjacent_points(
+        &self,
+        direction_set: &DirectionSet,
+    ) -> impl Iterator<Item = Point> + '_ {
+        direction_set
+            .get_directions()
+            .into_iter()
             .map(|direction| *self + direction)
     }
 }
@@ -206,9 +223,7 @@ fn solve_both_parts(input: &str) -> Result<(usize, usize), SimpleError> {
     let regex = crate::read_single_line(input)?;
     let regex: Regex = regex[1..regex.len() - 1].parse()?;
 
-    let mut map: HashMap<_, _> = iter::once(
-        (Point::new(0, 0), DirectionSet::new())
-    ).collect();
+    let mut map: HashMap<_, _> = iter::once((Point::new(0, 0), DirectionSet::new())).collect();
 
     fill_map(&mut map, &regex, &[Point::new(0, 0)])?;
 
@@ -217,7 +232,11 @@ fn solve_both_parts(input: &str) -> Result<(usize, usize), SimpleError> {
     Ok((distance_to_farthest_room, num_distant_rooms))
 }
 
-fn fill_map(map: &mut HashMap<Point, DirectionSet>, regex: &Regex, positions: &[Point]) -> Result<Vec<Point>, SimpleError> {
+fn fill_map(
+    map: &mut HashMap<Point, DirectionSet>,
+    regex: &Regex,
+    positions: &[Point],
+) -> Result<Vec<Point>, SimpleError> {
     let mut positions = positions.to_vec();
 
     for regex_part in &regex.parts {
@@ -307,8 +326,17 @@ mod tests {
     fn test_sample_input_part_1() {
         assert_eq!(Ok((3, 0)), solve_both_parts("^WNE$"));
         assert_eq!(Ok((10, 0)), solve_both_parts("^ENWWW(NEEE|SSE(EE|N))$"));
-        assert_eq!(Ok((18, 0)), solve_both_parts("^ENNWSWW(NEWS|)SSSEEN(WNSE|)EE(SWEN|)NNN$"));
-        assert_eq!(Ok((23, 0)), solve_both_parts("^ESSWWN(E|NNENN(EESS(WNSE|)SSS|WWWSSSSE(SW|NNNE)))$"));
-        assert_eq!(Ok((31, 0)), solve_both_parts("^WSSEESWWWNW(S|NENNEEEENN(ESSSSW(NWSW|SSEN)|WSWWN(E|WWS(E|SS))))$"));
+        assert_eq!(
+            Ok((18, 0)),
+            solve_both_parts("^ENNWSWW(NEWS|)SSSEEN(WNSE|)EE(SWEN|)NNN$")
+        );
+        assert_eq!(
+            Ok((23, 0)),
+            solve_both_parts("^ESSWWN(E|NNENN(EESS(WNSE|)SSS|WWWSSSSE(SW|NNNE)))$")
+        );
+        assert_eq!(
+            Ok((31, 0)),
+            solve_both_parts("^WSSEESWWWNW(S|NENNEEEENN(ESSSSW(NWSW|SSEN)|WSWWN(E|WWS(E|SS))))$")
+        );
     }
 }

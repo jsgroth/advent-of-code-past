@@ -1,10 +1,10 @@
 //! Day 10: Balance Bots
 //! https://adventofcode.com/2016/day/10
 
+use crate::SimpleError;
 use std::cmp;
 use std::collections::HashMap;
 use std::error::Error;
-use crate::SimpleError;
 
 #[derive(Debug, Clone, Copy)]
 enum BotTarget {
@@ -18,7 +18,9 @@ impl BotTarget {
         match type_str {
             "bot" => Ok(Self::Bot(target)),
             "output" => Ok(Self::Output(target)),
-            _ => Err(SimpleError::new(format!("invalid target string: {type_str} {target}")))
+            _ => Err(SimpleError::new(format!(
+                "invalid target string: {type_str} {target}"
+            ))),
         }
     }
 }
@@ -36,7 +38,8 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
     let (bots, starting_values) = parse_input(input)?;
 
     let (values, _) = simulate_bots(bots, starting_values);
-    values.into_iter()
+    values
+        .into_iter()
         .find_map(|(bot_number, bot_values)| {
             if bot_values == vec![17, 61] || bot_values == vec![61, 17] {
                 Some(bot_number)
@@ -54,17 +57,20 @@ fn solve_part_2(input: &str) -> Result<u32, SimpleError> {
 
     for output_number in [0, 1, 2] {
         if !outputs.contains_key(&output_number) {
-            return Err(SimpleError::new(format!("output is missing number {output_number}")));
+            return Err(SimpleError::new(format!(
+                "output is missing number {output_number}"
+            )));
         }
     }
 
     Ok(outputs.get(&0).unwrap() * outputs.get(&1).unwrap() * outputs.get(&2).unwrap())
 }
 
-fn simulate_bots(bots: Vec<Bot>, starting_values: StartingValues) -> (HashMap<usize, Vec<u32>>, HashMap<usize, u32>) {
-    let number_to_bot: HashMap<_, _> = bots.iter()
-        .map(|bot| (bot.number, bot))
-        .collect();
+fn simulate_bots(
+    bots: Vec<Bot>,
+    starting_values: StartingValues,
+) -> (HashMap<usize, Vec<u32>>, HashMap<usize, u32>) {
+    let number_to_bot: HashMap<_, _> = bots.iter().map(|bot| (bot.number, bot)).collect();
 
     let mut number_to_values: HashMap<usize, Vec<u32>> = HashMap::new();
     for &number in number_to_bot.keys() {
@@ -89,7 +95,12 @@ fn simulate_bots(bots: Vec<Bot>, starting_values: StartingValues) -> (HashMap<us
     (number_to_values, outputs)
 }
 
-fn check_bot(bot: &Bot, bots: &HashMap<usize, &Bot>, values: &mut HashMap<usize, Vec<u32>>, outputs: &mut HashMap<usize, u32>) {
+fn check_bot(
+    bot: &Bot,
+    bots: &HashMap<usize, &Bot>,
+    values: &mut HashMap<usize, Vec<u32>>,
+    outputs: &mut HashMap<usize, u32>,
+) {
     let bot_values = values.get_mut(&bot.number).unwrap();
 
     if bot_values.len() != 2 {
@@ -140,13 +151,18 @@ fn parse_input(input: &str) -> Result<(Vec<Bot>, StartingValues), SimpleError> {
                 let bot: usize = bot.parse()?;
                 starting_values.push((n, bot));
             }
-            ["bot", bot, "gives", "low", "to", low_type, low_target, "and", "high", "to", high_type, high_target] => {
+            ["bot", bot, "gives", "low", "to", low_type, low_target, "and", "high", "to", high_type, high_target] =>
+            {
                 let number: usize = bot.parse()?;
                 let low_target = BotTarget::from_strs(low_type, low_target)?;
                 let high_target = BotTarget::from_strs(high_type, high_target)?;
-                bots.push(Bot { number, low_target, high_target });
+                bots.push(Bot {
+                    number,
+                    low_target,
+                    high_target,
+                });
             }
-            _ => return Err(SimpleError::new(format!("invalid line format: {line}")))
+            _ => return Err(SimpleError::new(format!("invalid line format: {line}"))),
         }
     }
 

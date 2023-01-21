@@ -1,9 +1,9 @@
 //! Day 16: Aunt Sue
 //! https://adventofcode.com/2015/day/16
 
+use crate::SimpleError;
 use std::collections::HashMap;
 use std::error::Error;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 enum Compound {
@@ -61,9 +61,11 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
     let target_values: HashMap<_, _> = TARGET_VALUES.iter().copied().collect();
 
     for (i, aunt_sue) in aunt_sues.iter().enumerate() {
-        if aunt_sue.known_compounds.iter().all(|(compound, number)| {
-            target_values.get(compound) == Some(number)
-        }) {
+        if aunt_sue
+            .known_compounds
+            .iter()
+            .all(|(compound, number)| target_values.get(compound) == Some(number))
+        {
             return Ok(i + 1);
         }
     }
@@ -77,8 +79,10 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
     let target_values: HashMap<_, _> = TARGET_VALUES.iter().copied().collect();
 
     for (i, aunt_sue) in aunt_sues.iter().enumerate() {
-        if aunt_sue.known_compounds.iter().all(|(compound, &number)| {
-            match compound {
+        if aunt_sue
+            .known_compounds
+            .iter()
+            .all(|(compound, &number)| match compound {
                 Compound::Cats | Compound::Trees => {
                     number > target_values.get(compound).copied().unwrap()
                 }
@@ -86,8 +90,8 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
                     number < target_values.get(compound).copied().unwrap()
                 }
                 compound => number == target_values.get(compound).copied().unwrap(),
-            }
-        }) {
+            })
+        {
             return Ok(i + 1);
         }
     }
@@ -96,23 +100,25 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
 }
 
 fn parse_input(input: &str) -> Result<Vec<AuntSue>, SimpleError> {
-    input.lines().map(|line| {
-        let split: Vec<_> = line.split(' ').skip(2).collect();
+    input
+        .lines()
+        .map(|line| {
+            let split: Vec<_> = line.split(' ').skip(2).collect();
 
-        let mut known_compounds: HashMap<Compound, u32> = HashMap::new();
-        for chunk in split.chunks(2) {
-            let compound = chunk[0];
-            let compound = &compound[..compound.len() - 1];
-            let compound = Compound::from_str(compound)?;
+            let mut known_compounds: HashMap<Compound, u32> = HashMap::new();
+            for chunk in split.chunks(2) {
+                let compound = chunk[0];
+                let compound = &compound[..compound.len() - 1];
+                let compound = Compound::from_str(compound)?;
 
-            let number = chunk[1];
-            let number: u32 = number.strip_suffix(',').unwrap_or(number).parse()?;
+                let number = chunk[1];
+                let number: u32 = number.strip_suffix(',').unwrap_or(number).parse()?;
 
-            known_compounds.insert(compound, number);
-        }
+                known_compounds.insert(compound, number);
+            }
 
-        Ok(AuntSue { known_compounds })
-    })
+            Ok(AuntSue { known_compounds })
+        })
         .collect()
 }
 

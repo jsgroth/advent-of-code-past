@@ -1,8 +1,8 @@
 //! Day 20: Infinite Elves and Infinite Houses
 //! https://adventofcode.com/2015/day/20
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
     let line = crate::read_single_line(input)?;

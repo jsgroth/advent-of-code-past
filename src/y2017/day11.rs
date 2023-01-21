@@ -1,9 +1,9 @@
 //! Day 11: Hex Ed
 //! https://adventofcode.com/2017/day/11
 
+use crate::SimpleError;
 use std::cmp;
 use std::error::Error;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 enum Direction {
@@ -24,7 +24,7 @@ impl Direction {
             "s" => Ok(Self::South),
             "sw" => Ok(Self::Southwest),
             "nw" => Ok(Self::Northwest),
-            _ => Err(SimpleError::new(format!("invalid direction string: {s}")))
+            _ => Err(SimpleError::new(format!("invalid direction string: {s}"))),
         }
     }
 }

@@ -62,7 +62,7 @@ impl<I: InputFn, O: OutputFn> IntcodeProgram<I, O> {
             POSITION_MODE => self.program[index] as usize,
             IMMEDIATE_MODE => index,
             RELATIVE_MODE => (self.relative_base + self.program[index]) as usize,
-            _ => panic!("unexpected parameter mode: {}", parameter_mode % 10)
+            _ => panic!("unexpected parameter mode: {}", parameter_mode % 10),
         };
 
         self.program.get(address).copied().unwrap_or(0)
@@ -73,7 +73,7 @@ impl<I: InputFn, O: OutputFn> IntcodeProgram<I, O> {
             POSITION_MODE => self.program[index] as usize,
             IMMEDIATE_MODE => panic!("immediate parameter mode not supported for writes"),
             RELATIVE_MODE => (self.relative_base + self.program[index]) as usize,
-            _ => panic!("unexpected parameter mode: {}", parameter_mode % 10)
+            _ => panic!("unexpected parameter mode: {}", parameter_mode % 10),
         };
 
         if address >= self.program.len() {
@@ -163,7 +163,7 @@ impl<I: InputFn, O: OutputFn> IntcodeProgram<I, O> {
                 HALT_OPCODE => {
                     return true;
                 }
-                _ => panic!("invalid opcode: {opcode}")
+                _ => panic!("invalid opcode: {opcode}"),
             }
         }
 
@@ -241,11 +241,7 @@ impl InteractiveIntcodeProgram {
     }
 }
 
-pub fn execute(
-    program: &mut Vec<i64>,
-    input_fn: impl InputFn,
-    output_fn: impl OutputFn,
-) {
+pub fn execute(program: &mut Vec<i64>, input_fn: impl InputFn, output_fn: impl OutputFn) {
     let mut intcode_program = IntcodeProgram::new(program.clone(), input_fn, output_fn);
     intcode_program.execute();
     *program = intcode_program.program;
@@ -260,7 +256,10 @@ pub fn execute_no_io(program: &mut Vec<i64>) {
 }
 
 pub fn iterator_input_fn(mut iter: impl Iterator<Item = i64>) -> impl InputFn {
-    move || iter.next().expect("input fn called after iterator was exhausted")
+    move || {
+        iter.next()
+            .expect("input fn called after iterator was exhausted")
+    }
 }
 
 pub fn parse_program(input: &str) -> Result<Vec<i64>, Box<dyn Error>> {
@@ -310,7 +309,11 @@ mod tests {
     #[test]
     fn test_input() {
         let mut program = vec![3, 3, 99, 0];
-        execute(&mut program, || 5, |_| panic!("output should not be called"));
+        execute(
+            &mut program,
+            || 5,
+            |_| panic!("output should not be called"),
+        );
         assert_eq!(vec![3, 3, 99, 5], program);
     }
 
@@ -401,7 +404,9 @@ mod tests {
 
     #[test]
     fn test_relative_mode() {
-        let program = vec![109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99];
+        let program = vec![
+            109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99,
+        ];
 
         let outputs = execute_no_input(&program);
         assert_eq!(program, outputs);
@@ -447,8 +452,9 @@ mod tests {
     #[test]
     fn test_day5_sample_input() {
         let program = vec![
-            3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,
-            20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99,
+            3, 21, 1008, 21, 8, 20, 1005, 20, 22, 107, 8, 21, 20, 1006, 20, 31, 1106, 0, 36, 98, 0,
+            0, 1002, 21, 125, 20, 4, 20, 1105, 1, 46, 104, 999, 1105, 1, 46, 1101, 1000, 1, 20, 4,
+            20, 1105, 1, 46, 98, 99,
         ];
 
         let outputs = execute_with_input(&program, || 5);

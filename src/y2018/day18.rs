@@ -1,10 +1,10 @@
 //! Day 18: Settlers of The North Pole
 //! https://adventofcode.com/2018/day/18
 
+use crate::SimpleError;
 use std::collections::HashMap;
 use std::error::Error;
 use std::iter;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 enum Space {
@@ -36,7 +36,8 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
 fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
     let mut collection_area = parse_input(input)?;
 
-    let mut past_collection_areas: HashMap<_, _> = iter::once((collection_area.clone(), 0)).collect();
+    let mut past_collection_areas: HashMap<_, _> =
+        iter::once((collection_area.clone(), 0)).collect();
     for i in 1.. {
         collection_area = simulate_iteration(&collection_area);
 
@@ -63,7 +64,7 @@ fn compute_score(collection_area: &Vec<Vec<Space>>) -> usize {
             match space {
                 Space::Tree => tree_count += 1,
                 Space::Lumberyard => lumberyard_count += 1,
-                Space::Open => {},
+                Space::Open => {}
             }
         }
     }
@@ -108,10 +109,19 @@ fn simulate_iteration(collection_area: &Vec<Vec<Space>>) -> Vec<Vec<Space>> {
     next_area
 }
 
-fn count_neighbors(collection_area: &Vec<Vec<Space>>, i: usize , j: usize) -> [u32; 3] {
+fn count_neighbors(collection_area: &Vec<Vec<Space>>, i: usize, j: usize) -> [u32; 3] {
     let mut neighbor_counts = [0; 3];
 
-    for (di, dj) in [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)] {
+    for (di, dj) in [
+        (-1, -1),
+        (-1, 0),
+        (-1, 1),
+        (0, -1),
+        (0, 1),
+        (1, -1),
+        (1, 0),
+        (1, 1),
+    ] {
         if i == 0 && di == -1 || j == 0 && dj == -1 {
             continue;
         }
@@ -141,7 +151,7 @@ fn parse_input(input: &str) -> Result<Vec<Vec<Space>>, SimpleError> {
                 '.' => Space::Open,
                 '|' => Space::Tree,
                 '#' => Space::Lumberyard,
-                _ => return Err(SimpleError::new(format!("invalid char at ({i}, {j}): {c}")))
+                _ => return Err(SimpleError::new(format!("invalid char at ({i}, {j}): {c}"))),
             }
         }
     }

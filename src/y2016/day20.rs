@@ -1,9 +1,9 @@
 //! Day 20: Firewall Rules
 //! https://adventofcode.com/2016/day/20
 
+use crate::SimpleError;
 use std::cmp;
 use std::error::Error;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 struct IpRange {
@@ -25,7 +25,10 @@ impl IpRange {
             return None;
         }
 
-        Some(Self { start: self.start, end: cmp::max(self.end, other.end) })
+        Some(Self {
+            start: self.start,
+            end: cmp::max(self.end, other.end),
+        })
     }
 }
 
@@ -73,7 +76,7 @@ fn combine_ranges(mut ranges: Vec<IpRange>) -> Vec<IpRange> {
         match prev_range.combine(&range) {
             Some(combined) => {
                 prev_range = combined;
-            },
+            }
             None => {
                 combined_ranges.push(prev_range);
                 prev_range = range;
@@ -86,13 +89,15 @@ fn combine_ranges(mut ranges: Vec<IpRange>) -> Vec<IpRange> {
 }
 
 fn parse_input(input: &str) -> Result<Vec<IpRange>, SimpleError> {
-    let ranges: Result<Vec<_>, _> = input.lines().map(|line| {
-        let (l, r) = line.split_once('-').ok_or_else(
-            || SimpleError::new(format!("invalid line format: {line}"))
-        )?;
+    let ranges: Result<Vec<_>, _> = input
+        .lines()
+        .map(|line| {
+            let (l, r) = line
+                .split_once('-')
+                .ok_or_else(|| SimpleError::new(format!("invalid line format: {line}")))?;
 
-        Ok(IpRange::new(l.parse()?, r.parse()?))
-    })
+            Ok(IpRange::new(l.parse()?, r.parse()?))
+        })
         .collect();
 
     if let Ok(ranges) = &ranges {

@@ -1,9 +1,9 @@
 //! Day 14: Reindeer Olympics
 //! https://adventofcode.com/2015/day/14
 
+use crate::SimpleError;
 use std::cmp;
 use std::error::Error;
-use crate::SimpleError;
 
 struct Reindeer {
     speed: u32,
@@ -14,11 +14,19 @@ struct Reindeer {
 fn solve_part_1(input: &str, target_second: u32) -> Result<u32, SimpleError> {
     let reindeer = parse_input(input)?;
 
-    let max_distance = reindeer.into_iter().map(|reindeer| {
-        let last_fly_time = cmp::min(reindeer.fly_time, target_second % (reindeer.fly_time + reindeer.rest_time));
+    let max_distance = reindeer
+        .into_iter()
+        .map(|reindeer| {
+            let last_fly_time = cmp::min(
+                reindeer.fly_time,
+                target_second % (reindeer.fly_time + reindeer.rest_time),
+            );
 
-        last_fly_time * reindeer.speed + target_second / (reindeer.fly_time + reindeer.rest_time) * reindeer.fly_time * reindeer.speed
-    })
+            last_fly_time * reindeer.speed
+                + target_second / (reindeer.fly_time + reindeer.rest_time)
+                    * reindeer.fly_time
+                    * reindeer.speed
+        })
         .max()
         .unwrap_or(0);
 
@@ -55,19 +63,25 @@ fn solve_part_2(input: &str, target_second: u32) -> Result<u32, SimpleError> {
 }
 
 fn parse_input(input: &str) -> Result<Vec<Reindeer>, SimpleError> {
-    input.lines().map(|line| {
-        let split: Vec<_> = line.split(' ').collect();
+    input
+        .lines()
+        .map(|line| {
+            let split: Vec<_> = line.split(' ').collect();
 
-        if split.len() != 15 {
-            return Err(SimpleError::new(format!("invalid line: {line}")));
-        }
+            if split.len() != 15 {
+                return Err(SimpleError::new(format!("invalid line: {line}")));
+            }
 
-        let speed: u32 = split[3].parse()?;
-        let fly_time: u32 = split[6].parse()?;
-        let rest_time: u32 = split[13].parse()?;
+            let speed: u32 = split[3].parse()?;
+            let fly_time: u32 = split[6].parse()?;
+            let rest_time: u32 = split[13].parse()?;
 
-        Ok(Reindeer { speed, fly_time, rest_time })
-    })
+            Ok(Reindeer {
+                speed,
+                fly_time,
+                rest_time,
+            })
+        })
         .collect()
 }
 

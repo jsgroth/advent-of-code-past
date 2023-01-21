@@ -1,8 +1,8 @@
 //! Day 15: Rambunctious Recitation
 //! https://adventofcode.com/2020/day/15
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 fn solve_part_1(input: &str, nth_number: usize) -> Result<usize, SimpleError> {
     let starting_numbers = parse_input(input)?;
@@ -27,7 +27,8 @@ fn solve_part_1(input: &str, nth_number: usize) -> Result<usize, SimpleError> {
 }
 
 fn parse_input(input: &str) -> Result<Vec<usize>, SimpleError> {
-    crate::read_single_line(input)?.split(',')
+    crate::read_single_line(input)?
+        .split(',')
         .map(|s| s.parse::<usize>().map_err(SimpleError::from))
         .collect()
 }

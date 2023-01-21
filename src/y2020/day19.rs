@@ -1,9 +1,9 @@
 //! Day 19: Monster Messages
 //! https://adventofcode.com/2020/day/19
 
+use crate::SimpleError;
 use std::error::Error;
 use std::iter;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 struct Rule {
@@ -13,7 +13,10 @@ struct Rule {
 
 impl Rule {
     fn empty() -> Self {
-        Self { index: usize::MAX, branches: Vec::new() }
+        Self {
+            index: usize::MAX,
+            branches: Vec::new(),
+        }
     }
 }
 
@@ -39,7 +42,12 @@ struct State {
 }
 
 fn solve_part(input: &str, replace_8_11_rules: bool) -> Result<usize, SimpleError> {
-    let Input { rules, a_rule_index, b_rule_index, messages } = parse_input(input)?;
+    let Input {
+        rules,
+        a_rule_index,
+        b_rule_index,
+        messages,
+    } = parse_input(input)?;
 
     let rules = sort_rules(&rules);
 
@@ -52,7 +60,11 @@ fn solve_part(input: &str, replace_8_11_rules: bool) -> Result<usize, SimpleErro
     };
 
     let initial_states = generate_states_for_step(
-        StateStep { rule_index: 0, branch: 0, position: 0 },
+        StateStep {
+            rule_index: 0,
+            branch: 0,
+            position: 0,
+        },
         &Vec::new(),
         &rules,
         a_rule_index,
@@ -64,18 +76,23 @@ fn solve_part(input: &str, replace_8_11_rules: bool) -> Result<usize, SimpleErro
         let mut states = initial_states.clone();
 
         for c in message.chars() {
-            let (a_states, b_states): (Vec<_>, Vec<_>) = states.into_iter()
+            let (a_states, b_states): (Vec<_>, Vec<_>) = states
+                .into_iter()
                 .filter(|state| state.expected_next.is_some())
                 .partition(|state| state.expected_next == Some('a'));
 
             let matching_states = if c == 'a' { a_states } else { b_states };
 
-            states = matching_states.into_iter()
+            states = matching_states
+                .into_iter()
                 .flat_map(|state| advance_state(state, &rules, a_rule_index, b_rule_index))
                 .collect();
         }
 
-        if states.into_iter().any(|state| state.expected_next.is_none()) {
+        if states
+            .into_iter()
+            .any(|state| state.expected_next.is_none())
+        {
             valid_count += 1;
         }
     }
@@ -86,21 +103,20 @@ fn solve_part(input: &str, replace_8_11_rules: bool) -> Result<usize, SimpleErro
 fn replace_rules_for_part_two(rules: &mut [Rule]) {
     rules[8] = Rule {
         index: 8,
-        branches: vec![
-            vec![42],
-            vec![42, 8],
-        ],
+        branches: vec![vec![42], vec![42, 8]],
     };
     rules[11] = Rule {
         index: 11,
-        branches: vec![
-            vec![42, 31],
-            vec![42, 11, 31],
-        ],
+        branches: vec![vec![42, 31], vec![42, 11, 31]],
     };
 }
 
-fn advance_state(state: State, rules: &[Rule], a_rule_index: usize, b_rule_index: usize) -> Vec<State> {
+fn advance_state(
+    state: State,
+    rules: &[Rule],
+    a_rule_index: usize,
+    b_rule_index: usize,
+) -> Vec<State> {
     let State { mut steps, .. } = state;
 
     while let Some(last_step) = steps.pop() {
@@ -112,29 +128,64 @@ fn advance_state(state: State, rules: &[Rule], a_rule_index: usize, b_rule_index
                 position: last_step.position + 1,
                 ..last_step
             };
-            return generate_states_for_step(new_last_step, &steps, rules, a_rule_index, b_rule_index);
+            return generate_states_for_step(
+                new_last_step,
+                &steps,
+                rules,
+                a_rule_index,
+                b_rule_index,
+            );
         }
     }
 
-    vec![State { steps: Vec::new(), expected_next: None }]
+    vec![State {
+        steps: Vec::new(),
+        expected_next: None,
+    }]
 }
 
-fn generate_states_for_step(step: StateStep, path_so_far: &[StateStep], rules: &[Rule], a_rule_index: usize, b_rule_index: usize) -> Vec<State> {
+fn generate_states_for_step(
+    step: StateStep,
+    path_so_far: &[StateStep],
+    rules: &[Rule],
+    a_rule_index: usize,
+    b_rule_index: usize,
+) -> Vec<State> {
     let next_rule_index = rules[step.rule_index].branches[step.branch][step.position];
 
-    let new_path_so_far: Vec<_> = path_so_far.iter().copied().chain(iter::once(step)).collect();
+    let new_path_so_far: Vec<_> = path_so_far
+        .iter()
+        .copied()
+        .chain(iter::once(step))
+        .collect();
 
     if next_rule_index == a_rule_index {
-        vec![State { steps: new_path_so_far, expected_next: Some('a') }]
+        vec![State {
+            steps: new_path_so_far,
+            expected_next: Some('a'),
+        }]
     } else if next_rule_index == b_rule_index {
-        vec![State { steps: new_path_so_far, expected_next: Some('b') }]
+        vec![State {
+            steps: new_path_so_far,
+            expected_next: Some('b'),
+        }]
     } else {
         let mut states = Vec::new();
 
         let rule = &rules[next_rule_index];
         for branch_index in 0..rule.branches.len() {
-            let branch_step = StateStep { rule_index: next_rule_index, branch: branch_index, position: 0 };
-            states.extend(generate_states_for_step(branch_step, &new_path_so_far, rules, a_rule_index, b_rule_index));
+            let branch_step = StateStep {
+                rule_index: next_rule_index,
+                branch: branch_index,
+                position: 0,
+            };
+            states.extend(generate_states_for_step(
+                branch_step,
+                &new_path_so_far,
+                rules,
+                a_rule_index,
+                b_rule_index,
+            ));
         }
 
         states
@@ -162,9 +213,9 @@ fn parse_input(input: &str) -> Result<Input, SimpleError> {
     let mut a_rule_index: Option<usize> = None;
     let mut b_rule_index: Option<usize> = None;
     for rule_line in &rule_lines {
-        let (index, branches) = rule_line.split_once(": ").ok_or_else(
-            || SimpleError::new(format!("line did not contain a ': ': {rule_line}"))
-        )?;
+        let (index, branches) = rule_line
+            .split_once(": ")
+            .ok_or_else(|| SimpleError::new(format!("line did not contain a ': ': {rule_line}")))?;
 
         let index = index.parse()?;
 
@@ -176,10 +227,9 @@ fn parse_input(input: &str) -> Result<Input, SimpleError> {
                 b_rule_index = Some(index);
             }
             _ => {
-                let branches = branches.split(" | ")
-                    .map(|branch| {
-                        branch.split(' ').map(|s| s.parse::<usize>()).collect()
-                    })
+                let branches = branches
+                    .split(" | ")
+                    .map(|branch| branch.split(' ').map(|s| s.parse::<usize>()).collect())
                     .collect::<Result<_, _>>()?;
 
                 rules.push(Rule { index, branches });
@@ -188,7 +238,9 @@ fn parse_input(input: &str) -> Result<Input, SimpleError> {
     }
 
     if a_rule_index.is_none() || b_rule_index.is_none() {
-        return Err(SimpleError::new(String::from("input did not contain both \"a\" and \"b\" rules")));
+        return Err(SimpleError::new(String::from(
+            "input did not contain both \"a\" and \"b\" rules",
+        )));
     }
 
     Ok(Input {

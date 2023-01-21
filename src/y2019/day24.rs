@@ -1,10 +1,10 @@
 //! Day 24: Planet of Discord
 //! https://adventofcode.com/2019/day/24
 
+use crate::SimpleError;
 use std::collections::HashSet;
 use std::error::Error;
 use std::iter;
-use crate::SimpleError;
 
 fn solve_part_1(input: &str) -> Result<u64, SimpleError> {
     let mut grid = parse_input(input)?;
@@ -33,12 +33,13 @@ fn solve_part_2(input: &str, minutes: usize) -> Result<usize, SimpleError> {
         grids = simulate_iteration_recursive(&grids);
     }
 
-    let bugs = grids.iter().map(|grid| {
-        grid.iter().map(|row| {
-            row.iter().filter(|&&b| b).count()
+    let bugs = grids
+        .iter()
+        .map(|grid| {
+            grid.iter()
+                .map(|row| row.iter().filter(|&&b| b).count())
+                .sum::<usize>()
         })
-            .sum::<usize>()
-    })
         .sum();
 
     Ok(bugs)
@@ -147,19 +148,11 @@ fn simulate_iteration_recursive(grids: &Vec<Vec<Vec<bool>>>) -> Vec<Vec<Vec<bool
 
 fn count_from_direction(grid: &[Vec<bool>], di: i32, dj: i32) -> usize {
     match (di, dj) {
-        (-1, 0) => {
-            grid[4].iter().filter(|&&b| b).count()
-        }
-        (1, 0) => {
-            grid[0].iter().filter(|&&b| b).count()
-        }
-        (0, -1) => {
-            (0..5).filter(|&i| grid[i][4]).count()
-        }
-        (0, 1) => {
-            (0..5).filter(|&i| grid[i][0]).count()
-        }
-        _ => panic!("unexpected di/dj: di={di}, dj={dj}")
+        (-1, 0) => grid[4].iter().filter(|&&b| b).count(),
+        (1, 0) => grid[0].iter().filter(|&&b| b).count(),
+        (0, -1) => (0..5).filter(|&i| grid[i][4]).count(),
+        (0, 1) => (0..5).filter(|&i| grid[i][0]).count(),
+        _ => panic!("unexpected di/dj: di={di}, dj={dj}"),
     }
 }
 
@@ -176,24 +169,21 @@ fn should_prepend(first_grid: &[Vec<bool>]) -> bool {
 }
 
 fn should_append(last_grid: &[Vec<bool>]) -> bool {
-    (1..4).any(|i| {
-        (1..4).any(|j| {
-            last_grid[i][j]
-        })
-    })
+    (1..4).any(|i| (1..4).any(|j| last_grid[i][j]))
 }
 
 fn parse_input(input: &str) -> Result<Vec<Vec<bool>>, SimpleError> {
-    input.lines().map(|line| {
-        line.chars().map(|c| {
-            match c {
-                '#' => Ok(true),
-                '.' => Ok(false),
-                _ => Err(SimpleError::new(format!("unexpected char: {c}")))
-            }
+    input
+        .lines()
+        .map(|line| {
+            line.chars()
+                .map(|c| match c {
+                    '#' => Ok(true),
+                    '.' => Ok(false),
+                    _ => Err(SimpleError::new(format!("unexpected char: {c}"))),
+                })
+                .collect()
         })
-            .collect()
-    })
         .collect()
 }
 

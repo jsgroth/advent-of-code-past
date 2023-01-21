@@ -1,8 +1,8 @@
 //! Day 14: Chocolate Charts
 //! https://adventofcode.com/2018/day/14
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 const INITIAL_STATE: [u32; 2] = [3, 7];
 
@@ -26,7 +26,8 @@ fn solve_part_1(input: &str) -> Result<String, SimpleError> {
         elf1_index = (elf1_index + list[elf1_index] as usize + 1) % list.len();
     }
 
-    let result = list[num_recipes..num_recipes + 10].iter()
+    let result = list[num_recipes..num_recipes + 10]
+        .iter()
         .map(|&digit| char::from_digit(digit, 10).unwrap())
         .collect();
 
@@ -34,8 +35,12 @@ fn solve_part_1(input: &str) -> Result<String, SimpleError> {
 }
 
 fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
-    let target_sequence: Vec<_> = crate::read_single_line(input)?.chars()
-        .map(|c| c.to_digit(10).ok_or_else(|| SimpleError::new(format!("not a digit: {c}"))))
+    let target_sequence: Vec<_> = crate::read_single_line(input)?
+        .chars()
+        .map(|c| {
+            c.to_digit(10)
+                .ok_or_else(|| SimpleError::new(format!("not a digit: {c}")))
+        })
         .collect::<Result<_, _>>()?;
 
     let mut list = Vec::from(INITIAL_STATE);

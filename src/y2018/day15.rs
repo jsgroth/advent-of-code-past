@@ -1,13 +1,13 @@
 //! Day 15: Beverage Bandits
 //! https://adventofcode.com/2018/day/15
 
+use crate::SimpleError;
 use std::cell::RefCell;
 use std::cmp;
 use std::cmp::Ordering;
 use std::collections::VecDeque;
 use std::error::Error;
 use std::rc::Rc;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 struct Point {
@@ -38,8 +38,7 @@ impl PartialOrd for Point {
 
 impl Ord for Point {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.y.cmp(&other.y)
-            .then(self.x.cmp(&other.x))
+        self.y.cmp(&other.y).then(self.x.cmp(&other.x))
     }
 }
 
@@ -80,9 +79,7 @@ impl Clone for Space {
         match self {
             Space::Empty => Space::Empty,
             Space::Wall => Space::Wall,
-            Space::Warrior(warrior) => {
-                Space::Warrior(Rc::new(RefCell::new(*warrior.borrow())))
-            }
+            Space::Warrior(warrior) => Space::Warrior(Rc::new(RefCell::new(*warrior.borrow()))),
         }
     }
 }
@@ -122,14 +119,22 @@ impl Clone for SimulationInput {
             }
         }
 
-        Self { map, goblins, elves }
+        Self {
+            map,
+            goblins,
+            elves,
+        }
     }
 }
 
 fn solve_part_1(input: &str) -> Result<i32, SimpleError> {
     let simulation_input = parse_input(input)?;
 
-    let SimulationOutput { final_full_round, goblins, elves } = run_combat_simulation(simulation_input);
+    let SimulationOutput {
+        final_full_round,
+        goblins,
+        elves,
+    } = run_combat_simulation(simulation_input);
 
     if goblins.is_empty() {
         return Ok(compute_score(final_full_round, &elves));
@@ -150,7 +155,11 @@ fn solve_part_2(input: &str) -> Result<i32, SimpleError> {
             elf.borrow_mut().attack_power = elf_attack_power;
         }
 
-        let SimulationOutput { final_full_round, elves, .. } = run_combat_simulation(simulation_input.clone());
+        let SimulationOutput {
+            final_full_round,
+            elves,
+            ..
+        } = run_combat_simulation(simulation_input.clone());
 
         if elves.len() == simulation_input.elves.len() {
             return Ok(compute_score(final_full_round, &elves));
@@ -168,11 +177,10 @@ fn run_combat_simulation(input: SimulationInput) -> SimulationOutput {
     } = input;
 
     for round in 1.. {
-        let mut all_warriors: Vec<_> = goblins.iter()
+        let mut all_warriors: Vec<_> = goblins
+            .iter()
             .map(Rc::clone)
-            .chain(
-                elves.iter().map(Rc::clone)
-            )
+            .chain(elves.iter().map(Rc::clone))
             .collect();
         all_warriors.sort_by_key(|warrior| warrior.borrow().position);
 
@@ -184,9 +192,14 @@ fn run_combat_simulation(input: SimulationInput) -> SimulationOutput {
 
             // Check for win state
             let warrior_race = warrior.borrow().race;
-            if (warrior_race == WarriorRace::Goblin && elves.is_empty()) ||
-                (warrior_race == WarriorRace::Elf && goblins.is_empty()) {
-                return SimulationOutput { final_full_round: round - 1, goblins, elves };
+            if (warrior_race == WarriorRace::Goblin && elves.is_empty())
+                || (warrior_race == WarriorRace::Elf && goblins.is_empty())
+            {
+                return SimulationOutput {
+                    final_full_round: round - 1,
+                    goblins,
+                    elves,
+                };
             }
 
             // Move if not adjacent to an enemy and a target is reachable
@@ -208,7 +221,7 @@ fn run_combat_simulation(input: SimulationInput) -> SimulationOutput {
             if let Some(attack_target) = find_attack_target(&map, &warrior) {
                 let other_warrior = match &map[attack_target.y][attack_target.x] {
                     Space::Warrior(w) => Rc::clone(w),
-                    _ => panic!("attack target does not contain a warrior")
+                    _ => panic!("attack target does not contain a warrior"),
                 };
 
                 other_warrior.borrow_mut().hit_points -= warrior.attack_power;
@@ -234,10 +247,7 @@ fn run_combat_simulation(input: SimulationInput) -> SimulationOutput {
     panic!("simulation did not terminate organically");
 }
 
-fn find_move_target(
-    map: &Vec<Vec<Space>>,
-    warrior: &Rc<RefCell<Warrior>>,
-) -> Option<Point> {
+fn find_move_target(map: &Vec<Vec<Space>>, warrior: &Rc<RefCell<Warrior>>) -> Option<Point> {
     let warrior = warrior.borrow();
 
     let (destination, destination_distance) = match find_closest_square_in_range(map, &warrior) {
@@ -262,7 +272,9 @@ fn find_move_target(
 
     for potential_first_move in warrior_position.adjacent_points() {
         if let Space::Empty = &map[potential_first_move.y][potential_first_move.x] {
-            if find_distance_to(map, potential_first_move, destination) == Some(destination_distance - 1) {
+            if find_distance_to(map, potential_first_move, destination)
+                == Some(destination_distance - 1)
+            {
                 return Some(potential_first_move);
             }
         }
@@ -291,7 +303,7 @@ fn find_closest_square_in_range(
 
         for adjacent_point in position.adjacent_points() {
             match &map[adjacent_point.y][adjacent_point.x] {
-                Space::Wall => {},
+                Space::Wall => {}
                 Space::Empty => {
                     if !visited[adjacent_point.y][adjacent_point.x] && closest_square.is_none() {
                         visited[adjacent_point.y][adjacent_point.x] = true;
@@ -304,7 +316,7 @@ fn find_closest_square_in_range(
                             Some((existing_point, _)) => {
                                 Some((cmp::min(existing_point, position), distance))
                             }
-                            None => Some((position, distance))
+                            None => Some((position, distance)),
                         }
                     }
                 }
@@ -363,7 +375,8 @@ fn find_attack_target(map: &[Vec<Space>], warrior: &Warrior) -> Option<Point> {
 }
 
 fn compute_score(final_full_round: i32, remaining_warriors: &[Rc<RefCell<Warrior>>]) -> i32 {
-    let total_hit_points: i32 = remaining_warriors.iter()
+    let total_hit_points: i32 = remaining_warriors
+        .iter()
         .map(|warrior| warrior.borrow().hit_points)
         .sum();
 
@@ -389,25 +402,25 @@ fn parse_input(input: &str) -> Result<SimulationInput, SimpleError> {
                     map[i][j] = Space::Wall;
                 }
                 'G' => {
-                    let goblin = Rc::new(RefCell::new(Warrior::new(
-                        WarriorRace::Goblin, j, i
-                    )));
+                    let goblin = Rc::new(RefCell::new(Warrior::new(WarriorRace::Goblin, j, i)));
                     map[i][j] = Space::Warrior(Rc::clone(&goblin));
                     goblins.push(goblin);
                 }
                 'E' => {
-                    let elf = Rc::new(RefCell::new(Warrior::new(
-                        WarriorRace::Elf, j, i
-                    )));
+                    let elf = Rc::new(RefCell::new(Warrior::new(WarriorRace::Elf, j, i)));
                     map[i][j] = Space::Warrior(Rc::clone(&elf));
                     elves.push(elf);
                 }
-                _ => return Err(SimpleError::new(format!("unexpected char: {c}")))
+                _ => return Err(SimpleError::new(format!("unexpected char: {c}"))),
             }
         }
     }
 
-    Ok(SimulationInput { map, goblins, elves })
+    Ok(SimulationInput {
+        map,
+        goblins,
+        elves,
+    })
 }
 
 pub fn solve(input: &str) -> Result<(i32, i32), Box<dyn Error>> {

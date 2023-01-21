@@ -1,8 +1,8 @@
 //! Day 10: Elves Look, Elves Say
 //! https://adventofcode.com/2015/day/10
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 fn solve_part(input: &str, iterations: usize) -> Result<usize, SimpleError> {
     let line = crate::read_single_line(input)?;

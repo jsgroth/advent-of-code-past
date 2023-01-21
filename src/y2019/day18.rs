@@ -1,11 +1,11 @@
 //! Day 18: Many-Worlds Interpretation
 //! https://adventofcode.com/2019/day/18
 
+use crate::SimpleError;
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap, HashSet, VecDeque};
 use std::error::Error;
 use std::hash::Hash;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 struct Point {
@@ -36,7 +36,7 @@ impl Space {
             '@' => Self::Entrance,
             c @ 'a'..='z' => Self::Key(c),
             c @ 'A'..='Z' => Self::Door(c),
-            _ => return Err(SimpleError::new(format!("invalid space char: {c}")))
+            _ => return Err(SimpleError::new(format!("invalid space char: {c}"))),
         };
         Ok(space)
     }
@@ -100,15 +100,13 @@ struct PathToKey {
     doors_in_path: Vec<char>,
 }
 
-
 fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
     let map = parse_input(input)?;
 
     let num_keys = count_keys(&map);
 
-    let (entrance_i, entrance_j) = find_entrance(&map).ok_or_else(
-        || SimpleError::new(String::from("map does not contain an entrance"))
-    )?;
+    let (entrance_i, entrance_j) = find_entrance(&map)
+        .ok_or_else(|| SimpleError::new(String::from("map does not contain an entrance")))?;
     let entrance = Point::new(entrance_i, entrance_j);
 
     let mut heap = BinaryHeap::new();
@@ -122,12 +120,20 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
 
     let position_to_key_paths = build_reachable_keys_map(&map, &vec![entrance]);
 
-    while let Some(HeapEntry { state: position, keys, steps }) = heap.pop() {
+    while let Some(HeapEntry {
+        state: position,
+        keys,
+        steps,
+    }) = heap.pop()
+    {
         if keys.len() == num_keys {
             return Ok(steps);
         }
 
-        let visited_key = VisitedKey { state: position, keys };
+        let visited_key = VisitedKey {
+            state: position,
+            keys,
+        };
         if let Some(&distance) = min_distance_to_point_keys.get(&visited_key) {
             if distance <= steps {
                 continue;
@@ -142,13 +148,20 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
                 continue;
             }
 
-            if path.doors_in_path.iter().any(|&door| !keys.contains(door.to_ascii_lowercase())) {
+            if path
+                .doors_in_path
+                .iter()
+                .any(|&door| !keys.contains(door.to_ascii_lowercase()))
+            {
                 continue;
             }
 
             let new_keys = keys.plus(path.key);
 
-            let new_visited_key = VisitedKey { state: path.position, keys: new_keys };
+            let new_visited_key = VisitedKey {
+                state: path.position,
+                keys: new_keys,
+            };
             if let Some(&existing_distance) = min_distance_to_point_keys.get(&new_visited_key) {
                 if existing_distance <= steps + path.distance {
                     continue;
@@ -171,9 +184,8 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
 
     let num_keys = count_keys(&map);
 
-    let (entrance_i, entrance_j) = find_entrance(&map).ok_or_else(
-        || SimpleError::new(String::from("map does not contain an entrance"))
-    )?;
+    let (entrance_i, entrance_j) = find_entrance(&map)
+        .ok_or_else(|| SimpleError::new(String::from("map does not contain an entrance")))?;
 
     let entrances = rewrite_entrance(&mut map, entrance_i, entrance_j);
 
@@ -188,13 +200,20 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
 
     let mut min_distance_to_points_keys: HashMap<VisitedKey<Vec<Point>>, usize> = HashMap::new();
 
-
-    while let Some(HeapEntry { state: positions, keys, steps }) = heap.pop() {
+    while let Some(HeapEntry {
+        state: positions,
+        keys,
+        steps,
+    }) = heap.pop()
+    {
         if keys.len() == num_keys {
             return Ok(steps);
         }
 
-        let visited_key = VisitedKey { state: positions.clone(), keys };
+        let visited_key = VisitedKey {
+            state: positions.clone(),
+            keys,
+        };
         if let Some(&distance) = min_distance_to_points_keys.get(&visited_key) {
             if distance <= steps {
                 continue;
@@ -210,7 +229,11 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
                     continue;
                 }
 
-                if path.doors_in_path.iter().any(|&door| !keys.contains(door.to_ascii_lowercase())) {
+                if path
+                    .doors_in_path
+                    .iter()
+                    .any(|&door| !keys.contains(door.to_ascii_lowercase()))
+                {
                     continue;
                 }
 
@@ -221,8 +244,12 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
 
                 let new_keys = keys.plus(path.key);
 
-                let new_visited_key = VisitedKey { state: new_positions.clone(), keys: new_keys };
-                if let Some(&existing_distance) = min_distance_to_points_keys.get(&new_visited_key) {
+                let new_visited_key = VisitedKey {
+                    state: new_positions.clone(),
+                    keys: new_keys,
+                };
+                if let Some(&existing_distance) = min_distance_to_points_keys.get(&new_visited_key)
+                {
                     if existing_distance <= steps + path.distance {
                         continue;
                     }
@@ -240,16 +267,23 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
     Err(SimpleError::new(String::from("no solution found")))
 }
 
-fn build_reachable_keys_map(map: &Vec<Vec<Space>>, starts: &Vec<Point>) -> HashMap<Point, Vec<PathToKey>> {
-    let all_key_positions: Vec<_> = map.iter().enumerate()
+fn build_reachable_keys_map(
+    map: &Vec<Vec<Space>>,
+    starts: &Vec<Point>,
+) -> HashMap<Point, Vec<PathToKey>> {
+    let all_key_positions: Vec<_> = map
+        .iter()
+        .enumerate()
         .flat_map(|(i, row)| {
-            row.iter().enumerate().filter_map(|(j, &space)| {
-                if let Space::Key(..) = space {
-                    Some((i, j))
-                } else {
-                    None
-                }
-            })
+            row.iter()
+                .enumerate()
+                .filter_map(|(j, &space)| {
+                    if let Space::Key(..) = space {
+                        Some((i, j))
+                    } else {
+                        None
+                    }
+                })
                 .collect::<Vec<_>>()
         })
         .collect();
@@ -296,14 +330,12 @@ fn find_paths_to_keys(map: &Vec<Vec<Space>>, position: Point) -> Vec<PathToKey> 
                     Space::Door(door) => {
                         new_doors_passed.push(door);
                     }
-                    Space::Key(key) => {
-                        paths_to_keys.push(PathToKey {
-                            key,
-                            position: new_position,
-                            distance: steps + 1,
-                            doors_in_path: new_doors_passed.clone(),
-                        })
-                    }
+                    Space::Key(key) => paths_to_keys.push(PathToKey {
+                        key,
+                        position: new_position,
+                        distance: steps + 1,
+                        doors_in_path: new_doors_passed.clone(),
+                    }),
                     _ => {}
                 }
 
@@ -336,7 +368,8 @@ fn rewrite_entrance(map: &mut [Vec<Space>], entrance_i: usize, entrance_j: usize
 }
 
 fn count_keys(map: &[Vec<Space>]) -> u32 {
-    map.iter().flatten()
+    map.iter()
+        .flatten()
         .filter_map(|&space| {
             if let Space::Key(key_char) = space {
                 Some(key_char)
@@ -349,22 +382,21 @@ fn count_keys(map: &[Vec<Space>]) -> u32 {
 }
 
 fn find_entrance(map: &[Vec<Space>]) -> Option<(usize, usize)> {
-    map.iter().enumerate()
-        .find_map(|(i, row)| {
-            row.iter().enumerate().find_map(|(j, &space)| {
-                if let Space::Entrance = space {
-                    Some((i, j))
-                } else {
-                    None
-                }
-            })
+    map.iter().enumerate().find_map(|(i, row)| {
+        row.iter().enumerate().find_map(|(j, &space)| {
+            if let Space::Entrance = space {
+                Some((i, j))
+            } else {
+                None
+            }
         })
+    })
 }
 
 fn parse_input(input: &str) -> Result<Vec<Vec<Space>>, SimpleError> {
-    input.lines().map(|line| {
-        line.chars().map(Space::from_char).collect()
-    })
+    input
+        .lines()
+        .map(|line| line.chars().map(Space::from_char).collect())
         .collect()
 }
 

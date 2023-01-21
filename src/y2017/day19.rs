@@ -1,8 +1,8 @@
 //! Day 19: A Series of Tubes
 //! https://adventofcode.com/2017/day/19
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 enum Space {
@@ -21,7 +21,7 @@ impl Space {
             '|' => Ok(Self::VerticalLine),
             '+' => Ok(Self::Turn),
             c @ 'A'..='Z' => Ok(Self::Letter(c)),
-            _ => Err(SimpleError::new(format!("invalid char: {c}")))
+            _ => Err(SimpleError::new(format!("invalid char: {c}"))),
         }
     }
 }
@@ -29,9 +29,16 @@ impl Space {
 fn solve_both_parts(input: &str) -> Result<(String, usize), SimpleError> {
     let grid = parse_input(input)?;
 
-    let start = match grid[0].iter().position(|&space| space == Space::VerticalLine) {
+    let start = match grid[0]
+        .iter()
+        .position(|&space| space == Space::VerticalLine)
+    {
         Some(start) => start,
-        None => return Err(SimpleError::new(String::from("first row does not contain a '|'"))),
+        None => {
+            return Err(SimpleError::new(String::from(
+                "first row does not contain a '|'",
+            )))
+        }
     };
 
     let mut i = 0;
@@ -49,19 +56,21 @@ fn solve_both_parts(input: &str) -> Result<(String, usize), SimpleError> {
             Space::Void => {
                 return Ok((s, steps - 1));
             }
-            Space::HorizontalLine | Space::VerticalLine => {},
+            Space::HorizontalLine | Space::VerticalLine => {}
             Space::Letter(c) => {
                 s.push(c);
             }
-            Space::Turn => {
-                match try_turn(&grid, i, j, di, dj) {
-                    Some((new_di, new_dj)) => {
-                        di = new_di;
-                        dj = new_dj;
-                    }
-                    None => return Err(SimpleError::new(format!("unable to turn at i={i}, j={j}, di={di}, dj={dj}"))),
+            Space::Turn => match try_turn(&grid, i, j, di, dj) {
+                Some((new_di, new_dj)) => {
+                    di = new_di;
+                    dj = new_dj;
                 }
-            }
+                None => {
+                    return Err(SimpleError::new(format!(
+                        "unable to turn at i={i}, j={j}, di={di}, dj={dj}"
+                    )))
+                }
+            },
         }
     }
 }
@@ -72,14 +81,18 @@ fn try_turn(grid: &Vec<Vec<Space>>, i: usize, j: usize, di: i32, dj: i32) -> Opt
         let new_dj = di * di_sign;
         let new_i = (i as i32) + new_di;
         let new_j = (j as i32) + new_dj;
-        if new_i < 0 || new_j < 0 || new_i >= grid.len() as i32 || new_j >= grid[new_i as usize].len() as i32 {
+        if new_i < 0
+            || new_j < 0
+            || new_i >= grid.len() as i32
+            || new_j >= grid[new_i as usize].len() as i32
+        {
             continue;
         }
 
         let new_i = new_i as usize;
         let new_j = new_j as usize;
         match grid[new_i][new_j] {
-            Space::Void => {},
+            Space::Void => {}
             Space::Letter(_) | Space::Turn => {
                 return Some((new_di, new_dj));
             }
@@ -100,9 +113,9 @@ fn try_turn(grid: &Vec<Vec<Space>>, i: usize, j: usize, di: i32, dj: i32) -> Opt
 }
 
 fn parse_input(input: &str) -> Result<Vec<Vec<Space>>, SimpleError> {
-    let grid: Result<Vec<Vec<_>>, _> = input.lines().map(|line| {
-        line.chars().map(Space::from_char).collect()
-    })
+    let grid: Result<Vec<Vec<_>>, _> = input
+        .lines()
+        .map(|line| line.chars().map(Space::from_char).collect())
         .collect();
     let grid = grid?;
 
@@ -127,6 +140,9 @@ mod tests {
 
     #[test]
     fn test_sample_input_part_1() {
-        assert_eq!(Ok((String::from("ABCDEF"), 38)), solve_both_parts(SAMPLE_INPUT));
+        assert_eq!(
+            Ok((String::from("ABCDEF"), 38)),
+            solve_both_parts(SAMPLE_INPUT)
+        );
     }
 }

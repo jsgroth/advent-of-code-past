@@ -1,10 +1,10 @@
 //! Day 17: Two Steps Forward
 //! https://adventofcode.com/2016/day/17
 
+use crate::SimpleError;
 use std::collections::VecDeque;
 use std::error::Error;
 use std::ops::RangeInclusive;
-use crate::SimpleError;
 
 #[derive(Debug)]
 struct PathEntry {
@@ -15,7 +15,11 @@ struct PathEntry {
 
 impl PathEntry {
     fn new(steps: usize, path: String, position: (usize, usize)) -> Self {
-        Self { steps, path, position }
+        Self {
+            steps,
+            path,
+            position,
+        }
     }
 }
 
@@ -29,7 +33,11 @@ fn solve_part(input: &str, find_longest_path: bool) -> Result<String, SimpleErro
 
     let mut longest_path_so_far: Option<String> = None;
     while !queue.is_empty() {
-        let PathEntry { steps, path, position: (i, j) } = queue.pop_front().unwrap();
+        let PathEntry {
+            steps,
+            path,
+            position: (i, j),
+        } = queue.pop_front().unwrap();
 
         let digest = md5::compute(format!("{passcode}{path}").as_bytes());
         let hex_digest_prefix: Vec<_> = format!("{digest:x}").chars().take(4).collect();
@@ -62,9 +70,7 @@ fn solve_part(input: &str, find_longest_path: bool) -> Result<String, SimpleErro
     }
 
     if find_longest_path {
-        longest_path_so_far.ok_or_else(
-            || SimpleError::new(String::from("no solution found"))
-        )
+        longest_path_so_far.ok_or_else(|| SimpleError::new(String::from("no solution found")))
     } else {
         Err(SimpleError::new(String::from("no solution found")))
     }
@@ -88,8 +94,14 @@ mod tests {
     #[test]
     fn test_sample_input_part_1() {
         assert_eq!(Ok(String::from("DDRRRD")), solve_part("ihgpwlah", false));
-        assert_eq!(Ok(String::from("DDUDRLRRUDRD")), solve_part("kglvqrro", false));
-        assert_eq!(Ok(String::from("DRURDRUDDLLDLUURRDULRLDUUDDDRR")), solve_part("ulqzkmiv", false));
+        assert_eq!(
+            Ok(String::from("DDUDRLRRUDRD")),
+            solve_part("kglvqrro", false)
+        );
+        assert_eq!(
+            Ok(String::from("DRURDRUDDLLDLUURRDULRLDUUDDDRR")),
+            solve_part("ulqzkmiv", false)
+        );
     }
 
     #[test]

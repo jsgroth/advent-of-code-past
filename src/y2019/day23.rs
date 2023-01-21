@@ -1,13 +1,13 @@
 //! Day 23: Category Six
 //! https://adventofcode.com/2019/day/23
 
+use crate::y2019::intcode;
+use crate::y2019::intcode::{InputFn, IntcodeProgram, OutputFn};
 use std::collections::VecDeque;
 use std::error::Error;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
-use crate::y2019::intcode;
-use crate::y2019::intcode::{InputFn, IntcodeProgram, OutputFn};
 
 struct NetworkInputFn {
     input_queue: Arc<Mutex<VecDeque<i64>>>,
@@ -34,7 +34,10 @@ impl OutputFn for NetworkOutputFn {
     fn call(&mut self, output: i64) {
         self.output_buffer.push(output);
         if self.output_buffer.len() == 3 {
-            self.output_queue.lock().unwrap().extend(self.output_buffer.iter().copied());
+            self.output_queue
+                .lock()
+                .unwrap()
+                .extend(self.output_buffer.iter().copied());
             self.output_buffer.clear();
         }
     }
@@ -105,8 +108,10 @@ fn solve_both_parts(input: &str) -> Result<(i64, i64), Box<dyn Error>> {
 
             {
                 let mut program_queue_0 = program_queues[0].lock().unwrap();
-                program_queue_0.push_back(last_nat_x.expect("all programs idle before NAT packet sent"));
-                program_queue_0.push_back(last_nat_y.expect("all programs idle before NAT packet sent"));
+                program_queue_0
+                    .push_back(last_nat_x.expect("all programs idle before NAT packet sent"));
+                program_queue_0
+                    .push_back(last_nat_y.expect("all programs idle before NAT packet sent"));
             }
 
             *idle_flags[0].lock().unwrap() = false;

@@ -1,10 +1,10 @@
 //! Day 7: The Sum of Its Parts
 //! https://adventofcode.com/2018/day/7
 
+use crate::SimpleError;
 use std::collections::{HashMap, HashSet};
 use std::error::Error;
 use std::iter;
-use crate::SimpleError;
 
 #[derive(Debug, Clone, Copy)]
 struct Worker {
@@ -63,15 +63,18 @@ fn solve_part_2(input: &str, workers: usize, add_sixty: bool) -> Result<u32, Sim
             break;
         }
 
-        let letters_in_progress: HashSet<_> = workers.iter()
+        let letters_in_progress: HashSet<_> = workers
+            .iter()
             .filter_map(|worker| worker.current_letter)
             .collect();
 
         let mut available_letters = HashSet::new();
         for &letter in &all_letters {
-            available_letters.extend(
-                topological_sort_iteration(&requirements_map, letter, &visited)
-            );
+            available_letters.extend(topological_sort_iteration(
+                &requirements_map,
+                letter,
+                &visited,
+            ));
         }
 
         available_letters.retain(|&letter| !letters_in_progress.contains(&letter));
@@ -79,13 +82,16 @@ fn solve_part_2(input: &str, workers: usize, add_sixty: bool) -> Result<u32, Sim
         let mut available_letters: Vec<_> = available_letters.into_iter().collect();
         available_letters.sort();
 
-        let (in_progress_workers, free_workers): (Vec<_>, Vec<_>) = workers.iter_mut()
+        let (in_progress_workers, free_workers): (Vec<_>, Vec<_>) = workers
+            .iter_mut()
             .partition(|worker| worker.current_letter.is_some());
 
         if available_letters.is_empty() {
-            let elapsed = in_progress_workers.iter()
+            let elapsed = in_progress_workers
+                .iter()
                 .map(|worker| worker.time_left)
-                .min().unwrap();
+                .min()
+                .unwrap();
 
             total_time += elapsed;
             for worker in in_progress_workers {
@@ -107,14 +113,18 @@ fn time_required(letter: char, add_sixty: bool) -> u32 {
 }
 
 fn get_all_letters(requirements: &[(char, char)]) -> Vec<char> {
-    requirements.iter()
+    requirements
+        .iter()
         .flat_map(|&(before, after)| vec![before, after])
         .collect::<HashSet<_>>()
         .into_iter()
         .collect()
 }
 
-fn build_requirements_map(requirements: &Vec<(char, char)>, all_letters: &[char]) -> HashMap<char, Vec<char>> {
+fn build_requirements_map(
+    requirements: &Vec<(char, char)>,
+    all_letters: &[char],
+) -> HashMap<char, Vec<char>> {
     let mut requirements_map = HashMap::new();
     for &letter in all_letters {
         requirements_map.insert(letter, Vec::new());
@@ -145,12 +155,19 @@ fn topological_sort(requirements: &HashMap<char, Vec<char>>, all_letters: &[char
     result
 }
 
-fn topological_sort_iteration(requirements: &HashMap<char, Vec<char>>, letter: char, visited: &HashSet<char>) -> HashSet<char> {
+fn topological_sort_iteration(
+    requirements: &HashMap<char, Vec<char>>,
+    letter: char,
+    visited: &HashSet<char>,
+) -> HashSet<char> {
     if visited.contains(&letter) {
         return HashSet::new();
     }
 
-    let unvisited_edges: Vec<_> = requirements.get(&letter).unwrap().iter()
+    let unvisited_edges: Vec<_> = requirements
+        .get(&letter)
+        .unwrap()
+        .iter()
         .copied()
         .filter(|&c| !visited.contains(&c))
         .collect();
@@ -169,14 +186,18 @@ fn topological_sort_iteration(requirements: &HashMap<char, Vec<char>>, letter: c
 }
 
 fn parse_input(input: &str) -> Result<Vec<(char, char)>, SimpleError> {
-    input.lines().map(|line| {
-        let split: Vec<_> = line.split(' ').collect();
-        if split.len() != 10 {
-            return Err(SimpleError::new(format!("expected 10 words in line: {line}")));
-        }
+    input
+        .lines()
+        .map(|line| {
+            let split: Vec<_> = line.split(' ').collect();
+            if split.len() != 10 {
+                return Err(SimpleError::new(format!(
+                    "expected 10 words in line: {line}"
+                )));
+            }
 
-        Ok((split[1].parse()?, split[7].parse()?))
-    })
+            Ok((split[1].parse()?, split[7].parse()?))
+        })
         .collect()
 }
 

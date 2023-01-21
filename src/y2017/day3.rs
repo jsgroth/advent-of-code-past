@@ -1,10 +1,10 @@
 //! Day 3: Spiral Memory
 //! https://adventofcode.com/2017/day/3
 
+use crate::SimpleError;
 use std::collections::HashMap;
 use std::error::Error;
 use std::mem;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 struct Point {
@@ -18,8 +18,18 @@ impl Point {
     }
 
     fn all_adjacent_points(&self) -> impl Iterator<Item = Self> + '_ {
-        [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)].into_iter()
-            .map(|(dx, dy)| Point::new(self.x + dx, self.y + dy))
+        [
+            (-1, -1),
+            (-1, 0),
+            (-1, 1),
+            (0, -1),
+            (0, 1),
+            (1, -1),
+            (1, 0),
+            (1, 1),
+        ]
+        .into_iter()
+        .map(|(dx, dy)| Point::new(self.x + dx, self.y + dy))
     }
 }
 
@@ -37,7 +47,8 @@ fn solve_part_1(input: &str) -> Result<i32, SimpleError> {
         current_bound += 8 * current_multiple;
     }
 
-    let relative_pos = (target - (current_bound - 8 * current_multiple + 1)) % (2 * current_multiple);
+    let relative_pos =
+        (target - (current_bound - 8 * current_multiple + 1)) % (2 * current_multiple);
     let horizontal_pos = (relative_pos - (current_multiple - 1)).abs();
     Ok(horizontal_pos + current_multiple)
 }

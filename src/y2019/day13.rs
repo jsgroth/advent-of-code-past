@@ -1,10 +1,10 @@
 //! Day 13: Care Package
 //! https://adventofcode.com/2019/day/13
 
-use std::error::Error;
-use crate::SimpleError;
 use crate::y2019::intcode;
 use crate::y2019::intcode::InteractiveIntcodeProgram;
+use crate::SimpleError;
+use std::error::Error;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 enum Tile {
@@ -23,7 +23,7 @@ impl Tile {
             2 => Self::Block,
             3 => Self::Paddle,
             4 => Self::Ball,
-            _ => return Err(SimpleError::new(format!("invalid tile code: {n}")))
+            _ => return Err(SimpleError::new(format!("invalid tile code: {n}"))),
         };
         Ok(tile)
     }
@@ -40,12 +40,16 @@ fn solve_part_1(input: &str) -> Result<usize, Box<dyn Error>> {
     );
 
     if outputs.is_empty() || outputs.len() % 3 != 0 {
-        return Err(Box::new(SimpleError::new(
-            format!("expected outputs to be a positive multiple of 3, got {}", outputs.len())
-        )));
+        return Err(Box::new(SimpleError::new(format!(
+            "expected outputs to be a positive multiple of 3, got {}",
+            outputs.len()
+        ))));
     }
 
-    let block_tile_count = outputs.iter().skip(2).step_by(3)
+    let block_tile_count = outputs
+        .iter()
+        .skip(2)
+        .step_by(3)
         .filter(|&&n| n == 2)
         .count();
 

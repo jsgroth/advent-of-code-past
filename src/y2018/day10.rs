@@ -1,10 +1,10 @@
 //! Day 10: The Stars Align
 //! https://adventofcode.com/2018/day/10
 
+use crate::SimpleError;
 use std::cmp;
 use std::collections::HashSet;
 use std::error::Error;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 struct Coords {
@@ -44,13 +44,11 @@ fn solve_both_parts(input: &str) -> Result<(String, usize), SimpleError> {
                     cmp::min(min_y, point.position.y),
                     cmp::max(max_y, point.position.y),
                 )
-            }
+            },
         );
 
         if max_x - min_x <= 70 && max_y - min_y <= 10 {
-            let positions: HashSet<_> = points.iter()
-                .map(|point| point.position)
-                .collect();
+            let positions: HashSet<_> = points.iter().map(|point| point.position).collect();
 
             let mut word_in_the_stars = String::new();
             for y in min_y..=max_y {
@@ -67,7 +65,7 @@ fn solve_both_parts(input: &str) -> Result<(String, usize), SimpleError> {
                 }
             }
 
-            return Ok((word_in_the_stars, i))
+            return Ok((word_in_the_stars, i));
         }
 
         for point in &mut points {
@@ -79,27 +77,30 @@ fn solve_both_parts(input: &str) -> Result<(String, usize), SimpleError> {
 }
 
 fn parse_input(input: &str) -> Result<Vec<Point>, SimpleError> {
-    input.lines().map(|line| {
-        let position_end_index = line.chars().position(|c| c == '>').ok_or_else(
-            || SimpleError::new(format!("line has no '>': {line}"))
-        )?;
+    input
+        .lines()
+        .map(|line| {
+            let position_end_index = line
+                .chars()
+                .position(|c| c == '>')
+                .ok_or_else(|| SimpleError::new(format!("line has no '>': {line}")))?;
 
-        let position = &line["position=".len()..position_end_index + 1];
-        let velocity = &line[(position_end_index + 2 + "velocity=".len())..];
+            let position = &line["position=".len()..position_end_index + 1];
+            let velocity = &line[(position_end_index + 2 + "velocity=".len())..];
 
-        let position = parse_coords(position)?;
-        let velocity = parse_coords(velocity)?;
+            let position = parse_coords(position)?;
+            let velocity = parse_coords(velocity)?;
 
-        Ok(Point { position, velocity })
-    })
+            Ok(Point { position, velocity })
+        })
         .collect()
 }
 
 fn parse_coords(s: &str) -> Result<Coords, SimpleError> {
     let stripped: String = s[1..s.len() - 1].chars().filter(|&c| c != ' ').collect();
-    let (x, y) = stripped.split_once(',').ok_or_else(
-        || SimpleError::new(format!("invalid coords string: {s}"))
-    )?;
+    let (x, y) = stripped
+        .split_once(',')
+        .ok_or_else(|| SimpleError::new(format!("invalid coords string: {s}")))?;
 
     Ok(Coords::new(x.parse()?, y.parse()?))
 }

@@ -1,9 +1,9 @@
 //! Day 22: Crab Combat
 //! https://adventofcode.com/2020/day/22
 
+use crate::SimpleError;
 use std::collections::{HashSet, VecDeque};
 use std::error::Error;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 enum Winner {
@@ -30,7 +30,11 @@ fn solve_part_1(input: &str) -> Result<u32, SimpleError> {
         }
     }
 
-    let winning_deck = if !p1_deck.is_empty() { p1_deck } else { p2_deck };
+    let winning_deck = if !p1_deck.is_empty() {
+        p1_deck
+    } else {
+        p2_deck
+    };
 
     let score = score_deck(&winning_deck);
 
@@ -40,9 +44,8 @@ fn solve_part_1(input: &str) -> Result<u32, SimpleError> {
 fn solve_part_2(input: &str) -> Result<u32, SimpleError> {
     let (p1_deck, p2_deck) = parse_input(input)?;
 
-    let (winner, p1_deck, p2_deck) = play_recursive_combat(
-        VecDeque::from(p1_deck), VecDeque::from(p2_deck)
-    );
+    let (winner, p1_deck, p2_deck) =
+        play_recursive_combat(VecDeque::from(p1_deck), VecDeque::from(p2_deck));
 
     let winning_deck = match winner {
         Winner::Player1 => p1_deck,
@@ -54,7 +57,10 @@ fn solve_part_2(input: &str) -> Result<u32, SimpleError> {
     Ok(score)
 }
 
-fn play_recursive_combat(mut p1_deck: VecDeque<u32>, mut p2_deck: VecDeque<u32>) -> (Winner, VecDeque<u32>, VecDeque<u32>) {
+fn play_recursive_combat(
+    mut p1_deck: VecDeque<u32>,
+    mut p2_deck: VecDeque<u32>,
+) -> (Winner, VecDeque<u32>, VecDeque<u32>) {
     let mut previous_states = HashSet::new();
 
     while !p1_deck.is_empty() && !p2_deck.is_empty() {
@@ -66,7 +72,8 @@ fn play_recursive_combat(mut p1_deck: VecDeque<u32>, mut p2_deck: VecDeque<u32>)
         let p1_card = p1_deck.pop_front().unwrap();
         let p2_card = p2_deck.pop_front().unwrap();
 
-        let sub_game_winner = if p1_card <= p1_deck.len() as u32 && p2_card <= p2_deck.len() as u32 {
+        let sub_game_winner = if p1_card <= p1_deck.len() as u32 && p2_card <= p2_deck.len() as u32
+        {
             let p1_sub_deck: VecDeque<_> = p1_deck.iter().copied().take(p1_card as usize).collect();
             let p2_sub_deck: VecDeque<_> = p2_deck.iter().copied().take(p2_card as usize).collect();
 
@@ -98,7 +105,10 @@ fn play_recursive_combat(mut p1_deck: VecDeque<u32>, mut p2_deck: VecDeque<u32>)
 }
 
 fn score_deck(deck: &VecDeque<u32>) -> u32 {
-    deck.iter().rev().copied().enumerate()
+    deck.iter()
+        .rev()
+        .copied()
+        .enumerate()
         .map(|(i, card)| (i as u32 + 1) * card)
         .sum()
 }
@@ -106,11 +116,15 @@ fn score_deck(deck: &VecDeque<u32>) -> u32 {
 fn parse_input(input: &str) -> Result<(Vec<u32>, Vec<u32>), SimpleError> {
     let mut lines = input.lines();
 
-    let p1_deck = lines.by_ref().skip(1).take_while(|s| !s.is_empty())
+    let p1_deck = lines
+        .by_ref()
+        .skip(1)
+        .take_while(|s| !s.is_empty())
         .map(|line| line.parse::<u32>())
         .collect::<Result<_, _>>()?;
 
-    let p2_deck = lines.skip(1)
+    let p2_deck = lines
+        .skip(1)
         .map(|line| line.parse::<u32>())
         .collect::<Result<_, _>>()?;
 

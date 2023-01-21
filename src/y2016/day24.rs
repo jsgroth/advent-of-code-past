@@ -1,9 +1,9 @@
 //! Day 24: Air Duct Spelunking
 //! https://adventofcode.com/2016/day/24
 
+use crate::SimpleError;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::error::Error;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 struct Point {
@@ -93,7 +93,9 @@ fn solve_part(input: &str, robot_must_return: bool) -> Result<usize, SimpleError
                 new_visited_locations.insert(location);
             }
 
-            if new_visited_locations.len() == maze.locations.len() && (!robot_must_return || new_position == maze.start) {
+            if new_visited_locations.len() == maze.locations.len()
+                && (!robot_must_return || new_position == maze.start)
+            {
                 return Ok(steps + 1);
             }
 
@@ -114,16 +116,19 @@ fn solve_part(input: &str, robot_must_return: bool) -> Result<usize, SimpleError
 }
 
 fn parse_input(input: &str) -> Result<Maze, SimpleError> {
-    let walls: Result<Vec<Vec<_>>, _> = input.lines().map(|line| {
-        line.chars().map(|c| {
-            match c {
-                '#' => Ok(true),
-                _c @ '.' | _c @ '0'..='9' => Ok(false),
-                _ => Err(SimpleError::new(format!("invalid char '{c}' in line: {line}")))
-            }
+    let walls: Result<Vec<Vec<_>>, _> = input
+        .lines()
+        .map(|line| {
+            line.chars()
+                .map(|c| match c {
+                    '#' => Ok(true),
+                    _c @ '.' | _c @ '0'..='9' => Ok(false),
+                    _ => Err(SimpleError::new(format!(
+                        "invalid char '{c}' in line: {line}"
+                    ))),
+                })
+                .collect()
         })
-            .collect()
-    })
         .collect();
 
     let mut start: Option<Point> = None;
@@ -143,10 +148,16 @@ fn parse_input(input: &str) -> Result<Maze, SimpleError> {
     }
 
     if start.is_none() {
-        return Err(SimpleError::new(String::from("maze does not contain a '0'")));
+        return Err(SimpleError::new(String::from(
+            "maze does not contain a '0'",
+        )));
     }
 
-    Ok(Maze { walls: walls?, locations, start: start.unwrap() })
+    Ok(Maze {
+        walls: walls?,
+        locations,
+        start: start.unwrap(),
+    })
 }
 
 pub fn solve(input: &str) -> Result<(usize, usize), Box<dyn Error>> {

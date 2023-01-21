@@ -1,10 +1,10 @@
 //! Day 6: Chronal Coordinates
 //! https://adventofcode.com/2018/day/6
 
+use crate::SimpleError;
 use std::cmp;
 use std::collections::{HashMap, HashSet};
 use std::error::Error;
-use crate::SimpleError;
 
 #[derive(Debug, Clone, Copy)]
 struct Point {
@@ -35,7 +35,8 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
     for (y, row) in grid.iter_mut().enumerate() {
         for (x, value) in row.iter_mut().enumerate() {
             let p = Point::new(x as i32, y as i32);
-            let distances: Vec<_> = points.iter()
+            let distances: Vec<_> = points
+                .iter()
                 .map(|other_p| other_p.distance_to(p))
                 .collect();
 
@@ -98,9 +99,7 @@ fn solve_part_2(input: &str, distance_limit: i32) -> Result<usize, SimpleError> 
     for x in 0..cols {
         for y in 0..rows {
             let p = Point::new(x, y);
-            let total_distance: i32 = points.iter()
-                .map(|other_p| other_p.distance_to(p))
-                .sum();
+            let total_distance: i32 = points.iter().map(|other_p| other_p.distance_to(p)).sum();
             if total_distance < distance_limit {
                 safe_count += 1;
             }
@@ -111,19 +110,24 @@ fn solve_part_2(input: &str, distance_limit: i32) -> Result<usize, SimpleError> 
 }
 
 fn get_maximums(points: &[Point]) -> (i32, i32) {
-    points.iter().copied().fold((i32::MIN, i32::MIN), |(max_x, max_y), point| {
-        (cmp::max(max_x, point.x), cmp::max(max_y, point.y))
-    })
+    points
+        .iter()
+        .copied()
+        .fold((i32::MIN, i32::MIN), |(max_x, max_y), point| {
+            (cmp::max(max_x, point.x), cmp::max(max_y, point.y))
+        })
 }
 
 fn parse_input(input: &str) -> Result<Vec<Point>, SimpleError> {
-    input.lines().map(|line| {
-        let (x, y) = line.split_once(", ").ok_or_else(
-            || SimpleError::new(format!("line has no ', ': {line}"))
-        )?;
+    input
+        .lines()
+        .map(|line| {
+            let (x, y) = line
+                .split_once(", ")
+                .ok_or_else(|| SimpleError::new(format!("line has no ', ': {line}")))?;
 
-        Ok(Point::new(x.parse()?, y.parse()?))
-    })
+            Ok(Point::new(x.parse()?, y.parse()?))
+        })
         .collect()
 }
 

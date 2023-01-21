@@ -1,9 +1,9 @@
 //! Day 23: Coprocessor Conflagration
 //! https://adventofcode.com/2017/day/23
 
+use crate::SimpleError;
 use std::collections::HashMap;
 use std::error::Error;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 enum Arg {
@@ -43,7 +43,7 @@ impl Instruction {
             ["sub", x, y] => Ok(Self::Subtract(x.parse()?, Arg::from_str(y)?)),
             ["mul", x, y] => Ok(Self::Multiply(x.parse()?, Arg::from_str(y)?)),
             ["jnz", x, y] => Ok(Self::JumpNotZero(Arg::from_str(x)?, Arg::from_str(y)?)),
-            _ => Err(SimpleError::new(format!("invalid line: {line}")))
+            _ => Err(SimpleError::new(format!("invalid line: {line}"))),
         }
     }
 }
@@ -61,11 +61,17 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
                 pc += 1;
             }
             Instruction::Subtract(x, y) => {
-                registers.insert(x, registers.get(&x).copied().unwrap_or(0) - y.get_value(&registers));
+                registers.insert(
+                    x,
+                    registers.get(&x).copied().unwrap_or(0) - y.get_value(&registers),
+                );
                 pc += 1;
             }
             Instruction::Multiply(x, y) => {
-                registers.insert(x, registers.get(&x).copied().unwrap_or(0) * y.get_value(&registers));
+                registers.insert(
+                    x,
+                    registers.get(&x).copied().unwrap_or(0) * y.get_value(&registers),
+                );
                 pc += 1;
                 mul_count += 1;
             }
@@ -87,32 +93,60 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
 
     let mut b = match instructions[0] {
         Instruction::Set('b', Arg::Constant(n)) => n,
-        _ => return Err(SimpleError::new(format!("expected 'set b X', got {:?}", instructions[0])))
+        _ => {
+            return Err(SimpleError::new(format!(
+                "expected 'set b X', got {:?}",
+                instructions[0]
+            )))
+        }
     };
 
     b *= match instructions[4] {
         Instruction::Multiply('b', Arg::Constant(n)) => n,
-        _ => return Err(SimpleError::new(format!("expected 'mul b X', got {:?}", instructions[4])))
+        _ => {
+            return Err(SimpleError::new(format!(
+                "expected 'mul b X', got {:?}",
+                instructions[4]
+            )))
+        }
     };
 
     b -= match instructions[5] {
         Instruction::Subtract('b', Arg::Constant(n)) => n,
-        _ => return Err(SimpleError::new(format!("expected 'sub b X', got {:?}", instructions[5])))
+        _ => {
+            return Err(SimpleError::new(format!(
+                "expected 'sub b X', got {:?}",
+                instructions[5]
+            )))
+        }
     };
 
     if instructions[6] != Instruction::Set('c', Arg::Register('b')) {
-        return Err(SimpleError::new(format!("expected 'set c b', got {:?}", instructions[6])))
+        return Err(SimpleError::new(format!(
+            "expected 'set c b', got {:?}",
+            instructions[6]
+        )));
     }
 
     let c = b - match instructions[7] {
         Instruction::Subtract('c', Arg::Constant(n)) => n,
-        _ => return Err(SimpleError::new(format!("expected 'sub c X', got {:?}", instructions[7])))
+        _ => {
+            return Err(SimpleError::new(format!(
+                "expected 'sub c X', got {:?}",
+                instructions[7]
+            )))
+        }
     };
 
     // I think this is always 17 but just in case
     let step = match instructions[instructions.len() - 2] {
         Instruction::Subtract('b', Arg::Constant(n)) => -n,
-        _ => return Err(SimpleError::new(format!("expected 'sub b X', got {:?}", instructions[instructions.len() - 2])))
+        _ => {
+            return Err(SimpleError::new(format!(
+                "expected 'sub b X', got {:?}",
+                instructions[instructions.len() - 2]
+            )))
+        }
     };
 
     let mut not_prime_count = 0;

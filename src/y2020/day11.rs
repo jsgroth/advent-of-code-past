@@ -1,8 +1,8 @@
 //! Day 11: Seating System
 //! https://adventofcode.com/2020/day/11
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 enum Space {
@@ -15,11 +15,7 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
     let mut map = parse_input(input)?;
 
     loop {
-        let next_map = simulate_iteration(
-            &map,
-            count_neighbors_adjacent,
-            4,
-        );
+        let next_map = simulate_iteration(&map, count_neighbors_adjacent, 4);
 
         if map == next_map {
             return Ok(count_occupied(&map));
@@ -33,11 +29,7 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
     let mut map = parse_input(input)?;
 
     loop {
-        let next_map = simulate_iteration(
-            &map,
-            count_neighbors_line_of_sight,
-            5,
-        );
+        let next_map = simulate_iteration(&map, count_neighbors_line_of_sight, 5);
 
         if map == next_map {
             return Ok(count_occupied(&map));
@@ -49,7 +41,11 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
 
 fn count_occupied(map: &[Vec<Space>]) -> usize {
     map.iter()
-        .map(|row| row.iter().filter(|&&space| space == Space::OccupiedSeat).count())
+        .map(|row| {
+            row.iter()
+                .filter(|&&space| space == Space::OccupiedSeat)
+                .count()
+        })
         .sum()
 }
 
@@ -89,7 +85,16 @@ fn simulate_iteration(
     new_map
 }
 
-const DIRECTIONS: [(i32, i32); 8] = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)];
+const DIRECTIONS: [(i32, i32); 8] = [
+    (-1, -1),
+    (-1, 0),
+    (-1, 1),
+    (0, -1),
+    (0, 1),
+    (1, -1),
+    (1, 0),
+    (1, 1),
+];
 
 fn count_neighbors_adjacent(map: &Vec<Vec<Space>>, i: usize, j: usize) -> usize {
     let mut neighbors = 0;
@@ -147,16 +152,17 @@ fn count_neighbors_line_of_sight(map: &Vec<Vec<Space>>, i: usize, j: usize) -> u
 }
 
 fn parse_input(input: &str) -> Result<Vec<Vec<Space>>, SimpleError> {
-    input.lines().map(|line| {
-        line.chars().map(|c| {
-            match c {
-                'L' => Ok(Space::EmptySeat),
-                '.' => Ok(Space::Floor),
-                _ => Err(SimpleError::new(format!("unexpected char: {c}")))
-            }
+    input
+        .lines()
+        .map(|line| {
+            line.chars()
+                .map(|c| match c {
+                    'L' => Ok(Space::EmptySeat),
+                    '.' => Ok(Space::Floor),
+                    _ => Err(SimpleError::new(format!("unexpected char: {c}"))),
+                })
+                .collect()
         })
-            .collect()
-    })
         .collect()
 }
 

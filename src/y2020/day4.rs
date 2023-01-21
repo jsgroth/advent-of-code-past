@@ -1,10 +1,10 @@
 //! Day 4: Passport Processing
 //! https://adventofcode.com/2020/day/4
 
+use crate::SimpleError;
 use std::collections::HashSet;
 use std::error::Error;
 use std::str::FromStr;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 enum PassportFieldType {
@@ -32,35 +32,42 @@ impl PassportFieldType {
 
     fn validate(&self, value: &str) -> bool {
         match self {
-            Self::BirthYear => {
-                value.parse::<u32>().map(|year| (1920..=2002).contains(&year)).unwrap_or(false)
-            }
-            Self::IssueYear => {
-                value.parse::<u32>().map(|year| (2010..=2020).contains(&year)).unwrap_or(false)
-            }
-            Self::ExpirationYear => {
-                value.parse::<u32>().map(|year| (2020..=2030).contains(&year)).unwrap_or(false)
-            }
+            Self::BirthYear => value
+                .parse::<u32>()
+                .map(|year| (1920..=2002).contains(&year))
+                .unwrap_or(false),
+            Self::IssueYear => value
+                .parse::<u32>()
+                .map(|year| (2010..=2020).contains(&year))
+                .unwrap_or(false),
+            Self::ExpirationYear => value
+                .parse::<u32>()
+                .map(|year| (2020..=2030).contains(&year))
+                .unwrap_or(false),
             Self::Height => {
                 if let Some(cm) = value.strip_suffix("cm") {
-                    cm.parse::<u32>().map(|cm| (150..=193).contains(&cm)).unwrap_or(false)
+                    cm.parse::<u32>()
+                        .map(|cm| (150..=193).contains(&cm))
+                        .unwrap_or(false)
                 } else if let Some(inches) = value.strip_suffix("in") {
-                    inches.parse::<u32>().map(|inches| (59..=76).contains(&inches)).unwrap_or(false)
+                    inches
+                        .parse::<u32>()
+                        .map(|inches| (59..=76).contains(&inches))
+                        .unwrap_or(false)
                 } else {
                     false
                 }
             }
             Self::HairColor => {
                 let chars: Vec<_> = value.chars().collect();
-                chars.len() == 7 && chars[0] == '#' &&
-                    chars[1..].iter().all(|&c| c.is_ascii_digit() || ('a'..='f').contains(&c))
+                chars.len() == 7
+                    && chars[0] == '#'
+                    && chars[1..]
+                        .iter()
+                        .all(|&c| c.is_ascii_digit() || ('a'..='f').contains(&c))
             }
-            Self::EyeColor => {
-                ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"].contains(&value)
-            }
-            Self::PassportId => {
-                value.len() == 9 && value.chars().all(|c| c.is_ascii_digit())
-            }
+            Self::EyeColor => ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"].contains(&value),
+            Self::PassportId => value.len() == 9 && value.chars().all(|c| c.is_ascii_digit()),
             Self::CountryId => true,
         }
     }
@@ -79,7 +86,7 @@ impl FromStr for PassportFieldType {
             "ecl" => Ok(Self::EyeColor),
             "pid" => Ok(Self::PassportId),
             "cid" => Ok(Self::CountryId),
-            _ => Err(SimpleError::new(format!("invalid passport field: {s}")))
+            _ => Err(SimpleError::new(format!("invalid passport field: {s}"))),
         }
     }
 }
@@ -94,21 +101,25 @@ impl FromStr for PassportField {
     type Err = SimpleError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (field_name, field_value) = s.split_once(':').ok_or_else(
-            || SimpleError::new(format!("passport field does not contain a ':': {s}"))
-        )?;
+        let (field_name, field_value) = s.split_once(':').ok_or_else(|| {
+            SimpleError::new(format!("passport field does not contain a ':': {s}"))
+        })?;
 
         let field_type = PassportFieldType::from_str(field_name)?;
         let field_value = String::from(field_value);
 
-        Ok(Self { field_type, field_value })
+        Ok(Self {
+            field_type,
+            field_value,
+        })
     }
 }
 
 fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
     let passports = parse_input(input)?;
 
-    let valid_count = passports.iter()
+    let valid_count = passports
+        .iter()
         .filter(|&passport| has_all_required_fields(passport))
         .count();
 
@@ -118,10 +129,13 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
 fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
     let passports = parse_input(input)?;
 
-    let valid_count = passports.iter()
+    let valid_count = passports
+        .iter()
         .filter(|&passport| {
-            has_all_required_fields(passport) &&
-                passport.iter().all(|field| field.field_type.validate(&field.field_value))
+            has_all_required_fields(passport)
+                && passport
+                    .iter()
+                    .all(|field| field.field_type.validate(&field.field_value))
         })
         .count();
 
@@ -129,9 +143,7 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
 }
 
 fn has_all_required_fields(passport: &[PassportField]) -> bool {
-    let fields_present: HashSet<_> = passport.iter()
-        .map(|field| field.field_type)
-        .collect();
+    let fields_present: HashSet<_> = passport.iter().map(|field| field.field_type).collect();
 
     if fields_present.len() == PassportFieldType::ALL.len() {
         true

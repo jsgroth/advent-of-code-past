@@ -1,13 +1,13 @@
 //! Day 1: Report Repair
 //! https://adventofcode.com/2020/day/1
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 fn solve_part_1(input: &str) -> Result<u32, SimpleError> {
-    let numbers: Vec<_> = input.lines().map(|line| {
-        line.parse::<u32>()
-    })
+    let numbers: Vec<_> = input
+        .lines()
+        .map(|line| line.parse::<u32>())
         .collect::<Result<_, _>>()?;
 
     for (i, &n) in numbers.iter().enumerate() {
@@ -22,9 +22,9 @@ fn solve_part_1(input: &str) -> Result<u32, SimpleError> {
 }
 
 fn solve_part_2(input: &str) -> Result<u32, SimpleError> {
-    let numbers: Vec<_> = input.lines().map(|line| {
-        line.parse::<u32>()
-    })
+    let numbers: Vec<_> = input
+        .lines()
+        .map(|line| line.parse::<u32>())
         .collect::<Result<_, _>>()?;
 
     for (i, &n) in numbers.iter().enumerate() {

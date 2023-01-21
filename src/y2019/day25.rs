@@ -1,13 +1,13 @@
 //! Day 25: Cryostasis
 //! https://adventofcode.com/2019/day/25
 
-use std::error::Error;
-use std::{env, fs};
-use std::path::Path;
-use std::str::FromStr;
-use crate::SimpleError;
 use crate::y2019::intcode;
 use crate::y2019::intcode::InteractiveIntcodeProgram;
+use crate::SimpleError;
+use std::error::Error;
+use std::path::Path;
+use std::str::FromStr;
+use std::{env, fs};
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 enum Direction {
@@ -46,7 +46,7 @@ impl FromStr for Direction {
             "south" => Ok(Self::South),
             "east" => Ok(Self::East),
             "west" => Ok(Self::West),
-            _ => Err(SimpleError::new(format!("invalid direction string: {s}")))
+            _ => Err(SimpleError::new(format!("invalid direction string: {s}"))),
         }
     }
 }
@@ -70,8 +70,15 @@ fn solve(input: &str) -> Result<(), Box<dyn Error>> {
 
     let program = InteractiveIntcodeProgram::new(program);
 
-    let PlayerState { mut program, inventory, from_direction } =
-        traverse_map(PlayerState { program, inventory: Vec::new(), from_direction: None })?;
+    let PlayerState {
+        mut program,
+        inventory,
+        from_direction,
+    } = traverse_map(PlayerState {
+        program,
+        inventory: Vec::new(),
+        from_direction: None,
+    })?;
 
     for item in &inventory {
         program.push_line_as_ascii(&format!("drop {item}"));
@@ -89,7 +96,10 @@ fn solve(input: &str) -> Result<(), Box<dyn Error>> {
 
     let final_room_state = parse_room_state(&program.fetch_outputs())?;
 
-    let checkpoint_direction = final_room_state.exits.iter().copied()
+    let checkpoint_direction = final_room_state
+        .exits
+        .iter()
+        .copied()
         .find(|&direction| direction != from_direction.unwrap().invert())
         .unwrap();
 
@@ -114,14 +124,14 @@ fn solve(input: &str) -> Result<(), Box<dyn Error>> {
         }
     }
 
-    Err(Box::new(SimpleError::new(String::from("no solution found"))))
+    Err(Box::new(SimpleError::new(String::from(
+        "no solution found",
+    ))))
 }
 
 const BLACKLISTED_ITEMS: [&str; 2] = ["infinite loop", "giant electromagnet"];
 
-fn traverse_map(
-    mut state: PlayerState,
-) -> Result<PlayerState, SimpleError> {
+fn traverse_map(mut state: PlayerState) -> Result<PlayerState, SimpleError> {
     state.program.execute();
 
     let room_state = parse_room_state(&state.program.fetch_outputs())?;
@@ -157,7 +167,11 @@ fn traverse_map(
         if contains_exit(program.clone(), exit)? {
             exit_direction = Some(exit);
         } else {
-            state = traverse_map(PlayerState { program, inventory: state.inventory, from_direction: Some(exit) })?;
+            state = traverse_map(PlayerState {
+                program,
+                inventory: state.inventory,
+                from_direction: Some(exit),
+            })?;
             state.from_direction = from_direction;
         }
     }
@@ -169,18 +183,25 @@ fn traverse_map(
     if exit_direction.is_none() {
         match from_direction {
             Some(from_direction) => {
-                state.program.push_line_as_ascii(from_direction.invert().to_str());
+                state
+                    .program
+                    .push_line_as_ascii(from_direction.invert().to_str());
                 state.program.execute();
                 state.program.fetch_outputs();
                 return Ok(state);
             }
-            None => panic!("not on exit path and from direction is not set")
+            None => panic!("not on exit path and from direction is not set"),
         }
     }
 
-    state.program.push_line_as_ascii(exit_direction.unwrap().to_str());
+    state
+        .program
+        .push_line_as_ascii(exit_direction.unwrap().to_str());
 
-    traverse_map(PlayerState { from_direction: exit_direction, ..state })
+    traverse_map(PlayerState {
+        from_direction: exit_direction,
+        ..state
+    })
 }
 
 fn contains_exit(
@@ -228,20 +249,22 @@ fn parse_room_state(output: &[i64]) -> Result<RoomState, SimpleError> {
         if first_line.starts_with("== ") {
             name = String::from(&first_line[3..first_line.len() - 3]);
         } else if first_line == "Doors here lead:" {
-            exits = line_group[1..].iter().map(|line| {
-                Direction::from_str(&line[2..])
-            })
+            exits = line_group[1..]
+                .iter()
+                .map(|line| Direction::from_str(&line[2..]))
                 .collect::<Result<_, _>>()?;
         } else if first_line == "Items here:" {
-            items = line_group[1..].iter().map(|line| {
-                String::from(&line[2..])
-            })
+            items = line_group[1..]
+                .iter()
+                .map(|line| String::from(&line[2..]))
                 .collect();
         }
     }
 
     if name.is_empty() || exits.is_empty() {
-        return Err(SimpleError::new(format!("output has no name and/or doors: {room_string}")));
+        return Err(SimpleError::new(format!(
+            "output has no name and/or doors: {room_string}"
+        )));
     }
 
     Ok(RoomState { name, exits, items })
@@ -262,9 +285,11 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     let year = args.next().unwrap();
     let day = args.next().unwrap();
 
-    let input_filename = args.next().ok_or_else(
-        || SimpleError::new(format!("USAGE: {program_name} {year} {day} <input_filename>"))
-    )?;
+    let input_filename = args.next().ok_or_else(|| {
+        SimpleError::new(format!(
+            "USAGE: {program_name} {year} {day} <input_filename>"
+        ))
+    })?;
 
     let input = fs::read_to_string(Path::new(&input_filename))?;
 

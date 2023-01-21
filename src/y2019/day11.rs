@@ -1,12 +1,12 @@
 //! Day 11: Space Police
 //! https://adventofcode.com/2019/day/11
 
+use crate::y2019::intcode;
+use crate::y2019::intcode::InteractiveIntcodeProgram;
+use crate::SimpleError;
 use std::collections::HashSet;
 use std::error::Error;
 use std::{cmp, mem};
-use crate::SimpleError;
-use crate::y2019::intcode;
-use crate::y2019::intcode::InteractiveIntcodeProgram;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 struct Point {
@@ -44,7 +44,7 @@ fn solve_part_2(input: &str) -> Result<String, Box<dyn Error>> {
                 cmp::min(min_y, point.y),
                 cmp::max(max_y, point.y),
             )
-        }
+        },
     );
 
     let mut s = String::new();
@@ -65,8 +65,10 @@ fn solve_part_2(input: &str) -> Result<String, Box<dyn Error>> {
     Ok(s)
 }
 
-fn run_robot_program(mut program: InteractiveIntcodeProgram, start_on_white: bool) -> Result<(HashSet<Point>, HashSet<Point>), Box<dyn Error>> {
-
+fn run_robot_program(
+    mut program: InteractiveIntcodeProgram,
+    start_on_white: bool,
+) -> Result<(HashSet<Point>, HashSet<Point>), Box<dyn Error>> {
     let mut painted_points = HashSet::new();
     let mut white_points = HashSet::new();
 
@@ -90,7 +92,9 @@ fn run_robot_program(mut program: InteractiveIntcodeProgram, start_on_white: boo
 
         let outputs = program.fetch_outputs();
         if outputs.len() != 2 {
-            return Err(Box::new(SimpleError::new(format!("expected 2 outputs, got: {outputs:?}"))));
+            return Err(Box::new(SimpleError::new(format!(
+                "expected 2 outputs, got: {outputs:?}"
+            ))));
         }
 
         if outputs[0] == 1 {

@@ -1,11 +1,11 @@
 //! Day 24: Lobby Layout
 //! https://adventofcode.com/2020/day/24
 
+use crate::SimpleError;
 use std::cmp;
 use std::collections::HashSet;
 use std::error::Error;
 use std::ops::{Add, AddAssign};
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 enum HexDirection {
@@ -18,7 +18,14 @@ enum HexDirection {
 }
 
 impl HexDirection {
-    const ALL: [Self; 6] = [Self::East, Self::Southeast, Self::Southwest, Self::West, Self::Northwest, Self::Northeast];
+    const ALL: [Self; 6] = [
+        Self::East,
+        Self::Southeast,
+        Self::Southwest,
+        Self::West,
+        Self::Northwest,
+        Self::Northeast,
+    ];
 
     fn len_as_str(&self) -> usize {
         match self {
@@ -89,7 +96,7 @@ fn simulate_iteration(black_points: &HashSet<HexPoint>) -> HashSet<HexPoint> {
                 cmp::min(min_y, point.y),
                 cmp::max(max_y, point.y),
             )
-        }
+        },
     );
 
     for x in (min_x - 1)..=(max_x + 1) {
@@ -97,7 +104,9 @@ fn simulate_iteration(black_points: &HashSet<HexPoint>) -> HashSet<HexPoint> {
             let point = HexPoint::new(x, y);
             let is_black = black_points.contains(&point);
 
-            let neighbor_count = HexDirection::ALL.iter().copied()
+            let neighbor_count = HexDirection::ALL
+                .iter()
+                .copied()
                 .filter(|&direction| black_points.contains(&(point + direction)))
                 .count();
 
@@ -119,23 +128,31 @@ fn find_black_points(input: &str) -> Result<HashSet<HexPoint>, SimpleError> {
         let mut remaining = line;
         while !remaining.is_empty() {
             let direction = match remaining.chars().next().unwrap() {
-                'n' => {
-                    match &remaining[..2] {
-                        "ne" => HexDirection::Northeast,
-                        "nw" => HexDirection::Northwest,
-                        _ => return Err(SimpleError::new(format!("invalid n* sequence in line: {line}")))
+                'n' => match &remaining[..2] {
+                    "ne" => HexDirection::Northeast,
+                    "nw" => HexDirection::Northwest,
+                    _ => {
+                        return Err(SimpleError::new(format!(
+                            "invalid n* sequence in line: {line}"
+                        )))
                     }
-                }
-                's' => {
-                    match &remaining[..2] {
-                        "se" => HexDirection::Southeast,
-                        "sw" => HexDirection::Southwest,
-                        _ => return Err(SimpleError::new(format!("invalid s* sequence in line: {line}")))
+                },
+                's' => match &remaining[..2] {
+                    "se" => HexDirection::Southeast,
+                    "sw" => HexDirection::Southwest,
+                    _ => {
+                        return Err(SimpleError::new(format!(
+                            "invalid s* sequence in line: {line}"
+                        )))
                     }
-                }
+                },
                 'w' => HexDirection::West,
                 'e' => HexDirection::East,
-                _ => return Err(SimpleError::new(format!("invalid direction in line: {line}")))
+                _ => {
+                    return Err(SimpleError::new(format!(
+                        "invalid direction in line: {line}"
+                    )))
+                }
             };
 
             position += direction;

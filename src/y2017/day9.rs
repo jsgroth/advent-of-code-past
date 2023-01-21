@@ -1,9 +1,9 @@
 //! Day 9: Stream Processing
 //! https://adventofcode.com/2017/day/9
 
+use crate::SimpleError;
 use std::error::Error;
 use std::iter::Peekable;
-use crate::SimpleError;
 
 fn solve_both_parts(input: &str) -> Result<(usize, usize), SimpleError> {
     let line = crate::read_single_line(input)?;
@@ -12,7 +12,8 @@ fn solve_both_parts(input: &str) -> Result<(usize, usize), SimpleError> {
 }
 
 fn parse_group<I>(iter: &mut Peekable<I>, depth: usize) -> (usize, usize)
-where I: Iterator<Item = char>
+where
+    I: Iterator<Item = char>,
 {
     iter.next();
 
@@ -42,7 +43,8 @@ where I: Iterator<Item = char>
 }
 
 fn parse_garbage<I>(iter: &mut Peekable<I>) -> usize
-where I: Iterator<Item = char>
+where
+    I: Iterator<Item = char>,
 {
     iter.next();
 
@@ -57,7 +59,7 @@ where I: Iterator<Item = char>
             }
             _ => {
                 garbage_chars += 1;
-            },
+            }
         }
     }
 
@@ -77,7 +79,13 @@ mod tests {
     #[test]
     fn test_sample_input() {
         assert_eq!(Ok((16, 0)), solve_both_parts("{{{},{},{{}}}}"));
-        assert_eq!(Ok((9, 6)), solve_both_parts("{{<ab>},{<ab>},{<!b>},{<ab>}}"));
-        assert_eq!(Ok((9, 0)), solve_both_parts("{{<!!>},{<!>>},{<!!>},{<!>>}}"))
+        assert_eq!(
+            Ok((9, 6)),
+            solve_both_parts("{{<ab>},{<ab>},{<!b>},{<ab>}}")
+        );
+        assert_eq!(
+            Ok((9, 0)),
+            solve_both_parts("{{<!!>},{<!>>},{<!!>},{<!>>}}")
+        )
     }
 }

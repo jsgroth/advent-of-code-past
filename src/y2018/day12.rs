@@ -1,9 +1,9 @@
 //! Day 12: Subterranean Sustainability
 //! https://adventofcode.com/2018/day/12
 
+use crate::SimpleError;
 use std::collections::{HashSet, VecDeque};
 use std::error::Error;
-use crate::SimpleError;
 
 fn solve_part_1(input: &str) -> Result<i64, SimpleError> {
     let (initial_state, plant_generate_rules) = parse_input(input)?;
@@ -25,10 +25,12 @@ fn solve_part_2(input: &str) -> Result<i64, SimpleError> {
     let mut state = VecDeque::from(initial_state);
     let mut index_0_position = 0;
     for i in 1.. {
-        let (next_state, index_0_position_diff) = simulate_generation(state.clone(), &plant_generate_rules);
+        let (next_state, index_0_position_diff) =
+            simulate_generation(state.clone(), &plant_generate_rules);
 
         if state == next_state {
-            let final_index_0_position = (50_000_000_000 - i + 1) * index_0_position_diff + index_0_position;
+            let final_index_0_position =
+                (50_000_000_000 - i + 1) * index_0_position_diff + index_0_position;
             return Ok(score(&state, final_index_0_position));
         }
 
@@ -40,7 +42,9 @@ fn solve_part_2(input: &str) -> Result<i64, SimpleError> {
 }
 
 fn score(plants: &VecDeque<bool>, index_0_position: i64) -> i64 {
-    plants.iter().enumerate()
+    plants
+        .iter()
+        .enumerate()
         .filter_map(|(i, &b)| {
             if b {
                 Some(i as i64 + index_0_position)
@@ -51,7 +55,10 @@ fn score(plants: &VecDeque<bool>, index_0_position: i64) -> i64 {
         .sum()
 }
 
-fn simulate_generation(mut state: VecDeque<bool>, generation_rules: &HashSet<Vec<bool>>) -> (VecDeque<bool>, i64) {
+fn simulate_generation(
+    mut state: VecDeque<bool>,
+    generation_rules: &HashSet<Vec<bool>>,
+) -> (VecDeque<bool>, i64) {
     for _ in 0..4 {
         state.push_front(false);
         state.push_back(false);
@@ -80,18 +87,21 @@ fn simulate_generation(mut state: VecDeque<bool>, generation_rules: &HashSet<Vec
 fn parse_input(input: &str) -> Result<(Vec<bool>, HashSet<Vec<bool>>), SimpleError> {
     let lines: Vec<_> = input.lines().collect();
     if lines.len() < 3 {
-        return Err(SimpleError::new(format!("input only has {} lines, expected at least 3", lines.len())));
+        return Err(SimpleError::new(format!(
+            "input only has {} lines, expected at least 3",
+            lines.len()
+        )));
     }
 
-    let initial_state: Vec<_> = lines[0]["initial state: ".len()..].chars()
+    let initial_state: Vec<_> = lines[0]["initial state: ".len()..]
+        .chars()
         .map(|c| c == '#')
         .collect();
 
-    let plant_generate_rules: HashSet<_> = lines[2..].iter()
+    let plant_generate_rules: HashSet<_> = lines[2..]
+        .iter()
         .filter(|line| line.ends_with('#'))
-        .map(|line| {
-            line[..5].chars().map(|c| c == '#').collect::<Vec<_>>()
-        })
+        .map(|line| line[..5].chars().map(|c| c == '#').collect::<Vec<_>>())
         .collect();
 
     Ok((initial_state, plant_generate_rules))

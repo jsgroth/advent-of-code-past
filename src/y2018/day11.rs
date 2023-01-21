@@ -1,9 +1,9 @@
 //! Day 11: Chronal Charge
 //! https://adventofcode.com/2018/day/11
 
+use crate::SimpleError;
 use std::error::Error;
 use std::fmt::{Display, Formatter};
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub(crate) struct Point {
@@ -67,7 +67,10 @@ fn solve_part_2(input: &str) -> Result<Part2Solution, SimpleError> {
     let power_levels = compute_power_levels(serial_number);
 
     let mut max_power_level = i32::MIN;
-    let mut max_power_level_soln = Part2Solution { point: Point::new(0, 0), size: 0 };
+    let mut max_power_level_soln = Part2Solution {
+        point: Point::new(0, 0),
+        size: 0,
+    };
     for (i, row) in power_levels.iter().enumerate() {
         for (j, &power_level) in row.iter().enumerate() {
             if power_level > max_power_level {
@@ -145,11 +148,17 @@ mod tests {
     #[ignore] // This is fairly fast with release optimizations but takes >10 seconds without
     fn test_sample_input_part_2() {
         assert_eq!(
-            Ok(Part2Solution { point: Point::new(90, 269), size: 16 }),
+            Ok(Part2Solution {
+                point: Point::new(90, 269),
+                size: 16
+            }),
             solve_part_2("18"),
         );
         assert_eq!(
-            Ok(Part2Solution { point: Point::new(232, 251), size: 12 }),
+            Ok(Part2Solution {
+                point: Point::new(232, 251),
+                size: 12
+            }),
             solve_part_2("42"),
         );
     }

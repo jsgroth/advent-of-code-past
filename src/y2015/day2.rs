@@ -1,39 +1,43 @@
 //! Day 2: I Was Told There Would Be No Math
 //! https://adventofcode.com/2015/day/2
 
+use crate::SimpleError;
 use std::cmp;
 use std::error::Error;
-use crate::SimpleError;
 
 fn solve_part_1(input: &str) -> Result<u32, SimpleError> {
-    let result = parse_input(input)?.into_iter().map(|(l, w, h)| {
-        2 * l * w + 2 * l * h + 2 * w * h + cmp::min(l * w, cmp::min(l * h, w * h))
-    })
+    let result = parse_input(input)?
+        .into_iter()
+        .map(|(l, w, h)| {
+            2 * l * w + 2 * l * h + 2 * w * h + cmp::min(l * w, cmp::min(l * h, w * h))
+        })
         .sum();
 
     Ok(result)
 }
 
 fn solve_part_2(input: &str) -> Result<u32, SimpleError> {
-    let result = parse_input(input)?.into_iter().map(|(l, w, h)| {
-        let smallest_perimeter = 2 * cmp::min(l + w, cmp::min(l + h, w + h));
-        smallest_perimeter + l * w * h
-    })
+    let result = parse_input(input)?
+        .into_iter()
+        .map(|(l, w, h)| {
+            let smallest_perimeter = 2 * cmp::min(l + w, cmp::min(l + h, w + h));
+            smallest_perimeter + l * w * h
+        })
         .sum();
 
     Ok(result)
 }
 
 fn parse_input(input: &str) -> Result<Vec<(u32, u32, u32)>, SimpleError> {
-    let dimensions: Result<Vec<_>, _> = input.lines().map(|line| {
-        let split: Vec<_> = line.split('x').collect();
-        match split.as_slice() {
-            [l, w, h] => {
-                Ok((l.parse::<u32>()?, w.parse::<u32>()?, h.parse::<u32>()?))
-            },
-            _ => Err(SimpleError::new(format!("unexpected line format: {line}")))
-        }
-    })
+    let dimensions: Result<Vec<_>, _> = input
+        .lines()
+        .map(|line| {
+            let split: Vec<_> = line.split('x').collect();
+            match split.as_slice() {
+                [l, w, h] => Ok((l.parse::<u32>()?, w.parse::<u32>()?, h.parse::<u32>()?)),
+                _ => Err(SimpleError::new(format!("unexpected line format: {line}"))),
+            }
+        })
         .collect();
 
     if let Ok(dimensions) = &dimensions {

@@ -1,13 +1,13 @@
 //! Day 13: Mine Cart Madness
 //! https://adventofcode.com/2018/day/13
 
+use crate::SimpleError;
 use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
 use std::error::Error;
 use std::fmt::{Display, Formatter};
 use std::mem;
 use std::ops::{Add, AddAssign};
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 enum Space {
@@ -28,7 +28,7 @@ impl Space {
             '+' => Ok(Self::Intersection),
             '/' => Ok(Self::RightCurve),
             '\\' => Ok(Self::LeftCurve),
-            _ => Err(SimpleError::new(format!("invalid space char: {c}")))
+            _ => Err(SimpleError::new(format!("invalid space char: {c}"))),
         }
     }
 }
@@ -49,7 +49,10 @@ impl Add<(i32, i32)> for Point {
     type Output = Self;
 
     fn add(self, rhs: (i32, i32)) -> Self::Output {
-        Self::new((self.x as i32 + rhs.0) as usize, (self.y as i32 + rhs.1) as usize)
+        Self::new(
+            (self.x as i32 + rhs.0) as usize,
+            (self.y as i32 + rhs.1) as usize,
+        )
     }
 }
 
@@ -67,8 +70,7 @@ impl PartialOrd for Point {
 
 impl Ord for Point {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.y.cmp(&other.y)
-            .then(self.x.cmp(&other.x))
+        self.y.cmp(&other.y).then(self.x.cmp(&other.x))
     }
 }
 
@@ -111,22 +113,20 @@ impl MineCart {
 
     fn maybe_turn(&mut self, current_space: Space) {
         match current_space {
-            Space::HorizontalTrack | Space::VerticalTrack => {},
-            Space::Intersection => {
-                match self.last_turn_direction {
-                    None | Some(TurnDirection::Right) => {
-                        self.turn_left();
-                        self.last_turn_direction = Some(TurnDirection::Left);
-                    }
-                    Some(TurnDirection::Left) => {
-                        self.last_turn_direction = Some(TurnDirection::Straight);
-                    }
-                    Some(TurnDirection::Straight) => {
-                        self.turn_right();
-                        self.last_turn_direction = Some(TurnDirection::Right);
-                    }
+            Space::HorizontalTrack | Space::VerticalTrack => {}
+            Space::Intersection => match self.last_turn_direction {
+                None | Some(TurnDirection::Right) => {
+                    self.turn_left();
+                    self.last_turn_direction = Some(TurnDirection::Left);
                 }
-            }
+                Some(TurnDirection::Left) => {
+                    self.last_turn_direction = Some(TurnDirection::Straight);
+                }
+                Some(TurnDirection::Straight) => {
+                    self.turn_right();
+                    self.last_turn_direction = Some(TurnDirection::Right);
+                }
+            },
             Space::RightCurve => {
                 if self.dx != 0 {
                     self.turn_left();
@@ -141,7 +141,7 @@ impl MineCart {
                     self.turn_left();
                 }
             }
-            Space::Void => panic!("mine cart fell into the void: {self:?}")
+            Space::Void => panic!("mine cart fell into the void: {self:?}"),
         }
     }
 
@@ -162,7 +162,10 @@ fn solve_part_1(input: &str) -> Result<Point, SimpleError> {
     loop {
         mine_carts.sort_by_key(|mine_cart| mine_cart.position);
 
-        let mut mine_cart_positions: HashSet<_> = mine_carts.iter().map(|mine_cart| mine_cart.position).collect();
+        let mut mine_cart_positions: HashSet<_> = mine_carts
+            .iter()
+            .map(|mine_cart| mine_cart.position)
+            .collect();
         for mine_cart in &mut mine_carts {
             mine_cart_positions.remove(&mine_cart.position);
             mine_cart.tick();
@@ -183,7 +186,9 @@ fn solve_part_2(input: &str) -> Result<Point, SimpleError> {
     loop {
         mine_carts.sort_by_key(|mine_cart| mine_cart.position);
 
-        let mut mine_cart_positions: HashMap<_, _> = mine_carts.iter().enumerate()
+        let mut mine_cart_positions: HashMap<_, _> = mine_carts
+            .iter()
+            .enumerate()
             .map(|(i, mine_cart)| (mine_cart.position, i))
             .collect();
 
@@ -206,7 +211,9 @@ fn solve_part_2(input: &str) -> Result<Point, SimpleError> {
             mine_cart.maybe_turn(grid[mine_cart.position.y][mine_cart.position.x]);
         }
 
-        mine_carts = mine_carts.into_iter().enumerate()
+        mine_carts = mine_carts
+            .into_iter()
+            .enumerate()
             .filter(|&(i, _)| !crashed_cart_indices.contains(&i))
             .map(|(_, mine_cart)| mine_cart)
             .collect();
@@ -238,7 +245,7 @@ fn parse_input(input: &str) -> Result<(Vec<Vec<Space>>, Vec<MineCart>), SimpleEr
                     '<' => (-1, 0),
                     '>' => (1, 0),
                     'v' => (0, 1),
-                    _ => panic!("should not be possible due to surrounding if check")
+                    _ => panic!("should not be possible due to surrounding if check"),
                 };
 
                 let mine_cart = MineCart::new(j, i, dx, dy);

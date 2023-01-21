@@ -1,8 +1,8 @@
 //! Day 18: Operation Order
 //! https://adventofcode.com/2020/day/18
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 enum Operator {
@@ -20,7 +20,8 @@ impl Operator {
 }
 
 fn solve_part_1(input: &str) -> Result<u64, SimpleError> {
-    let expression_sum = input.lines()
+    let expression_sum = input
+        .lines()
         .map(evaluate_no_precedence)
         .collect::<Result<Vec<_>, _>>()?
         .into_iter()
@@ -30,7 +31,8 @@ fn solve_part_1(input: &str) -> Result<u64, SimpleError> {
 }
 
 fn solve_part_2(input: &str) -> Result<u64, SimpleError> {
-    let expression_sum = input.lines()
+    let expression_sum = input
+        .lines()
         .map(evaluate_add_first)
         .collect::<Result<Vec<_>, _>>()?
         .into_iter()
@@ -63,9 +65,11 @@ fn evaluate_no_precedence(expression: &str) -> Result<u64, SimpleError> {
                 last_operator = Operator::Add;
             }
             ")" => {
-                let (prev_level_value, prev_level_operator) = levels.pop().ok_or_else(
-                    || SimpleError::new(format!("expression has unbalanced parentheses: {expression}"))
-                )?;
+                let (prev_level_value, prev_level_operator) = levels.pop().ok_or_else(|| {
+                    SimpleError::new(format!(
+                        "expression has unbalanced parentheses: {expression}"
+                    ))
+                })?;
 
                 current_value = prev_level_operator.evaluate(prev_level_value, current_value);
                 last_operator = prev_level_operator;
@@ -78,7 +82,9 @@ fn evaluate_no_precedence(expression: &str) -> Result<u64, SimpleError> {
     }
 
     if !levels.is_empty() {
-        return Err(SimpleError::new(format!("expression has unbalanced parentheses: {expression}")));
+        return Err(SimpleError::new(format!(
+            "expression has unbalanced parentheses: {expression}"
+        )));
     }
 
     Ok(current_value)
@@ -110,9 +116,11 @@ fn evaluate_add_first(expression: &str) -> Result<u64, SimpleError> {
             ")" => {
                 let level_product = operands.into_iter().product();
 
-                let (prev_level_operands, prev_level_operator) = levels.pop().ok_or_else(
-                    || SimpleError::new(format!("expression has unbalanced parentheses: {expression}"))
-                )?;
+                let (prev_level_operands, prev_level_operator) = levels.pop().ok_or_else(|| {
+                    SimpleError::new(format!(
+                        "expression has unbalanced parentheses: {expression}"
+                    ))
+                })?;
 
                 operands = prev_level_operands;
                 last_operator = prev_level_operator;
@@ -120,7 +128,9 @@ fn evaluate_add_first(expression: &str) -> Result<u64, SimpleError> {
                 match prev_level_operator {
                     Operator::Add => {
                         if operands.is_empty() {
-                            return Err(SimpleError::new(format!("no value/expression before '+': {expression}")));
+                            return Err(SimpleError::new(format!(
+                                "no value/expression before '+': {expression}"
+                            )));
                         }
 
                         let value = operands.pop().unwrap() + level_product;
@@ -137,7 +147,9 @@ fn evaluate_add_first(expression: &str) -> Result<u64, SimpleError> {
                 match last_operator {
                     Operator::Add => {
                         if operands.is_empty() {
-                            return Err(SimpleError::new(format!("'+' preceded by no value: {expression}")));
+                            return Err(SimpleError::new(format!(
+                                "'+' preceded by no value: {expression}"
+                            )));
                         }
 
                         let value = operands.pop().unwrap() + n;
@@ -152,11 +164,15 @@ fn evaluate_add_first(expression: &str) -> Result<u64, SimpleError> {
     }
 
     if !levels.is_empty() {
-        return Err(SimpleError::new(format!("expression has unbalanced parentheses: {expression}")));
+        return Err(SimpleError::new(format!(
+            "expression has unbalanced parentheses: {expression}"
+        )));
     }
 
     if operands.is_empty() {
-        return Err(SimpleError::new(format!("expression evaluated to empty: {expression}")));
+        return Err(SimpleError::new(format!(
+            "expression evaluated to empty: {expression}"
+        )));
     }
 
     Ok(operands.into_iter().product())
@@ -176,11 +192,23 @@ mod tests {
     #[test]
     fn test_sample_input_part_1() {
         assert_eq!(Ok(71), evaluate_no_precedence("1 + 2 * 3 + 4 * 5 + 6"));
-        assert_eq!(Ok(51), evaluate_no_precedence("1 + (2 * 3) + (4 * (5 + 6))"));
+        assert_eq!(
+            Ok(51),
+            evaluate_no_precedence("1 + (2 * 3) + (4 * (5 + 6))")
+        );
         assert_eq!(Ok(26), evaluate_no_precedence("2 * 3 + (4 * 5)"));
-        assert_eq!(Ok(437), evaluate_no_precedence("5 + (8 * 3 + 9 + 3 * 4 * 3)"));
-        assert_eq!(Ok(12240), evaluate_no_precedence("5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))"));
-        assert_eq!(Ok(13632), evaluate_no_precedence("((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2"));
+        assert_eq!(
+            Ok(437),
+            evaluate_no_precedence("5 + (8 * 3 + 9 + 3 * 4 * 3)")
+        );
+        assert_eq!(
+            Ok(12240),
+            evaluate_no_precedence("5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))")
+        );
+        assert_eq!(
+            Ok(13632),
+            evaluate_no_precedence("((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2")
+        );
     }
 
     #[test]
@@ -189,7 +217,13 @@ mod tests {
         assert_eq!(Ok(51), evaluate_add_first("1 + (2 * 3) + (4 * (5 + 6))"));
         assert_eq!(Ok(46), evaluate_add_first("2 * 3 + (4 * 5)"));
         assert_eq!(Ok(1445), evaluate_add_first("5 + (8 * 3 + 9 + 3 * 4 * 3)"));
-        assert_eq!(Ok(669060), evaluate_add_first("5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))"));
-        assert_eq!(Ok(23340), evaluate_add_first("((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2"));
+        assert_eq!(
+            Ok(669060),
+            evaluate_add_first("5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))")
+        );
+        assert_eq!(
+            Ok(23340),
+            evaluate_add_first("((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2")
+        );
     }
 }

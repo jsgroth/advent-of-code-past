@@ -1,9 +1,9 @@
 //! Day 7: Recursive Circus
 //! https://adventofcode.com/2017/day/7
 
+use crate::SimpleError;
 use std::collections::{HashMap, HashSet};
 use std::error::Error;
-use crate::SimpleError;
 
 #[derive(Debug, Clone)]
 struct Program {
@@ -24,13 +24,18 @@ impl ProgramTreeNode {
             return Ok(self.weight);
         }
 
-        let holding_weights: Result<Vec<_>, _> = self.holding.iter()
+        let holding_weights: Result<Vec<_>, _> = self
+            .holding
+            .iter()
             .map(|node| node.find_fixed_weight())
             .collect();
 
         let holding_weights = holding_weights?;
 
-        if holding_weights[1..].iter().all(|&weight| weight == holding_weights[0]) {
+        if holding_weights[1..]
+            .iter()
+            .all(|&weight| weight == holding_weights[0])
+        {
             let weight_sum: u32 = holding_weights.into_iter().sum();
             return Ok(weight_sum + self.weight);
         }
@@ -44,11 +49,21 @@ impl ProgramTreeNode {
             }
         }
 
-        let correct_weight = weight_counts.iter().find_map(|(&weight, &count)| {
-            if count > 1 { Some(weight) } else { None }
-        }).unwrap();
+        let correct_weight = weight_counts
+            .iter()
+            .find_map(
+                |(&weight, &count)| {
+                    if count > 1 {
+                        Some(weight)
+                    } else {
+                        None
+                    }
+                },
+            )
+            .unwrap();
 
-        let incorrect_index = holding_weights.iter()
+        let incorrect_index = holding_weights
+            .iter()
             .position(|&weight| weight != correct_weight)
             .unwrap();
 
@@ -95,7 +110,10 @@ fn build_tree(sorted_programs: &[Program]) -> ProgramTreeNode {
 }
 
 fn topological_sort(programs: &Vec<Program>) -> Vec<Program> {
-    let name_map: HashMap<_, _> = programs.iter().map(|program| (program.name.as_str(), program)).collect();
+    let name_map: HashMap<_, _> = programs
+        .iter()
+        .map(|program| (program.name.as_str(), program))
+        .collect();
 
     let mut result_rev = Vec::new();
     let mut visited = HashSet::new();
@@ -107,7 +125,12 @@ fn topological_sort(programs: &Vec<Program>) -> Vec<Program> {
     result_rev.into_iter().rev().collect()
 }
 
-fn sort_visit<'a>(program: &'a Program, programs: &HashMap<&str, &'a Program>, visited: &mut HashSet<&'a str>, result_rev: &mut Vec<Program>) {
+fn sort_visit<'a>(
+    program: &'a Program,
+    programs: &HashMap<&str, &'a Program>,
+    visited: &mut HashSet<&'a str>,
+    result_rev: &mut Vec<Program>,
+) {
     if visited.contains(program.name.as_str()) {
         return;
     }
@@ -115,33 +138,46 @@ fn sort_visit<'a>(program: &'a Program, programs: &HashMap<&str, &'a Program>, v
     visited.insert(program.name.as_str());
 
     for holding_name in &program.holding {
-        sort_visit(programs.get(holding_name.as_str()).unwrap(), programs, visited, result_rev);
+        sort_visit(
+            programs.get(holding_name.as_str()).unwrap(),
+            programs,
+            visited,
+            result_rev,
+        );
     }
 
     result_rev.push(program.clone());
 }
 
 fn parse_input(input: &str) -> Result<Vec<Program>, SimpleError> {
-    input.lines().map(|line| {
-        match line.split_once(" -> ") {
+    input
+        .lines()
+        .map(|line| match line.split_once(" -> ") {
             Some((l, r)) => {
                 let (name, weight) = parse_name_and_weight(l)?;
                 let holding = r.split(", ").map(String::from).collect();
-                Ok(Program { name, weight, holding })
+                Ok(Program {
+                    name,
+                    weight,
+                    holding,
+                })
             }
             None => {
                 let (name, weight) = parse_name_and_weight(line)?;
-                Ok(Program { name, weight, holding: Vec::new() })
+                Ok(Program {
+                    name,
+                    weight,
+                    holding: Vec::new(),
+                })
             }
-        }
-    })
+        })
         .collect()
 }
 
 fn parse_name_and_weight(s: &str) -> Result<(String, u32), SimpleError> {
-    let (name, weight) = s.split_once(' ').ok_or_else(
-        || SimpleError::new(format!("invalid name/weight string: {s}"))
-    )?;
+    let (name, weight) = s
+        .split_once(' ')
+        .ok_or_else(|| SimpleError::new(format!("invalid name/weight string: {s}")))?;
 
     let weight = weight[1..weight.len() - 1].parse()?;
 

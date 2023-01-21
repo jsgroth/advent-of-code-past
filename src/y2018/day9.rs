@@ -1,9 +1,9 @@
 //! Day 9: Marble Mania
 //! https://adventofcode.com/2018/day/9
 
+use crate::SimpleError;
 use std::collections::VecDeque;
 use std::error::Error;
-use crate::SimpleError;
 
 fn solve_part_1(input: &str) -> Result<u64, SimpleError> {
     let (players, last_marble) = parse_input(input)?;
@@ -43,7 +43,9 @@ fn parse_input(input: &str) -> Result<(u64, u64), SimpleError> {
     let line = crate::read_single_line(input)?;
     let split: Vec<_> = line.split(' ').collect();
     if split.len() != 8 {
-        return Err(SimpleError::new(format!("expected 8 words in line: {line}")));
+        return Err(SimpleError::new(format!(
+            "expected 8 words in line: {line}"
+        )));
     }
 
     let players: u64 = split[0].parse()?;

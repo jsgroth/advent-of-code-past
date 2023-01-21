@@ -1,9 +1,9 @@
 //! Day 14: One-Time Pad
 //! https://adventofcode.com/2016/day/14
 
+use crate::SimpleError;
 use std::collections::VecDeque;
 use std::error::Error;
-use crate::SimpleError;
 
 fn solve_part(input: &str, stretch_hashes: bool) -> Result<usize, SimpleError> {
     let salt = crate::read_single_line(input)?;
@@ -12,7 +12,10 @@ fn solve_part(input: &str, stretch_hashes: bool) -> Result<usize, SimpleError> {
     let mut possible_keys: VecDeque<(usize, char)> = VecDeque::new();
 
     for i in 0.. {
-        while i >= 1000 && !possible_keys.is_empty() && possible_keys.front().copied().unwrap().0 < i - 1000 {
+        while i >= 1000
+            && !possible_keys.is_empty()
+            && possible_keys.front().copied().unwrap().0 < i - 1000
+        {
             possible_keys.pop_front();
         }
 

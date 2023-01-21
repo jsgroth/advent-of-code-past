@@ -1,9 +1,9 @@
 //! Day 7: Handy Haversacks
 //! https://adventofcode.com/2020/day/7
 
+use crate::SimpleError;
 use std::collections::HashMap;
 use std::error::Error;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 struct InnerBagRule {
@@ -20,15 +20,18 @@ struct Bag {
 fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
     let bag_rules = parse_input(input)?;
 
-    let color_to_rule: HashMap<_, _> = bag_rules.iter()
+    let color_to_rule: HashMap<_, _> = bag_rules
+        .iter()
         .map(|bag| (bag.color.as_str(), bag))
         .collect();
 
     let mut cache = HashMap::new();
 
-    let shiny_gold_count = bag_rules.iter()
+    let shiny_gold_count = bag_rules
+        .iter()
         .filter(|bag| {
-            bag.color.as_str() != "shiny gold" && can_contain_shiny_gold(bag, &color_to_rule, &mut cache)
+            bag.color.as_str() != "shiny gold"
+                && can_contain_shiny_gold(bag, &color_to_rule, &mut cache)
         })
         .count();
 
@@ -38,7 +41,8 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
 fn solve_part_2(input: &str) -> Result<u64, SimpleError> {
     let bag_rules = parse_input(input)?;
 
-    let color_to_rule: HashMap<_, _> = bag_rules.iter()
+    let color_to_rule: HashMap<_, _> = bag_rules
+        .iter()
         .map(|bag| (bag.color.as_str(), bag))
         .collect();
 
@@ -50,7 +54,11 @@ fn solve_part_2(input: &str) -> Result<u64, SimpleError> {
     Ok(shiny_gold_inner_count)
 }
 
-fn count_inner_bags<'a>(bag: &'a Bag, rules: &HashMap<&'a str, &'a Bag>, cache: &mut HashMap<&'a str, u64>) -> u64 {
+fn count_inner_bags<'a>(
+    bag: &'a Bag,
+    rules: &HashMap<&'a str, &'a Bag>,
+    cache: &mut HashMap<&'a str, u64>,
+) -> u64 {
     if let Some(&value) = cache.get(bag.color.as_str()) {
         return value;
     }
@@ -65,7 +73,11 @@ fn count_inner_bags<'a>(bag: &'a Bag, rules: &HashMap<&'a str, &'a Bag>, cache: 
     total_inner_bags
 }
 
-fn can_contain_shiny_gold<'a>(bag: &'a Bag, rules: &HashMap<&'a str, &'a Bag>, cache: &mut HashMap<&'a str, bool>) -> bool {
+fn can_contain_shiny_gold<'a>(
+    bag: &'a Bag,
+    rules: &HashMap<&'a str, &'a Bag>,
+    cache: &mut HashMap<&'a str, bool>,
+) -> bool {
     if bag.color.as_str() == "shiny gold" {
         return true;
     }
@@ -87,33 +99,42 @@ fn can_contain_shiny_gold<'a>(bag: &'a Bag, rules: &HashMap<&'a str, &'a Bag>, c
 }
 
 fn parse_input(input: &str) -> Result<Vec<Bag>, SimpleError> {
-    input.lines().map(|line| {
-        let split: Vec<_> = line.splitn(5, ' ').collect();
-        if split.len() != 5 {
-            return Err(SimpleError::new(format!("line does not have enough spaces: {line}")));
-        }
-
-        let color = format!("{} {}", split[0], split[1]);
-
-        if line.ends_with("no other bags.") {
-            return Ok(Bag { color, rules: Vec::new() });
-        }
-
-        let mut rules = Vec::new();
-        for inner_rule in split[4].split(", ") {
-            let inner_rule_split: Vec<_> = inner_rule.split(' ').collect();
-            if inner_rule_split.len() != 4 {
-                return Err(SimpleError::new(format!("inner bag rules are invalid: {line}")));
+    input
+        .lines()
+        .map(|line| {
+            let split: Vec<_> = line.splitn(5, ' ').collect();
+            if split.len() != 5 {
+                return Err(SimpleError::new(format!(
+                    "line does not have enough spaces: {line}"
+                )));
             }
 
-            let count = inner_rule_split[0].parse()?;
-            let color = format!("{} {}", inner_rule_split[1], inner_rule_split[2]);
+            let color = format!("{} {}", split[0], split[1]);
 
-            rules.push(InnerBagRule { color, count });
-        }
+            if line.ends_with("no other bags.") {
+                return Ok(Bag {
+                    color,
+                    rules: Vec::new(),
+                });
+            }
 
-        Ok(Bag { color, rules })
-    })
+            let mut rules = Vec::new();
+            for inner_rule in split[4].split(", ") {
+                let inner_rule_split: Vec<_> = inner_rule.split(' ').collect();
+                if inner_rule_split.len() != 4 {
+                    return Err(SimpleError::new(format!(
+                        "inner bag rules are invalid: {line}"
+                    )));
+                }
+
+                let count = inner_rule_split[0].parse()?;
+                let color = format!("{} {}", inner_rule_split[1], inner_rule_split[2]);
+
+                rules.push(InnerBagRule { color, count });
+            }
+
+            Ok(Bag { color, rules })
+        })
         .collect()
 }
 

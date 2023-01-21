@@ -1,10 +1,10 @@
 //! Day 9: Encoding Error
 //! https://adventofcode.com/2020/day/9
 
+use crate::SimpleError;
 use std::cmp;
 use std::error::Error;
 use std::num::ParseIntError;
-use crate::SimpleError;
 
 fn solve_part_1(input: &str, preamble_size: usize) -> Result<u64, SimpleError> {
     let numbers = parse_input(input)?;
@@ -17,7 +17,8 @@ fn solve_part_1(input: &str, preamble_size: usize) -> Result<u64, SimpleError> {
 fn solve_part_2(input: &str, preamble_size: usize) -> Result<u64, SimpleError> {
     let numbers = parse_input(input)?;
 
-    let (first_invalid_index, first_invalid_number) = find_first_invalid_number(&numbers, preamble_size)?;
+    let (first_invalid_index, first_invalid_number) =
+        find_first_invalid_number(&numbers, preamble_size)?;
 
     for (i, &number) in numbers[..first_invalid_index].iter().enumerate() {
         let mut sum = number;
@@ -40,7 +41,10 @@ fn solve_part_2(input: &str, preamble_size: usize) -> Result<u64, SimpleError> {
     Err(SimpleError::new(String::from("no solution found")))
 }
 
-fn find_first_invalid_number(numbers: &[u64], preamble_size: usize) -> Result<(usize, u64), SimpleError> {
+fn find_first_invalid_number(
+    numbers: &[u64],
+    preamble_size: usize,
+) -> Result<(usize, u64), SimpleError> {
     for (i, window) in numbers.windows(preamble_size + 1).enumerate() {
         let preamble = &window[..window.len() - 1];
         let target = *window.last().unwrap();
@@ -65,9 +69,7 @@ fn is_valid_sequence(preamble: &[u64], target: u64) -> bool {
 }
 
 fn parse_input(input: &str) -> Result<Vec<u64>, ParseIntError> {
-    input.lines()
-        .map(|line| line.parse::<u64>())
-        .collect()
+    input.lines().map(|line| line.parse::<u64>()).collect()
 }
 
 pub fn solve(input: &str) -> Result<(u64, u64), Box<dyn Error>> {

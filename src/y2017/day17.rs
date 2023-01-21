@@ -1,10 +1,10 @@
 //! Day 17: Spinlock
 //! https://adventofcode.com/2017/day/17
 
+use crate::SimpleError;
 use std::cell::RefCell;
 use std::error::Error;
 use std::rc::{Rc, Weak};
-use crate::SimpleError;
 
 #[derive(Debug)]
 struct BufferNode {
@@ -36,13 +36,14 @@ impl CircularBuffer {
             })
         });
         let nodes = vec![Rc::clone(&head)];
-        Self {
-            nodes,
-            head,
-        }
+        Self { nodes, head }
     }
 
-    fn insert_new_node(&mut self, node: &Rc<RefCell<BufferNode>>, new_val: u32) -> Rc<RefCell<BufferNode>> {
+    fn insert_new_node(
+        &mut self,
+        node: &Rc<RefCell<BufferNode>>,
+        new_val: u32,
+    ) -> Rc<RefCell<BufferNode>> {
         let new_node = Rc::new(RefCell::new(BufferNode {
             val: new_val,
             next: Weak::clone(&node.borrow().next),
@@ -58,11 +59,8 @@ fn solve_part_1(input: &str) -> Result<u32, SimpleError> {
     let steps_per_turn: usize = crate::read_single_line(input)?.parse()?;
 
     let mut circular_buffer = CircularBuffer::new();
-    let last_node_inserted = populate_circular_buffer(
-        &mut circular_buffer,
-        steps_per_turn,
-        1..=2017,
-    );
+    let last_node_inserted =
+        populate_circular_buffer(&mut circular_buffer, steps_per_turn, 1..=2017);
 
     let next_after_2017 = last_node_inserted.borrow().unwrap_next().borrow().val;
     Ok(next_after_2017)

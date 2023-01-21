@@ -1,8 +1,8 @@
 //! Day 8: Two-Factor Authentication
 //! https://adventofcode.com/2016/day/8
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 #[derive(Debug, Clone, Copy)]
 enum Instruction {
@@ -18,7 +18,11 @@ impl Instruction {
             ["rect", dimensions] => {
                 let (width, height) = match dimensions.split_once('x') {
                     Some((width, height)) => (width, height),
-                    None => return Err(SimpleError::new(format!("invalid rect instruction: {line}"))),
+                    None => {
+                        return Err(SimpleError::new(format!(
+                            "invalid rect instruction: {line}"
+                        )))
+                    }
                 };
                 let width: usize = width.parse()?;
                 let height: usize = height.parse()?;
@@ -28,7 +32,11 @@ impl Instruction {
             ["rotate", "column", x, "by", n] => {
                 let x = match x.split_once('=') {
                     Some((_, x)) => x,
-                    None => return Err(SimpleError::new(format!("invalid rotate column instruction: {line}"))),
+                    None => {
+                        return Err(SimpleError::new(format!(
+                            "invalid rotate column instruction: {line}"
+                        )))
+                    }
                 };
                 let x: usize = x.parse()?;
                 let n: usize = n.parse()?;
@@ -38,14 +46,22 @@ impl Instruction {
             ["rotate", "row", y, "by", n] => {
                 let y = match y.split_once('=') {
                     Some((_, y)) => y,
-                    None => return Err(SimpleError::new(format!("invalid rotate row instruction: {line}"))),
+                    None => {
+                        return Err(SimpleError::new(format!(
+                            "invalid rotate row instruction: {line}"
+                        )))
+                    }
                 };
                 let y: usize = y.parse()?;
                 let n: usize = n.parse()?;
 
                 Self::RotateRow(y, n)
             }
-            _ => return Err(SimpleError::new(format!("unrecognized instruction: {line}")))
+            _ => {
+                return Err(SimpleError::new(format!(
+                    "unrecognized instruction: {line}"
+                )))
+            }
         };
 
         Ok(instruction)
@@ -77,9 +93,9 @@ fn solve_both_parts(input: &str) -> Result<(usize, String), SimpleError> {
         }
     }
 
-    let lit_count = screen.iter().map(|row| {
-        row.iter().filter(|&&b| b).count()
-    })
+    let lit_count = screen
+        .iter()
+        .map(|row| row.iter().filter(|&&b| b).count())
         .sum();
 
     let printed_screen = print_screen(&screen);

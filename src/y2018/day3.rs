@@ -1,8 +1,8 @@
 //! Day 3: No Matter How You Slice It
 //! https://adventofcode.com/2018/day/3
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 #[derive(Debug, Clone, Copy)]
 struct Rectangle {
@@ -17,9 +17,9 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
 
     let square = compute_tile_counts(&rectangles);
 
-    let overlap_tiles = square.iter().map(|row| {
-        row.iter().filter(|&&count| count > 1).count()
-    })
+    let overlap_tiles = square
+        .iter()
+        .map(|row| row.iter().filter(|&&count| count > 1).count())
         .sum();
 
     Ok(overlap_tiles)
@@ -63,30 +63,32 @@ fn compute_tile_counts(rectangles: &Vec<Rectangle>) -> Vec<Vec<i32>> {
 }
 
 fn parse_input(input: &str) -> Result<Vec<Rectangle>, SimpleError> {
-    input.lines().map(|line| {
-        let (_, line) = line.split_once(" @ ").ok_or_else(
-            || SimpleError::new(format!("line has no ' @ ': {line}"))
-        )?;
+    input
+        .lines()
+        .map(|line| {
+            let (_, line) = line
+                .split_once(" @ ")
+                .ok_or_else(|| SimpleError::new(format!("line has no ' @ ': {line}")))?;
 
-        let (position, lengths) = line.split_once(": ").ok_or_else(
-            || SimpleError::new(format!("line has no ': ': {line}"))
-        )?;
+            let (position, lengths) = line
+                .split_once(": ")
+                .ok_or_else(|| SimpleError::new(format!("line has no ': ': {line}")))?;
 
-        let (x, y) = position.split_once(',').ok_or_else(
-            || SimpleError::new(format!("position part of line has no ',': {line}"))
-        )?;
+            let (x, y) = position.split_once(',').ok_or_else(|| {
+                SimpleError::new(format!("position part of line has no ',': {line}"))
+            })?;
 
-        let (w, h) = lengths.split_once('x').ok_or_else(
-            || SimpleError::new(format!("lengths part of line has no 'x': {line}"))
-        )?;
+            let (w, h) = lengths.split_once('x').ok_or_else(|| {
+                SimpleError::new(format!("lengths part of line has no 'x': {line}"))
+            })?;
 
-        Ok(Rectangle {
-            x: x.parse()?,
-            y: y.parse()?,
-            width: w.parse()?,
-            height: h.parse()?,
+            Ok(Rectangle {
+                x: x.parse()?,
+                y: y.parse()?,
+                width: w.parse()?,
+                height: h.parse()?,
+            })
         })
-    })
         .collect()
 }
 

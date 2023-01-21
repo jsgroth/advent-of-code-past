@@ -1,10 +1,10 @@
 //! Day 23: Crab Cups
 //! https://adventofcode.com/2020/day/23
 
+use crate::SimpleError;
 use std::collections::VecDeque;
 use std::error::Error;
 use std::fmt::Debug;
-use crate::SimpleError;
 
 #[derive(Debug, Clone)]
 struct CircularLinkedHashMap {
@@ -57,8 +57,12 @@ impl From<Vec<u32>> for CircularLinkedHashMap {
 }
 
 fn solve_part_1(input: &str, moves: usize) -> Result<String, SimpleError> {
-    let mut numbers: VecDeque<_> = crate::read_single_line(input)?.chars()
-        .map(|c| c.to_digit(10).ok_or_else(|| SimpleError::new(format!("not a digit: {c}"))))
+    let mut numbers: VecDeque<_> = crate::read_single_line(input)?
+        .chars()
+        .map(|c| {
+            c.to_digit(10)
+                .ok_or_else(|| SimpleError::new(format!("not a digit: {c}")))
+        })
         .collect::<Result<_, _>>()?;
 
     let min = numbers.iter().copied().min().unwrap();
@@ -99,12 +103,19 @@ fn solve_part_1(input: &str, moves: usize) -> Result<String, SimpleError> {
     numbers.rotate_left(one_position % numbers.len());
     numbers.pop_front();
 
-    Ok(numbers.into_iter().map(|n| char::from_digit(n, 10).unwrap()).collect())
+    Ok(numbers
+        .into_iter()
+        .map(|n| char::from_digit(n, 10).unwrap())
+        .collect())
 }
 
 fn solve_part_2(input: &str) -> Result<u64, SimpleError> {
-    let mut numbers: Vec<_> = crate::read_single_line(input)?.chars()
-        .map(|c| c.to_digit(10).ok_or_else(|| SimpleError::new(format!("not a digit: {c}"))))
+    let mut numbers: Vec<_> = crate::read_single_line(input)?
+        .chars()
+        .map(|c| {
+            c.to_digit(10)
+                .ok_or_else(|| SimpleError::new(format!("not a digit: {c}")))
+        })
         .collect::<Result<_, _>>()?;
 
     let initial_max = *numbers.iter().max().unwrap();

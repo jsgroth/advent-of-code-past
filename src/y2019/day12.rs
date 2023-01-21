@@ -1,11 +1,11 @@
 //! Day 12: The N-Body Problem
 //! https://adventofcode.com/2019/day/12
 
+use crate::SimpleError;
 use std::collections::HashMap;
 use std::error::Error;
 use std::iter;
 use std::ops::{Add, AddAssign, Sub};
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 struct Coords {
@@ -123,7 +123,9 @@ fn solve_part_2(input: &str) -> Result<u64, SimpleError> {
             let current_x_state = x_state(&moons);
             if let Some(&prev) = previous_x_states.get(&current_x_state) {
                 if prev != 0 {
-                    return Err(SimpleError::new(format!("expected x cycle to start at 0, starts at {prev}")));
+                    return Err(SimpleError::new(format!(
+                        "expected x cycle to start at 0, starts at {prev}"
+                    )));
                 }
                 x_cycle_end = step;
             } else {
@@ -135,7 +137,9 @@ fn solve_part_2(input: &str) -> Result<u64, SimpleError> {
             let current_y_state = y_state(&moons);
             if let Some(&prev) = previous_y_states.get(&current_y_state) {
                 if prev != 0 {
-                    return Err(SimpleError::new(format!("expected y cycle to start at 0, starts at {prev}")));
+                    return Err(SimpleError::new(format!(
+                        "expected y cycle to start at 0, starts at {prev}"
+                    )));
                 }
                 y_cycle_end = step;
             } else {
@@ -147,7 +151,9 @@ fn solve_part_2(input: &str) -> Result<u64, SimpleError> {
             let current_z_state = z_state(&moons);
             if let Some(&prev) = previous_z_states.get(&current_z_state) {
                 if prev != 0 {
-                    return Err(SimpleError::new(format!("expected z cycle to start at 0, starts at {prev}")));
+                    return Err(SimpleError::new(format!(
+                        "expected z cycle to start at 0, starts at {prev}"
+                    )));
                 }
                 z_cycle_end = step;
             } else {
@@ -164,15 +170,24 @@ fn solve_part_2(input: &str) -> Result<u64, SimpleError> {
 }
 
 fn x_state(moons: &[Moon]) -> Vec<(i64, i64)> {
-    moons.iter().map(|&moon| (moon.position.x, moon.velocity.x)).collect()
+    moons
+        .iter()
+        .map(|&moon| (moon.position.x, moon.velocity.x))
+        .collect()
 }
 
 fn y_state(moons: &[Moon]) -> Vec<(i64, i64)> {
-    moons.iter().map(|&moon| (moon.position.y, moon.velocity.y)).collect()
+    moons
+        .iter()
+        .map(|&moon| (moon.position.y, moon.velocity.y))
+        .collect()
 }
 
 fn z_state(moons: &[Moon]) -> Vec<(i64, i64)> {
-    moons.iter().map(|&moon| (moon.position.z, moon.velocity.z)).collect()
+    moons
+        .iter()
+        .map(|&moon| (moon.position.z, moon.velocity.z))
+        .collect()
 }
 
 fn lcm(a: u64, b: u64) -> u64 {
@@ -196,25 +211,27 @@ fn gcd(a: u64, b: u64) -> u64 {
 }
 
 fn total_energy(moons: &[Moon]) -> i64 {
-    moons.iter().map(|&moon| {
-        moon.position.energy() * moon.velocity.energy()
-    })
+    moons
+        .iter()
+        .map(|&moon| moon.position.energy() * moon.velocity.energy())
         .sum()
 }
 
 fn parse_input(input: &str) -> Result<Vec<Moon>, SimpleError> {
-    input.lines().map(|line| {
-        let split: Vec<_> = line[1..line.len() - 1].split(", ").collect();
-        if split.len() != 3 {
-            return Err(SimpleError::new(format!("invalid line format: {line}")));
-        }
+    input
+        .lines()
+        .map(|line| {
+            let split: Vec<_> = line[1..line.len() - 1].split(", ").collect();
+            if split.len() != 3 {
+                return Err(SimpleError::new(format!("invalid line format: {line}")));
+            }
 
-        let x = split[0][2..].parse()?;
-        let y = split[1][2..].parse()?;
-        let z = split[2][2..].parse()?;
+            let x = split[0][2..].parse()?;
+            let y = split[1][2..].parse()?;
+            let z = split[2][2..].parse()?;
 
-        Ok(Moon::new(Coords::new(x, y, z)))
-    })
+            Ok(Moon::new(Coords::new(x, y, z)))
+        })
         .collect()
 }
 

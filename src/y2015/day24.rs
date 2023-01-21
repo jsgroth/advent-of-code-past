@@ -1,18 +1,24 @@
 //! Day 24: It Hangs in the Balance
 //! https://adventofcode.com/2015/day/24
 
+use crate::SimpleError;
 use std::cmp;
 use std::collections::HashSet;
 use std::error::Error;
 use std::num::ParseIntError;
-use crate::SimpleError;
 
 fn solve_part_1(input: &str) -> Result<u64, SimpleError> {
     let weights = parse_input(input)?;
 
     let total_weight: u64 = weights.iter().copied().sum();
 
-    let all_groupings = find_all_shortest_groupings(&weights, 0, total_weight / 3, Vec::new(), &mut usize::MAX.clone());
+    let all_groupings = find_all_shortest_groupings(
+        &weights,
+        0,
+        total_weight / 3,
+        Vec::new(),
+        &mut usize::MAX.clone(),
+    );
     let valid_groupings = find_valid_shortest_groupings(&all_groupings, &weights, total_weight, 3);
 
     let min_qe = find_qe_for_best_grouping(&valid_groupings);
@@ -25,7 +31,13 @@ fn solve_part_2(input: &str) -> Result<u64, SimpleError> {
 
     let total_weight: u64 = weights.iter().copied().sum();
 
-    let all_groupings = find_all_shortest_groupings(&weights, 0, total_weight / 4, Vec::new(), &mut usize::MAX.clone());
+    let all_groupings = find_all_shortest_groupings(
+        &weights,
+        0,
+        total_weight / 4,
+        Vec::new(),
+        &mut usize::MAX.clone(),
+    );
     let valid_groupings = find_valid_shortest_groupings(&all_groupings, &weights, total_weight, 4);
 
     let min_qe = find_qe_for_best_grouping(&valid_groupings);
@@ -34,28 +46,37 @@ fn solve_part_2(input: &str) -> Result<u64, SimpleError> {
 }
 
 fn find_qe_for_best_grouping(groupings: &[Vec<u64>]) -> u64 {
-    groupings.iter()
+    groupings
+        .iter()
         .map(|a| a.iter().product::<u64>())
         .min()
         .unwrap_or(0)
 }
 
-fn find_valid_shortest_groupings(groupings: &[Vec<u64>], weights: &[u64], total_weight: u64, target_groups: usize) -> Vec<Vec<u64>> {
-    let min_grouping_len = groupings.iter()
+fn find_valid_shortest_groupings(
+    groupings: &[Vec<u64>],
+    weights: &[u64],
+    total_weight: u64,
+    target_groups: usize,
+) -> Vec<Vec<u64>> {
+    let min_grouping_len = groupings
+        .iter()
         .map(|grouping| grouping.len())
         .min()
         .unwrap_or(0);
 
-    groupings.iter()
+    groupings
+        .iter()
         .filter(|grouping| {
-            grouping.len() == min_grouping_len && grouping_exists(
-                weights,
-                0,
-                total_weight / (target_groups as u64),
-                grouping.iter().copied().collect(),
-                Vec::new(),
-                target_groups - 1,
-            )
+            grouping.len() == min_grouping_len
+                && grouping_exists(
+                    weights,
+                    0,
+                    total_weight / (target_groups as u64),
+                    grouping.iter().copied().collect(),
+                    Vec::new(),
+                    target_groups - 1,
+                )
         })
         .cloned()
         .collect()
@@ -75,7 +96,7 @@ fn find_all_shortest_groupings(
             vec![group_so_far]
         } else {
             Vec::new()
-        }
+        };
     }
 
     if group_so_far.len() >= *min_group_len {
@@ -87,13 +108,25 @@ fn find_all_shortest_groupings(
     }
 
     let mut groupings = Vec::new();
-    groupings.extend(find_all_shortest_groupings(weights, index + 1, target_weight, group_so_far.clone(), min_group_len));
+    groupings.extend(find_all_shortest_groupings(
+        weights,
+        index + 1,
+        target_weight,
+        group_so_far.clone(),
+        min_group_len,
+    ));
 
     let weight = weights[index];
     if weight + group_sum <= target_weight {
         let mut new_group_so_far = group_so_far;
         new_group_so_far.push(weight);
-        groupings.extend(find_all_shortest_groupings(weights, index + 1, target_weight, new_group_so_far, min_group_len));
+        groupings.extend(find_all_shortest_groupings(
+            weights,
+            index + 1,
+            target_weight,
+            new_group_so_far,
+            min_group_len,
+        ));
     }
 
     groupings
@@ -115,14 +148,28 @@ fn grouping_exists(
     if group_sum == target_weight {
         let mut new_visited = visited;
         new_visited.extend(group_so_far);
-        return grouping_exists(weights, 0, target_weight, new_visited, Vec::new(), target_groups - 1);
+        return grouping_exists(
+            weights,
+            0,
+            target_weight,
+            new_visited,
+            Vec::new(),
+            target_groups - 1,
+        );
     }
 
     if index == weights.len() {
         return false;
     }
 
-    if grouping_exists(weights, index + 1, target_weight, visited.clone(), group_so_far.clone(), target_groups) {
+    if grouping_exists(
+        weights,
+        index + 1,
+        target_weight,
+        visited.clone(),
+        group_so_far.clone(),
+        target_groups,
+    ) {
         return true;
     }
 
@@ -130,7 +177,14 @@ fn grouping_exists(
     if !visited.contains(&weight) && group_sum + weight <= target_weight {
         let mut new_group_so_far = group_so_far;
         new_group_so_far.push(weight);
-        if grouping_exists(weights, index + 1, target_weight, visited, new_group_so_far, target_groups) {
+        if grouping_exists(
+            weights,
+            index + 1,
+            target_weight,
+            visited,
+            new_group_so_far,
+            target_groups,
+        ) {
             return true;
         }
     }

@@ -1,12 +1,15 @@
 //! Day 1: Not Quite Lisp
 //! https://adventofcode.com/2015/day/1
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 fn solve_part_1(input: &str) -> Result<i32, SimpleError> {
     let increments = parse_input(input)?;
-    let floor = increments.into_iter().reduce(|a, b| a + b).expect("input should not be empty");
+    let floor = increments
+        .into_iter()
+        .reduce(|a, b| a + b)
+        .expect("input should not be empty");
 
     Ok(floor)
 }
@@ -22,19 +25,20 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
         }
     }
 
-    Err(SimpleError::new(String::from("no solution found for part 2")))
+    Err(SimpleError::new(String::from(
+        "no solution found for part 2",
+    )))
 }
 
 fn parse_input(input: &str) -> Result<Vec<i32>, SimpleError> {
     let line = crate::read_single_line(input)?;
 
-    line.chars().map(|c| {
-        match c {
+    line.chars()
+        .map(|c| match c {
             '(' => Ok(1),
             ')' => Ok(-1),
-            _ => Err(SimpleError::new(format!("unexpected char: {c}")))
-        }
-    })
+            _ => Err(SimpleError::new(format!("unexpected char: {c}"))),
+        })
         .collect()
 }
 

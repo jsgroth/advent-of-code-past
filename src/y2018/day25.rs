@@ -1,9 +1,9 @@
 //! Day 25: Four-Dimensional Adventure
 //! https://adventofcode.com/2018/day/25
 
+use crate::SimpleError;
 use std::collections::HashSet;
 use std::error::Error;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 struct Point4D {
@@ -19,7 +19,10 @@ impl Point4D {
     }
 
     fn distance_to(&self, other: Point4D) -> i64 {
-        (self.x - other.x).abs() + (self.y - other.y).abs() + (self.z - other.z).abs() + (self.t - other.t).abs()
+        (self.x - other.x).abs()
+            + (self.y - other.y).abs()
+            + (self.z - other.z).abs()
+            + (self.t - other.t).abs()
     }
 }
 
@@ -74,27 +77,28 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
         }
     }
 
-    let distinct_constellations: HashSet<_> = (0..points.len())
-        .map(|i| disjoint_set.find(i))
-        .collect();
+    let distinct_constellations: HashSet<_> =
+        (0..points.len()).map(|i| disjoint_set.find(i)).collect();
 
     Ok(distinct_constellations.len())
 }
 
 fn parse_input(input: &str) -> Result<Vec<Point4D>, SimpleError> {
-    input.lines().map(|line| {
-        let split: Vec<_> = line.split(',').collect();
-        if split.len() != 4 {
-            return Err(SimpleError::new(format!("invalid line format: {line}")));
-        }
+    input
+        .lines()
+        .map(|line| {
+            let split: Vec<_> = line.split(',').collect();
+            if split.len() != 4 {
+                return Err(SimpleError::new(format!("invalid line format: {line}")));
+            }
 
-        let x = split[0].parse()?;
-        let y = split[1].parse()?;
-        let z = split[2].parse()?;
-        let t = split[3].parse()?;
+            let x = split[0].parse()?;
+            let y = split[1].parse()?;
+            let z = split[2].parse()?;
+            let t = split[3].parse()?;
 
-        Ok(Point4D::new(x, y, z, t))
-    })
+            Ok(Point4D::new(x, y, z, t))
+        })
         .collect()
 }
 

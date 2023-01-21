@@ -1,16 +1,17 @@
 //! Day 23: Safe Cracking
 //! https://adventofcode.com/2016/day/23
 
+use crate::y2016::assembunny::AssembunnyProgram;
+use crate::SimpleError;
 use std::collections::HashMap;
 use std::error::Error;
-use crate::SimpleError;
-use crate::y2016::assembunny::AssembunnyProgram;
 
 fn solve_part(input: &str, initial_a_value: i64) -> Result<i64, SimpleError> {
     let mut program = AssembunnyProgram::from_lines(input)?;
 
-    let mut registers: HashMap<_, _> =
-        [('a', initial_a_value), ('b', 0), ('c', 0), ('d', 0)].into_iter().collect();
+    let mut registers: HashMap<_, _> = [('a', initial_a_value), ('b', 0), ('c', 0), ('d', 0)]
+        .into_iter()
+        .collect();
 
     program.optimize_multiplies();
     program.execute(&mut registers);

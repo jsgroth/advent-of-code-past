@@ -1,9 +1,9 @@
 //! Day 12: Digital Plumber
 //! https://adventofcode.com/2017/day/12
 
+use crate::SimpleError;
 use std::collections::HashSet;
 use std::error::Error;
-use crate::SimpleError;
 
 #[derive(Debug)]
 struct DisjointSetNode {
@@ -18,9 +18,7 @@ struct DisjointSet {
 
 impl DisjointSet {
     fn new() -> Self {
-        Self {
-            nodes: Vec::new(),
-        }
+        Self { nodes: Vec::new() }
     }
 
     fn ensure_node_exists(&mut self, index: usize) {
@@ -90,18 +88,21 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
 }
 
 fn parse_input(input: &str) -> Result<Vec<(usize, Vec<usize>)>, SimpleError> {
-    input.lines().map(|line| {
-        let (l, r) = line.split_once(" <-> ").ok_or_else(
-            || SimpleError::new(format!("invalid line, missing <->: {line}"))
-        )?;
+    input
+        .lines()
+        .map(|line| {
+            let (l, r) = line
+                .split_once(" <-> ")
+                .ok_or_else(|| SimpleError::new(format!("invalid line, missing <->: {line}")))?;
 
-        let l: usize = l.parse()?;
-        let r = r.split(", ")
-            .map(|n| n.parse::<usize>().map_err(SimpleError::from))
-            .collect::<Result<Vec<_>, _>>()?;
+            let l: usize = l.parse()?;
+            let r = r
+                .split(", ")
+                .map(|n| n.parse::<usize>().map_err(SimpleError::from))
+                .collect::<Result<Vec<_>, _>>()?;
 
-        Ok((l, r))
-    })
+            Ok((l, r))
+        })
         .collect()
 }
 

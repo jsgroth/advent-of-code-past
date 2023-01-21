@@ -1,10 +1,10 @@
 //! Day 22: Mode Maze
 //! https://adventofcode.com/2018/day/22
 
+use crate::SimpleError;
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashSet};
 use std::error::Error;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 struct Point {
@@ -35,7 +35,7 @@ impl RegionType {
             0 => Self::Rocky,
             1 => Self::Wet,
             2 => Self::Narrow,
-            _ => panic!("an unsigned integer mod 3 cannot be anything other than 0/1/2")
+            _ => panic!("an unsigned integer mod 3 cannot be anything other than 0/1/2"),
         }
     }
 
@@ -104,19 +104,23 @@ fn solve_part_1(input: &str) -> Result<u32, SimpleError> {
 
     let geologic_indices = build_geologic_index_map(depth, target);
 
-    let region_types: Vec<Vec<_>> = geologic_indices.iter()
+    let region_types: Vec<Vec<_>> = geologic_indices
+        .iter()
         .map(|row| {
-            row.iter().copied()
-                .map(|geologic_index| {
-                    RegionType::from_geologic_index(geologic_index, depth)
-                })
+            row.iter()
+                .copied()
+                .map(|geologic_index| RegionType::from_geologic_index(geologic_index, depth))
                 .collect()
         })
         .collect();
 
-    let total_risk_level = region_types.iter().map(|row| {
-        row.iter().map(|region_type| region_type.risk_level()).sum::<u32>()
-    })
+    let total_risk_level = region_types
+        .iter()
+        .map(|row| {
+            row.iter()
+                .map(|region_type| region_type.risk_level())
+                .sum::<u32>()
+        })
         .sum();
 
     Ok(total_risk_level)
@@ -161,12 +165,17 @@ fn expand_geologic_map_horizontally(map: &mut Vec<Vec<u64>>, depth: u64) {
     let x = map[0].len();
     map[0].push((x as u64 * 16807) % EROSION_LEVEL_MODULO);
     for y in 1..map.len() {
-        let geologic_index = ((map[y - 1][x] + depth) * (map[y][x - 1] + depth)) % EROSION_LEVEL_MODULO;
+        let geologic_index =
+            ((map[y - 1][x] + depth) * (map[y][x - 1] + depth)) % EROSION_LEVEL_MODULO;
         map[y].push(geologic_index);
     }
 }
 
-fn find_shortest_path_to_target(mut geologic_indices: Vec<Vec<u64>>, depth: u64, target: Point) -> Option<u32> {
+fn find_shortest_path_to_target(
+    mut geologic_indices: Vec<Vec<u64>>,
+    depth: u64,
+    target: Point,
+) -> Option<u32> {
     let initial_state = HeapEntry {
         position: Point::new(0, 0),
         tool: Tool::Torch,
@@ -179,7 +188,11 @@ fn find_shortest_path_to_target(mut geologic_indices: Vec<Vec<u64>>, depth: u64,
     let mut visited = HashSet::new();
 
     while !heap.is_empty() {
-        let HeapEntry { position, tool, minutes_spent } = heap.pop().unwrap();
+        let HeapEntry {
+            position,
+            tool,
+            minutes_spent,
+        } = heap.pop().unwrap();
 
         if position == target && tool == Tool::Torch {
             return Some(minutes_spent);
@@ -217,9 +230,8 @@ fn find_shortest_path_to_target(mut geologic_indices: Vec<Vec<u64>>, depth: u64,
             }
         }
 
-        let current_region_type = RegionType::from_geologic_index(
-            geologic_indices[position.y][position.x], depth
-        );
+        let current_region_type =
+            RegionType::from_geologic_index(geologic_indices[position.y][position.x], depth);
         let tool_change = get_possible_tool_change(tool, current_region_type);
 
         let new_state = HeapEntry {
@@ -244,21 +256,27 @@ fn get_possible_tool_change(tool: Tool, region_type: RegionType) -> Tool {
         (Tool::None, RegionType::Wet) => Tool::ClimbingGear,
         (Tool::Torch, RegionType::Narrow) => Tool::None,
         (Tool::None, RegionType::Narrow) => Tool::Torch,
-        _ => panic!("invalid tool/region combination of {tool:?} and {region_type:?}")
+        _ => panic!("invalid tool/region combination of {tool:?} and {region_type:?}"),
     }
 }
 
 fn parse_input(input: &str) -> Result<(u64, Point), SimpleError> {
     let first_line = crate::read_single_line(input)?;
-    let second_line = input.lines().nth(1).ok_or_else(
-        || SimpleError::new(String::from("input should have two lines"))
-    )?;
+    let second_line = input
+        .lines()
+        .nth(1)
+        .ok_or_else(|| SimpleError::new(String::from("input should have two lines")))?;
 
     let depth = first_line["depth: ".len()..].parse()?;
 
-    let (target_x, target_y) = second_line["target: ".len()..].split_once(',').ok_or_else(
-        || SimpleError::new(format!("target string should contain one comma: {second_line}"))
-    )?;
+    let (target_x, target_y) =
+        second_line["target: ".len()..]
+            .split_once(',')
+            .ok_or_else(|| {
+                SimpleError::new(format!(
+                    "target string should contain one comma: {second_line}"
+                ))
+            })?;
 
     let target_x = target_x.parse()?;
     let target_y = target_y.parse()?;

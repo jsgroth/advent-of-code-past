@@ -1,9 +1,9 @@
 //! Day 23: Experimental Emergency Teleportation
 //! https://adventofcode.com/2018/day/23
 
+use crate::SimpleError;
 use std::cmp;
 use std::error::Error;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 struct Point {
@@ -30,14 +30,16 @@ struct Nanobot {
 
 impl Nanobot {
     fn from_line(line: &str) -> Result<Self, SimpleError> {
-        let (position, radius) = line.split_once(", ").ok_or_else(
-            || SimpleError::new(format!("line has no ', ': {line}"))
-        )?;
+        let (position, radius) = line
+            .split_once(", ")
+            .ok_or_else(|| SimpleError::new(format!("line has no ', ': {line}")))?;
 
         let position = &position[5..position.len() - 1];
         let split: Vec<_> = position.split(',').collect();
         if split.len() != 3 {
-            return Err(SimpleError::new(format!("position does not contain exactly 3 coordinates: {line}")));
+            return Err(SimpleError::new(format!(
+                "position does not contain exactly 3 coordinates: {line}"
+            )));
         }
 
         let x = split[0].parse()?;
@@ -51,8 +53,6 @@ impl Nanobot {
             radius,
         })
     }
-
-
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -118,7 +118,9 @@ impl Cube {
 fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
     let nanobots = parse_input(input)?;
 
-    let strongest_nanobot = nanobots.iter().copied()
+    let strongest_nanobot = nanobots
+        .iter()
+        .copied()
         .max_by_key(|&nanobot| nanobot.radius)
         .unwrap();
 
@@ -147,7 +149,7 @@ fn solve_part_2(input: &str) -> Result<i64, SimpleError> {
                 cmp::min(min_z, p.z),
                 cmp::max(max_z, p.z),
             )
-        }
+        },
     );
 
     let x_range = Range::new(min_x, max_x + 1);
@@ -161,8 +163,15 @@ fn solve_part_2(input: &str) -> Result<i64, SimpleError> {
     Ok(best_point.x.abs() + best_point.y.abs() + best_point.z.abs())
 }
 
-fn find_optimal_position(cube: Cube, nanobots: &[Nanobot], best_so_far: &mut usize) -> (Point, usize) {
-    if cube.x.end == cube.x.start + 1 && cube.y.end == cube.y.start + 1 && cube.z.end == cube.z.start + 1 {
+fn find_optimal_position(
+    cube: Cube,
+    nanobots: &[Nanobot],
+    best_so_far: &mut usize,
+) -> (Point, usize) {
+    if cube.x.end == cube.x.start + 1
+        && cube.y.end == cube.y.start + 1
+        && cube.z.end == cube.z.start + 1
+    {
         let mut nanobot_overlap_count = 0;
         let p = Point::new(cube.x.start, cube.y.start, cube.z.start);
         for &nanobot in nanobots {
@@ -172,7 +181,10 @@ fn find_optimal_position(cube: Cube, nanobots: &[Nanobot], best_so_far: &mut usi
         }
 
         *best_so_far = cmp::max(*best_so_far, nanobot_overlap_count);
-        return (Point::new(cube.x.start, cube.y.start, cube.z.start), nanobot_overlap_count);
+        return (
+            Point::new(cube.x.start, cube.y.start, cube.z.start),
+            nanobot_overlap_count,
+        );
     }
 
     let x_split = cube.x.split();
@@ -210,7 +222,10 @@ fn find_optimal_position(cube: Cube, nanobots: &[Nanobot], best_so_far: &mut usi
         if overlap_count > best_overlap_count {
             best_overlap_count = overlap_count;
             best_point = p;
-        } else if overlap_count == best_overlap_count && p.x.abs() + p.y.abs() + p.z.abs() < best_point.x.abs() + best_point.y.abs() + best_point.z.abs()  {
+        } else if overlap_count == best_overlap_count
+            && p.x.abs() + p.y.abs() + p.z.abs()
+                < best_point.x.abs() + best_point.y.abs() + best_point.z.abs()
+        {
             best_point = p;
         }
     }

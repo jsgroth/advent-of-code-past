@@ -1,10 +1,10 @@
 //! Day 12: JSAbacusFramework.io
 //! https://adventofcode.com/2015/day/12
 
+use crate::SimpleError;
 use std::collections::HashMap;
 use std::error::Error;
 use std::iter::Peekable;
-use crate::SimpleError;
 
 #[derive(Debug)]
 enum JsonValue {
@@ -16,7 +16,8 @@ enum JsonValue {
 
 impl JsonValue {
     fn sum_all_numbers<P>(&self, predicate: P) -> i32
-    where P: Copy + Fn(&JsonValue) -> bool
+    where
+        P: Copy + Fn(&JsonValue) -> bool,
     {
         if !predicate(self) {
             return 0;
@@ -25,12 +26,14 @@ impl JsonValue {
         match self {
             Self::Number(n) => *n,
             Self::String(_) => 0,
-            Self::Array(array) => {
-                array.iter().map(|json_value| json_value.sum_all_numbers(predicate)).sum()
-            }
-            Self::Object(object) => {
-                object.values().map(|json_value| json_value.sum_all_numbers(predicate)).sum()
-            }
+            Self::Array(array) => array
+                .iter()
+                .map(|json_value| json_value.sum_all_numbers(predicate))
+                .sum(),
+            Self::Object(object) => object
+                .values()
+                .map(|json_value| json_value.sum_all_numbers(predicate))
+                .sum(),
         }
     }
 }
@@ -64,7 +67,8 @@ fn parse_input(input: &str) -> Result<JsonValue, SimpleError> {
 }
 
 fn parse_json_value<I>(iter: &mut Peekable<I>) -> Result<JsonValue, SimpleError>
-where I: Iterator<Item = char>
+where
+    I: Iterator<Item = char>,
 {
     if iter.peek().is_none() {
         return Err(SimpleError::new(String::from("unexpected end of stream")));
@@ -76,12 +80,16 @@ where I: Iterator<Item = char>
         '"' => parse_string(iter),
         '-' => parse_int(iter),
         _c @ '0'..='9' => parse_int(iter),
-        _ => Err(SimpleError::new(format!("invalid character at start of value: {}", iter.peek().unwrap())))
+        _ => Err(SimpleError::new(format!(
+            "invalid character at start of value: {}",
+            iter.peek().unwrap()
+        ))),
     }
 }
 
 fn parse_object<I>(iter: &mut Peekable<I>) -> Result<JsonValue, SimpleError>
-where I: Iterator<Item = char>
+where
+    I: Iterator<Item = char>,
 {
     iter.next();
 
@@ -102,7 +110,9 @@ where I: Iterator<Item = char>
         skip_spaces(iter);
 
         if iter.next() != Some(':') {
-            return Err(SimpleError::new(format!("missing colon after object key '{key}'")));
+            return Err(SimpleError::new(format!(
+                "missing colon after object key '{key}'"
+            )));
         }
 
         skip_spaces(iter);
@@ -121,7 +131,8 @@ where I: Iterator<Item = char>
 }
 
 fn parse_array<I>(iter: &mut Peekable<I>) -> Result<JsonValue, SimpleError>
-where I: Iterator<Item = char>
+where
+    I: Iterator<Item = char>,
 {
     iter.next();
 
@@ -147,7 +158,8 @@ where I: Iterator<Item = char>
 }
 
 fn parse_string<I>(iter: &mut Peekable<I>) -> Result<JsonValue, SimpleError>
-where I: Iterator<Item = char>
+where
+    I: Iterator<Item = char>,
 {
     iter.next();
 
@@ -164,7 +176,8 @@ where I: Iterator<Item = char>
 }
 
 fn parse_int<I>(iter: &mut Peekable<I>) -> Result<JsonValue, SimpleError>
-where I: Iterator<Item = char>
+where
+    I: Iterator<Item = char>,
 {
     let mut s = String::new();
     while let Some(&c) = iter.peek() {
@@ -179,7 +192,8 @@ where I: Iterator<Item = char>
 }
 
 fn skip_spaces<I>(iter: &mut Peekable<I>)
-where I: Iterator<Item = char>
+where
+    I: Iterator<Item = char>,
 {
     while iter.peek() == Some(&' ') {
         iter.next();

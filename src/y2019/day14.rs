@@ -1,10 +1,10 @@
 //! Day 14: Space Stoichiometry
 //! https://adventofcode.com/2019/day/14
 
+use crate::SimpleError;
 use std::collections::{HashMap, HashSet};
 use std::error::Error;
 use std::str::FromStr;
-use crate::SimpleError;
 
 #[derive(Debug, Clone)]
 struct Chemical {
@@ -16,9 +16,9 @@ impl FromStr for Chemical {
     type Err = SimpleError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (amount, name) = s.split_once(' ').ok_or_else(
-||             SimpleError::new(format!("invalid chemical string, expected one space: {s}"))
-        )?;
+        let (amount, name) = s.split_once(' ').ok_or_else(|| {
+            SimpleError::new(format!("invalid chemical string, expected one space: {s}"))
+        })?;
 
         let name = String::from(name);
         let amount = amount.parse()?;
@@ -40,7 +40,8 @@ fn solve_part_1(input: &str) -> Result<u32, SimpleError> {
 
     let sorted_chem_names = topological_sort(&reactions_dag);
 
-    let name_to_reaction: HashMap<_, _> = reactions.iter()
+    let name_to_reaction: HashMap<_, _> = reactions
+        .iter()
         .map(|reaction| (reaction.output.name.as_str(), reaction))
         .collect();
 
@@ -80,7 +81,8 @@ fn solve_part_2(input: &str) -> Result<u64, SimpleError> {
 
     let sorted_chem_names = topological_sort(&reactions_dag);
 
-    let name_to_reaction: HashMap<_, _> = reactions.iter()
+    let name_to_reaction: HashMap<_, _> = reactions
+        .iter()
         .map(|reaction| (reaction.output.name.as_str(), reaction))
         .collect();
 
@@ -89,7 +91,10 @@ fn solve_part_2(input: &str) -> Result<u64, SimpleError> {
         let required = if chem_name.as_str() == "FUEL" {
             1.0
         } else {
-            required_chems.get(chem_name.as_str()).copied().unwrap_or(0.0)
+            required_chems
+                .get(chem_name.as_str())
+                .copied()
+                .unwrap_or(0.0)
         };
 
         if chem_name.as_str() == "ORE" {
@@ -117,7 +122,9 @@ fn build_dag(reactions: &[Reaction]) -> HashMap<String, Vec<String>> {
     let mut reactions_dag = HashMap::new();
 
     for reaction in reactions {
-        let input_names: Vec<_> = reaction.inputs.iter()
+        let input_names: Vec<_> = reaction
+            .inputs
+            .iter()
             .map(|chemical| chemical.name.clone())
             .collect();
         reactions_dag.insert(reaction.output.name.clone(), input_names);
@@ -133,13 +140,23 @@ fn topological_sort(reactions_dag: &HashMap<String, Vec<String>>) -> Vec<String>
     let mut output_reverse = Vec::new();
 
     for output_name in reactions_dag.keys() {
-        topological_sort_visit(output_name, reactions_dag, &mut visited, &mut output_reverse);
+        topological_sort_visit(
+            output_name,
+            reactions_dag,
+            &mut visited,
+            &mut output_reverse,
+        );
     }
 
     output_reverse.into_iter().rev().collect()
 }
 
-fn topological_sort_visit(name: &str, reactions_dag: &HashMap<String, Vec<String>>, visited: &mut HashSet<String>, output_reverse: &mut Vec<String>) {
+fn topological_sort_visit(
+    name: &str,
+    reactions_dag: &HashMap<String, Vec<String>>,
+    visited: &mut HashSet<String>,
+    output_reverse: &mut Vec<String>,
+) {
     if visited.contains(name) {
         return;
     }
@@ -154,19 +171,22 @@ fn topological_sort_visit(name: &str, reactions_dag: &HashMap<String, Vec<String
 }
 
 fn parse_input(input: &str) -> Result<Vec<Reaction>, SimpleError> {
-    input.lines().map(|line| {
-        let (inputs, output) = line.split_once(" => ").ok_or_else(
-            || SimpleError::new(format!("invalid line format, no ' => ': {line}"))
-        )?;
+    input
+        .lines()
+        .map(|line| {
+            let (inputs, output) = line.split_once(" => ").ok_or_else(|| {
+                SimpleError::new(format!("invalid line format, no ' => ': {line}"))
+            })?;
 
-        let inputs: Vec<_> = inputs.split(", ")
-            .map(Chemical::from_str)
-            .collect::<Result<_, _>>()?;
+            let inputs: Vec<_> = inputs
+                .split(", ")
+                .map(Chemical::from_str)
+                .collect::<Result<_, _>>()?;
 
-        let output = output.parse()?;
+            let output = output.parse()?;
 
-        Ok(Reaction { inputs, output })
-    })
+            Ok(Reaction { inputs, output })
+        })
         .collect()
 }
 

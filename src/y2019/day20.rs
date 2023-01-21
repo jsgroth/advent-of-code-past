@@ -1,10 +1,10 @@
 //! Day 20: Donut Maze
 //! https://adventofcode.com/2019/day/20
 
+use crate::SimpleError;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::error::Error;
 use std::iter;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 struct Point {
@@ -68,7 +68,7 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
             let new_j = (position.j as i32 + dj) as usize;
 
             match maze[new_i][new_j] {
-                Space::Wall => {},
+                Space::Wall => {}
                 Space::Empty | Space::Portal(_) => {
                     let new_position = Point::new(new_i, new_j);
 
@@ -106,7 +106,8 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
                 let i = position.i;
                 let j = position.j;
 
-                let on_outer_edge = i == 2 || i == maze.len() - 3 || j == 2 || j == maze[0].len() - 3;
+                let on_outer_edge =
+                    i == 2 || i == maze.len() - 3 || j == 2 || j == maze[0].len() - 3;
                 if !(on_outer_edge && depth == 0) {
                     let new_depth = if on_outer_edge { depth - 1 } else { depth + 1 };
                     if visited.insert((connected_point, new_depth)) {
@@ -121,7 +122,7 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
             let new_j = (position.j as i32 + dj) as usize;
 
             match maze[new_i][new_j] {
-                Space::Wall => {},
+                Space::Wall => {}
                 Space::Empty | Space::Portal(_) => {
                     let new_position = Point::new(new_i, new_j);
                     if new_position == end && depth == 0 {
@@ -157,7 +158,9 @@ fn find_start_and_end(grid: &[Vec<Space>]) -> Result<(Point, Point), SimpleError
 
     match (start, end) {
         (Some(start), Some(end)) => Ok((start, end)),
-        _ => Err(SimpleError::new(format!("maze is missing start and/or end points: start={start:?}, end={end:?}")))
+        _ => Err(SimpleError::new(format!(
+            "maze is missing start and/or end points: start={start:?}, end={end:?}"
+        ))),
     }
 }
 
@@ -187,10 +190,15 @@ fn build_portal_connection_map(maze: &[Vec<Space>]) -> Result<HashMap<Point, Poi
                 }
 
                 let p = Point::new(i, j);
-                let connected_point = portal_to_points.get(label).unwrap().iter()
+                let connected_point = portal_to_points
+                    .get(label)
+                    .unwrap()
+                    .iter()
                     .find(|&&other_p| other_p != p)
                     .copied()
-                    .ok_or_else(|| SimpleError::new(format!("label {label} only has one portal in map")))?;
+                    .ok_or_else(|| {
+                        SimpleError::new(format!("label {label} only has one portal in map"))
+                    })?;
 
                 point_to_connected.insert(p, connected_point);
             }
@@ -201,28 +209,36 @@ fn build_portal_connection_map(maze: &[Vec<Space>]) -> Result<HashMap<Point, Poi
 }
 
 fn locate_portals(raw_maze: &Vec<Vec<RawSpace>>) -> Vec<Vec<Space>> {
-    let mut maze: Vec<Vec<_>> = raw_maze.iter().map(|row| {
-        row.iter().copied().map(Space::from).collect()
-    })
+    let mut maze: Vec<Vec<_>> = raw_maze
+        .iter()
+        .map(|row| row.iter().copied().map(Space::from).collect())
         .collect();
 
     for i in 2..raw_maze.len() - 2 {
         for j in 2..raw_maze[0].len() - 2 {
             match raw_maze[i][j] {
-                RawSpace::Empty => {},
+                RawSpace::Empty => {}
                 _ => continue,
             }
 
-            if let (RawSpace::HalfPortal(lower), RawSpace::HalfPortal(upper)) = (raw_maze[i - 1][j], raw_maze[i - 2][j]) {
+            if let (RawSpace::HalfPortal(lower), RawSpace::HalfPortal(upper)) =
+                (raw_maze[i - 1][j], raw_maze[i - 2][j])
+            {
                 maze[i][j] = Space::Portal(String::from_iter([upper, lower].into_iter()));
             }
-            if let (RawSpace::HalfPortal(upper), RawSpace::HalfPortal(lower)) = (raw_maze[i + 1][j], raw_maze[i + 2][j]) {
+            if let (RawSpace::HalfPortal(upper), RawSpace::HalfPortal(lower)) =
+                (raw_maze[i + 1][j], raw_maze[i + 2][j])
+            {
                 maze[i][j] = Space::Portal(String::from_iter([upper, lower].into_iter()));
             }
-            if let (RawSpace::HalfPortal(right), RawSpace::HalfPortal(left)) = (raw_maze[i][j - 1], raw_maze[i][j - 2]) {
+            if let (RawSpace::HalfPortal(right), RawSpace::HalfPortal(left)) =
+                (raw_maze[i][j - 1], raw_maze[i][j - 2])
+            {
                 maze[i][j] = Space::Portal(String::from_iter([left, right].into_iter()));
             }
-            if let (RawSpace::HalfPortal(left), RawSpace::HalfPortal(right)) = (raw_maze[i][j + 1], raw_maze[i][j + 2]) {
+            if let (RawSpace::HalfPortal(left), RawSpace::HalfPortal(right)) =
+                (raw_maze[i][j + 1], raw_maze[i][j + 2])
+            {
                 maze[i][j] = Space::Portal(String::from_iter([left, right].into_iter()));
             }
         }
@@ -232,17 +248,18 @@ fn locate_portals(raw_maze: &Vec<Vec<RawSpace>>) -> Vec<Vec<Space>> {
 }
 
 fn parse_input(input: &str) -> Result<Vec<Vec<RawSpace>>, SimpleError> {
-    input.lines().map(|line| {
-        line.chars().map(|c| {
-            match c {
-                '.' => Ok(RawSpace::Empty),
-                ' ' | '#' => Ok(RawSpace::Wall),
-                c @ 'A'..='Z' => Ok(RawSpace::HalfPortal(c)),
-                _ => Err(SimpleError::new(format!("unexpected char: {c}")))
-            }
+    input
+        .lines()
+        .map(|line| {
+            line.chars()
+                .map(|c| match c {
+                    '.' => Ok(RawSpace::Empty),
+                    ' ' | '#' => Ok(RawSpace::Wall),
+                    c @ 'A'..='Z' => Ok(RawSpace::HalfPortal(c)),
+                    _ => Err(SimpleError::new(format!("unexpected char: {c}"))),
+                })
+                .collect()
         })
-            .collect()
-    })
         .collect()
 }
 

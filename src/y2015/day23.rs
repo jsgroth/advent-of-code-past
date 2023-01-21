@@ -1,8 +1,8 @@
 //! Day 23: Opening the Turing Lock
 //! https://adventofcode.com/2015/day/23
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 #[derive(Debug, Clone, Copy)]
 enum Instruction {
@@ -16,12 +16,14 @@ enum Instruction {
 
 impl Instruction {
     fn from_line(line: &str) -> Result<Self, SimpleError> {
-        let (operator, operands) = line.split_once(' ').ok_or_else(
-            || SimpleError::new(format!("invalid line format, missing space: {line}"))
-        )?;
+        let (operator, operands) = line.split_once(' ').ok_or_else(|| {
+            SimpleError::new(format!("invalid line format, missing space: {line}"))
+        })?;
 
         if operands.is_empty() {
-            return Err(SimpleError::new(format!("invalid line format, missing operands: {line}")));
+            return Err(SimpleError::new(format!(
+                "invalid line format, missing operands: {line}"
+            )));
         }
 
         let instruction = match operator {
@@ -37,7 +39,7 @@ impl Instruction {
                 let (register, offset) = parse_jump_if_operands(operands)?;
                 Self::JumpIfOne(register, offset)
             }
-            _ => return Err(SimpleError::new(format!("invalid operator: {line}")))
+            _ => return Err(SimpleError::new(format!("invalid operator: {line}"))),
         };
 
         Ok(instruction)
@@ -103,12 +105,16 @@ fn solve_part(input: &str, initial_a_value: u64) -> Result<u64, SimpleError> {
 }
 
 fn parse_jump_if_operands(operands: &str) -> Result<(char, i32), SimpleError> {
-    let (register, offset) = operands.split_once(", ").ok_or_else(
-        || SimpleError::new(format!("invalid line format for jie, missing comma: {operands}"))
-    )?;
+    let (register, offset) = operands.split_once(", ").ok_or_else(|| {
+        SimpleError::new(format!(
+            "invalid line format for jie, missing comma: {operands}"
+        ))
+    })?;
 
     if register.is_empty() {
-        return Err(SimpleError::new(format!("invalid line format for jie, missing register: {operands}")));
+        return Err(SimpleError::new(format!(
+            "invalid line format for jie, missing register: {operands}"
+        )));
     }
 
     Ok((register.chars().next().unwrap(), offset.parse()?))

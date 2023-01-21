@@ -1,9 +1,9 @@
 //! Day 6: Signals and Noise
 //! https://adventofcode.com/2016/day/6
 
+use crate::SimpleError;
 use std::collections::HashMap;
 use std::error::Error;
-use crate::SimpleError;
 
 fn solve_part(input: &str, find_min: bool) -> Result<String, SimpleError> {
     let chars = parse_input(input);
@@ -24,9 +24,15 @@ fn solve_part(input: &str, find_min: bool) -> Result<String, SimpleError> {
         }
 
         let (c, _) = if find_min {
-            char_counts.into_iter().min_by_key(|&(_, count)| count).unwrap()
+            char_counts
+                .into_iter()
+                .min_by_key(|&(_, count)| count)
+                .unwrap()
         } else {
-            char_counts.into_iter().max_by_key(|&(_, count)| count).unwrap()
+            char_counts
+                .into_iter()
+                .max_by_key(|&(_, count)| count)
+                .unwrap()
         };
         result.push(c);
     }
@@ -35,10 +41,7 @@ fn solve_part(input: &str, find_min: bool) -> Result<String, SimpleError> {
 }
 
 fn parse_input(input: &str) -> Vec<Vec<char>> {
-    input.lines().map(|line| {
-        line.chars().collect()
-    })
-        .collect()
+    input.lines().map(|line| line.chars().collect()).collect()
 }
 
 pub fn solve(input: &str) -> Result<(String, String), Box<dyn Error>> {

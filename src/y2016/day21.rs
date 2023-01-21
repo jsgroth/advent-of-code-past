@@ -1,8 +1,8 @@
 //! Day 21: Scrambled Letters and Hash
 //! https://adventofcode.com/2016/day/21
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 #[derive(Debug, Clone, Copy)]
 enum Instruction {
@@ -25,22 +25,14 @@ impl Instruction {
             ["swap", "letter", x, "with", "letter", y] => {
                 Ok(Self::SwapLetters(first_letter(x)?, first_letter(y)?))
             }
-            ["rotate", "left", x, _] => {
-                Ok(Self::RotateLeft(x.parse()?))
-            }
-            ["rotate", "right", x, _] => {
-                Ok(Self::RotateRight(x.parse()?))
-            }
+            ["rotate", "left", x, _] => Ok(Self::RotateLeft(x.parse()?)),
+            ["rotate", "right", x, _] => Ok(Self::RotateRight(x.parse()?)),
             ["rotate", "based", "on", "position", "of", "letter", x] => {
                 Ok(Self::RotatePositionOf(first_letter(x)?))
             }
-            ["reverse", "positions", x, "through", y] => {
-                Ok(Self::Reverse(x.parse()?, y.parse()?))
-            }
-            ["move", "position", x, "to", "position", y] => {
-                Ok(Self::Move(x.parse()?, y.parse()?))
-            }
-            _ => Err(SimpleError::new(format!("invalid line: {line}")))
+            ["reverse", "positions", x, "through", y] => Ok(Self::Reverse(x.parse()?, y.parse()?)),
+            ["move", "position", x, "to", "position", y] => Ok(Self::Move(x.parse()?, y.parse()?)),
+            _ => Err(SimpleError::new(format!("invalid line: {line}"))),
         }
     }
 
@@ -66,12 +58,11 @@ impl Instruction {
                 *password = rotate_right(password, rotate_right_x);
             }
             Self::Reverse(x, y) => {
-                *password = password.iter().copied().take(x)
-                    .chain(password.iter().copied()
-                        .skip(x)
-                        .take(y - x + 1)
-                        .rev()
-                    )
+                *password = password
+                    .iter()
+                    .copied()
+                    .take(x)
+                    .chain(password.iter().copied().skip(x).take(y - x + 1).rev())
                     .chain(password.iter().copied().skip(y + 1))
                     .collect();
             }
@@ -104,7 +95,10 @@ impl Instruction {
                     password.len() / 2 + shifted_rotated_pos / 2
                 };
 
-                *password = rotate_right(password, (original_pos + password.len() - rotated_pos) % password.len());
+                *password = rotate_right(
+                    password,
+                    (original_pos + password.len() - rotated_pos) % password.len(),
+                );
             }
             Self::Move(x, y) => {
                 let c = password.remove(y);
@@ -117,7 +111,9 @@ impl Instruction {
 }
 
 fn first_letter(s: &str) -> Result<char, SimpleError> {
-    s.chars().next().ok_or_else(|| SimpleError::new(String::from("unexpected empty string")))
+    s.chars()
+        .next()
+        .ok_or_else(|| SimpleError::new(String::from("unexpected empty string")))
 }
 
 fn solve_part_1(input: &str, starting_password: &str) -> Result<String, SimpleError> {
@@ -149,15 +145,21 @@ fn rotate_left(password: &Vec<char>, n: usize) -> Vec<char> {
 fn rotate_right(password: &Vec<char>, n: usize) -> Vec<char> {
     let n = n % password.len();
 
-    password.iter().copied().skip(password.len() - n).take(n)
+    password
+        .iter()
+        .copied()
+        .skip(password.len() - n)
+        .take(n)
         .chain(password.iter().copied().take(password.len() - n))
         .collect()
 }
 
 fn find_letter(password: &Vec<char>, letter: char) -> Result<usize, SimpleError> {
-    password.iter().position(|&c| c == letter).ok_or_else(
-        || SimpleError::new(format!("password does not contain letter '{letter}': {password:?}"))
-    )
+    password.iter().position(|&c| c == letter).ok_or_else(|| {
+        SimpleError::new(format!(
+            "password does not contain letter '{letter}': {password:?}"
+        ))
+    })
 }
 
 fn parse_input(input: &str) -> Result<Vec<Instruction>, SimpleError> {
@@ -179,6 +181,9 @@ mod tests {
 
     #[test]
     fn test_sample_input_part_1() {
-        assert_eq!(Ok(String::from("decab")), solve_part_1(SAMPLE_INPUT, "abcde"));
+        assert_eq!(
+            Ok(String::from("decab")),
+            solve_part_1(SAMPLE_INPUT, "abcde")
+        );
     }
 }

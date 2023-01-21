@@ -1,19 +1,21 @@
 //! Day 25: Combo Breaker
 //! https://adventofcode.com/2020/day/25
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 fn solve_part_1(input: &str) -> Result<u64, SimpleError> {
     let mut lines = input.lines();
 
-    let public_key_1: u64 = lines.next().ok_or_else(
-        || SimpleError::new(String::from("input is empty"))
-    )?.parse()?;
+    let public_key_1: u64 = lines
+        .next()
+        .ok_or_else(|| SimpleError::new(String::from("input is empty")))?
+        .parse()?;
 
-    let public_key_2: u64 = lines.next().ok_or_else(
-        || SimpleError::new(String::from("input only has one line, expected two"))
-    )?.parse()?;
+    let public_key_2: u64 = lines
+        .next()
+        .ok_or_else(|| SimpleError::new(String::from("input only has one line, expected two")))?
+        .parse()?;
 
     let loop_size_1 = find_loop_size(public_key_1)?;
 
@@ -35,9 +37,10 @@ fn find_loop_size(public_key: u64) -> Result<u32, SimpleError> {
         }
     }
 
-    Err(SimpleError::new(format!("no loop size found for public key {public_key}")))
+    Err(SimpleError::new(format!(
+        "no loop size found for public key {public_key}"
+    )))
 }
-
 
 pub fn solve(input: &str) -> Result<(u64, String), Box<dyn Error>> {
     let solution1 = solve_part_1(input)?;

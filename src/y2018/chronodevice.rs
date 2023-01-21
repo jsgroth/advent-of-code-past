@@ -58,7 +58,11 @@ impl ChronoOperation {
             "eqir" => Self::EqualImmediateRegister,
             "eqri" => Self::EqualRegisterImmediate,
             "eqrr" => Self::EqualRegisterRegister,
-            _ => return Err(SimpleError::new(format!("invalid chrono device operation: {s}")))
+            _ => {
+                return Err(SimpleError::new(format!(
+                    "invalid chrono device operation: {s}"
+                )))
+            }
         };
 
         Ok(op)
@@ -104,7 +108,9 @@ impl ChronoInstruction {
     pub fn from_line(line: &str) -> Result<Self, SimpleError> {
         let split: Vec<_> = line.split(' ').collect();
         if split.len() != 4 {
-            return Err(SimpleError::new(format!("invalid line format, expected 3 spaces: {line}")));
+            return Err(SimpleError::new(format!(
+                "invalid line format, expected 3 spaces: {line}"
+            )));
         }
 
         let op = ChronoOperation::from_str(split[0])?;
@@ -112,6 +118,6 @@ impl ChronoInstruction {
         let b = split[2].parse()?;
         let c = split[3].parse()?;
 
-        Ok(ChronoInstruction { op, a, b, c, })
+        Ok(ChronoInstruction { op, a, b, c })
     }
 }

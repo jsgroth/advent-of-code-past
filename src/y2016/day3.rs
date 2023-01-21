@@ -1,13 +1,14 @@
 //! Day 3: Squares With Three Sides
 //! https://adventofcode.com/2016/day/3
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
     let triangle_lengths = parse_input(input)?;
 
-    let valid = triangle_lengths.into_iter()
+    let valid = triangle_lengths
+        .into_iter()
         .filter(|&(a, b, c)| is_possible(a, b, c))
         .count();
 
@@ -18,7 +19,10 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
     let triangle_lengths = parse_input(input)?;
 
     if triangle_lengths.len() % 3 != 0 {
-        return Err(SimpleError::new(format!("input length is {}, must be a mutiple of 3", triangle_lengths.len())));
+        return Err(SimpleError::new(format!(
+            "input length is {}, must be a mutiple of 3",
+            triangle_lengths.len()
+        )));
     }
 
     let mut valid = 0;
@@ -46,18 +50,20 @@ fn is_possible(a: u32, b: u32, c: u32) -> bool {
 }
 
 fn parse_input(input: &str) -> Result<Vec<(u32, u32, u32)>, SimpleError> {
-    input.lines().map(|line| {
-        let split: Vec<_> = line.split(' ').filter(|s| !s.is_empty()).collect();
-        if split.len() != 3 {
-            return Err(SimpleError::new(format!("invalid line: {line}")));
-        }
+    input
+        .lines()
+        .map(|line| {
+            let split: Vec<_> = line.split(' ').filter(|s| !s.is_empty()).collect();
+            if split.len() != 3 {
+                return Err(SimpleError::new(format!("invalid line: {line}")));
+            }
 
-        let a: u32 = split[0].parse()?;
-        let b: u32 = split[1].parse()?;
-        let c: u32 = split[2].parse()?;
+            let a: u32 = split[0].parse()?;
+            let b: u32 = split[1].parse()?;
+            let c: u32 = split[2].parse()?;
 
-        Ok((a, b, c))
-    })
+            Ok((a, b, c))
+        })
         .collect()
 }
 

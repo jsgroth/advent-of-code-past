@@ -1,17 +1,19 @@
 //! Day 13: Shuttle Search
 //! https://adventofcode.com/2020/day/13
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 fn solve_part_1(input: &str) -> Result<u64, SimpleError> {
     let earliest_departure: u64 = crate::read_single_line(input)?.parse()?;
 
-    let second_line = input.lines().nth(1).ok_or_else(
-        || SimpleError::new(String::from("input should have 2 lines"))
-    )?;
+    let second_line = input
+        .lines()
+        .nth(1)
+        .ok_or_else(|| SimpleError::new(String::from("input should have 2 lines")))?;
 
-    let buses: Vec<_> = second_line.split(',')
+    let buses: Vec<_> = second_line
+        .split(',')
         .filter(|&s| s != "x")
         .map(|s| s.parse::<u64>())
         .collect::<Result<_, _>>()?;
@@ -28,11 +30,14 @@ fn solve_part_1(input: &str) -> Result<u64, SimpleError> {
 }
 
 fn solve_part_2(input: &str) -> Result<i128, SimpleError> {
-    let second_line = input.lines().nth(1).ok_or_else(
-        || SimpleError::new(String::from("input should have 2 lines"))
-    )?;
+    let second_line = input
+        .lines()
+        .nth(1)
+        .ok_or_else(|| SimpleError::new(String::from("input should have 2 lines")))?;
 
-    let buses_with_indices: Vec<_> = second_line.split(',').enumerate()
+    let buses_with_indices: Vec<_> = second_line
+        .split(',')
+        .enumerate()
         .filter(|(_, s)| *s != "x")
         .map(|(i, s)| s.parse::<i64>().map(|n| (i as i64, n)))
         .collect::<Result<_, _>>()?;
@@ -43,7 +48,8 @@ fn solve_part_2(input: &str) -> Result<i128, SimpleError> {
     // Or equivalently:
     //     x ≡ bus_id - index (mod bus_id)
     // Rewrite the list as (a, N) pairs such that x ≡ a (mod N) and 0 <= a < N
-    let linear_congruences = buses_with_indices.into_iter()
+    let linear_congruences = buses_with_indices
+        .into_iter()
         .map(|(index, bus)| ((bus - index) as i128, bus as i128));
 
     // https://en.wikipedia.org/wiki/Chinese_remainder_theorem

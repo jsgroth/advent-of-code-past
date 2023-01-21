@@ -1,10 +1,10 @@
 //! Day 11: Radioisotope Thermoelectric Generators
 //! https://adventofcode.com/2016/day/11
 
+use crate::SimpleError;
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashSet};
 use std::error::Error;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 enum FloorItem<'a> {
@@ -31,8 +31,12 @@ impl FloorState {
 
         for &floor_item in floor_items {
             match floor_item {
-                FloorItem::Microchip(microchip) => new_state.microchips.push(String::from(microchip)),
-                FloorItem::Generator(generator) => new_state.generators.push(String::from(generator)),
+                FloorItem::Microchip(microchip) => {
+                    new_state.microchips.push(String::from(microchip))
+                }
+                FloorItem::Generator(generator) => {
+                    new_state.generators.push(String::from(generator))
+                }
             }
         }
 
@@ -43,7 +47,8 @@ impl FloorState {
     }
 
     fn without_floor_items(&self, floor_items: &[FloorItem]) -> FloorState {
-        let microchips_to_remove: HashSet<_> = floor_items.iter()
+        let microchips_to_remove: HashSet<_> = floor_items
+            .iter()
             .filter_map(|floor_item| match floor_item {
                 FloorItem::Microchip(microchip) => Some(microchip),
                 FloorItem::Generator(_) => None,
@@ -51,7 +56,8 @@ impl FloorState {
             .copied()
             .collect();
 
-        let generators_to_remove: HashSet<_> = floor_items.iter()
+        let generators_to_remove: HashSet<_> = floor_items
+            .iter()
             .filter_map(|floor_item| match floor_item {
                 FloorItem::Generator(generator) => Some(generator),
                 FloorItem::Microchip(_) => None,
@@ -60,8 +66,12 @@ impl FloorState {
             .collect();
 
         let mut new_state = self.clone();
-        new_state.microchips.retain(|microchip| !microchips_to_remove.contains(microchip.as_str()));
-        new_state.generators.retain(|generator| !generators_to_remove.contains(generator.as_str()));
+        new_state
+            .microchips
+            .retain(|microchip| !microchips_to_remove.contains(microchip.as_str()));
+        new_state
+            .generators
+            .retain(|generator| !generators_to_remove.contains(generator.as_str()));
 
         new_state
     }
@@ -98,9 +108,9 @@ impl IsolationAreaState {
     }
 
     fn is_win_state(&self) -> bool {
-        self.floors[..self.floors.len() - 1].iter().all(|floor| {
-            floor.microchips.is_empty() && floor.generators.is_empty()
-        })
+        self.floors[..self.floors.len() - 1]
+            .iter()
+            .all(|floor| floor.microchips.is_empty() && floor.generators.is_empty())
     }
 
     fn a_star_heuristic(&self) -> usize {
@@ -124,16 +134,23 @@ impl IsolationAreaState {
     }
 
     fn make_visited_key(&self) -> VisitedKey {
-        let floors: Vec<_> = self.floors.iter().map(|floor| {
-            let (paired, lone_microchips): (Vec<_>, Vec<_>) = floor.microchips.iter()
-                .partition(|&microchip| floor.generators.contains(microchip));
+        let floors: Vec<_> = self
+            .floors
+            .iter()
+            .map(|floor| {
+                let (paired, lone_microchips): (Vec<_>, Vec<_>) = floor
+                    .microchips
+                    .iter()
+                    .partition(|&microchip| floor.generators.contains(microchip));
 
-            let lone_generator_count = floor.generators.iter()
-                .filter(|&generator| !floor.microchips.contains(generator))
-                .count();
+                let lone_generator_count = floor
+                    .generators
+                    .iter()
+                    .filter(|&generator| !floor.microchips.contains(generator))
+                    .count();
 
-            (paired.len(), lone_microchips.len(), lone_generator_count)
-        })
+                (paired.len(), lone_microchips.len(), lone_generator_count)
+            })
             .collect();
 
         VisitedKey {
@@ -151,7 +168,9 @@ impl PartialOrd<Self> for IsolationAreaState {
 
 impl Ord for IsolationAreaState {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.a_star_heuristic().cmp(&other.a_star_heuristic()).reverse()
+        self.a_star_heuristic()
+            .cmp(&other.a_star_heuristic())
+            .reverse()
     }
 }
 
@@ -169,7 +188,8 @@ fn solve_part(input: &str, add_additional_items: bool) -> Result<usize, SimpleEr
 
         let current_floor = &state.floors[state.elevator_pos];
 
-        let move_combinations = item_combinations(&current_floor.microchips, &current_floor.generators);
+        let move_combinations =
+            item_combinations(&current_floor.microchips, &current_floor.generators);
 
         for move_combination in &move_combinations {
             let mut states_to_consider = Vec::new();
@@ -180,10 +200,11 @@ fn solve_part(input: &str, add_additional_items: bool) -> Result<usize, SimpleEr
                     elevator_pos: state.elevator_pos - 1,
                     steps: state.steps + 1,
                 };
-                new_state.floors[state.elevator_pos] = current_floor.without_floor_items(move_combination);
-                new_state.floors[state.elevator_pos - 1] = state.floors[state.elevator_pos - 1].with_floor_items(move_combination);
+                new_state.floors[state.elevator_pos] =
+                    current_floor.without_floor_items(move_combination);
+                new_state.floors[state.elevator_pos - 1] =
+                    state.floors[state.elevator_pos - 1].with_floor_items(move_combination);
                 states_to_consider.push(new_state);
-
             }
 
             if state.elevator_pos < state.floors.len() - 1 {
@@ -192,8 +213,10 @@ fn solve_part(input: &str, add_additional_items: bool) -> Result<usize, SimpleEr
                     elevator_pos: state.elevator_pos + 1,
                     steps: state.steps + 1,
                 };
-                new_state.floors[state.elevator_pos] = current_floor.without_floor_items(move_combination);
-                new_state.floors[state.elevator_pos + 1] = state.floors[state.elevator_pos + 1].with_floor_items(move_combination);
+                new_state.floors[state.elevator_pos] =
+                    current_floor.without_floor_items(move_combination);
+                new_state.floors[state.elevator_pos + 1] =
+                    state.floors[state.elevator_pos + 1].with_floor_items(move_combination);
                 states_to_consider.push(new_state);
             }
 
@@ -216,11 +239,16 @@ fn solve_part(input: &str, add_additional_items: bool) -> Result<usize, SimpleEr
     Err(SimpleError::new(String::from("no solution found")))
 }
 
-fn item_combinations<'a>(microchips: &'a [String], generators: &'a [String]) -> Vec<Vec<FloorItem<'a>>> {
-    let (paired, lone_microchips): (Vec<_>, Vec<_>) = microchips.iter()
+fn item_combinations<'a>(
+    microchips: &'a [String],
+    generators: &'a [String],
+) -> Vec<Vec<FloorItem<'a>>> {
+    let (paired, lone_microchips): (Vec<_>, Vec<_>) = microchips
+        .iter()
         .partition(|&microchip| generators.contains(microchip));
 
-    let lone_generators: Vec<_> = generators.iter()
+    let lone_generators: Vec<_> = generators
+        .iter()
         .filter(|&generator| !microchips.contains(generator))
         .collect();
 
@@ -228,18 +256,27 @@ fn item_combinations<'a>(microchips: &'a [String], generators: &'a [String]) -> 
 
     if !paired.is_empty() {
         combinations.push(vec![FloorItem::Microchip(paired[0].as_str())]);
-        combinations.push(vec![FloorItem::Microchip(paired[0].as_str()), FloorItem::Generator(paired[0].as_str())]);
+        combinations.push(vec![
+            FloorItem::Microchip(paired[0].as_str()),
+            FloorItem::Generator(paired[0].as_str()),
+        ]);
 
         if paired.len() == 1 && lone_generators.is_empty() {
             combinations.push(vec![FloorItem::Generator(paired[0].as_str())]);
 
             if !lone_microchips.is_empty() {
-                combinations.push(vec![FloorItem::Generator(paired[0].as_str()), FloorItem::Microchip(lone_microchips[0].as_str())])
+                combinations.push(vec![
+                    FloorItem::Generator(paired[0].as_str()),
+                    FloorItem::Microchip(lone_microchips[0].as_str()),
+                ])
             }
         }
 
         if paired.len() == 1 && lone_generators.len() == 1 {
-            combinations.push(vec![FloorItem::Generator(paired[0].as_str()), FloorItem::Generator(lone_generators[0].as_str())]);
+            combinations.push(vec![
+                FloorItem::Generator(paired[0].as_str()),
+                FloorItem::Generator(lone_generators[0].as_str()),
+            ]);
         }
     }
 
@@ -247,7 +284,10 @@ fn item_combinations<'a>(microchips: &'a [String], generators: &'a [String]) -> 
         combinations.push(vec![FloorItem::Microchip(lone_microchips[0].as_str())]);
 
         if !lone_generators.is_empty() {
-            combinations.push(vec![FloorItem::Microchip(lone_microchips[0].as_str()), FloorItem::Generator(lone_generators[0].as_str())]);
+            combinations.push(vec![
+                FloorItem::Microchip(lone_microchips[0].as_str()),
+                FloorItem::Generator(lone_generators[0].as_str()),
+            ]);
         }
     }
 
@@ -256,19 +296,31 @@ fn item_combinations<'a>(microchips: &'a [String], generators: &'a [String]) -> 
     }
 
     if paired.len() >= 2 {
-        combinations.push(vec![FloorItem::Microchip(paired[0].as_str()), FloorItem::Microchip(paired[1].as_str())]);
+        combinations.push(vec![
+            FloorItem::Microchip(paired[0].as_str()),
+            FloorItem::Microchip(paired[1].as_str()),
+        ]);
 
         if paired.len() == 2 && lone_generators.is_empty() {
-            combinations.push(vec![FloorItem::Generator(paired[0].as_str()), FloorItem::Generator(paired[1].as_str())]);
+            combinations.push(vec![
+                FloorItem::Generator(paired[0].as_str()),
+                FloorItem::Generator(paired[1].as_str()),
+            ]);
         }
     }
 
     if lone_microchips.len() >= 2 {
-        combinations.push(vec![FloorItem::Microchip(lone_microchips[0].as_str()), FloorItem::Microchip(lone_microchips[1].as_str())]);
+        combinations.push(vec![
+            FloorItem::Microchip(lone_microchips[0].as_str()),
+            FloorItem::Microchip(lone_microchips[1].as_str()),
+        ]);
     }
 
     if lone_generators.len() >= 2 {
-        combinations.push(vec![FloorItem::Generator(lone_generators[0].as_str()), FloorItem::Generator(lone_generators[1].as_str())]);
+        combinations.push(vec![
+            FloorItem::Generator(lone_generators[0].as_str()),
+            FloorItem::Generator(lone_generators[1].as_str()),
+        ]);
     }
 
     combinations
@@ -306,7 +358,9 @@ fn parse_line(line: &str) -> Result<FloorState, SimpleError> {
 
     let split: Vec<_> = line.split(' ').collect();
     if split.len() <= 4 {
-        return Err(SimpleError::new(format!("line does not have enough spaces: {line}")));
+        return Err(SimpleError::new(format!(
+            "line does not have enough spaces: {line}"
+        )));
     }
 
     let line = split[4..].join(" ");
@@ -318,7 +372,9 @@ fn parse_line(line: &str) -> Result<FloorState, SimpleError> {
     for object_str in split_iter {
         let split: Vec<_> = object_str.split(' ').collect();
         if split.len() < 3 {
-            return Err(SimpleError::new(format!("invalid object string '{object_str}' in line: {line}")));
+            return Err(SimpleError::new(format!(
+                "invalid object string '{object_str}' in line: {line}"
+            )));
         }
 
         let mut obj_type = *split.last().unwrap();
@@ -332,14 +388,18 @@ fn parse_line(line: &str) -> Result<FloorState, SimpleError> {
         } else if obj_type == "microchip" {
             let microchip_type = split[split.len() - 2];
             if !microchip_type.ends_with("-compatible") {
-                return Err(SimpleError::new(format!("invalid microchip type '{microchip_type}' in line: {line}")));
+                return Err(SimpleError::new(format!(
+                    "invalid microchip type '{microchip_type}' in line: {line}"
+                )));
             }
 
             let type_len = microchip_type.len() - "-compatible".len();
             let microchip_type = &microchip_type[..type_len];
             floor.microchips.push(String::from(microchip_type));
         } else {
-            return Err(SimpleError::new(format!("invalid object type '{obj_type}' in line: {line}")));
+            return Err(SimpleError::new(format!(
+                "invalid object type '{obj_type}' in line: {line}"
+            )));
         }
     }
 

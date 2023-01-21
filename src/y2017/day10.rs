@@ -1,9 +1,9 @@
 //! Day 10: Knot Hash
 //! https://adventofcode.com/2017/day/10
 
-use std::error::Error;
-use crate::SimpleError;
 use crate::y2017::knothash;
+use crate::SimpleError;
+use std::error::Error;
 
 fn solve_part_1(input: &str, list_len: usize) -> Result<usize, SimpleError> {
     let lengths = parse_input(input)?;

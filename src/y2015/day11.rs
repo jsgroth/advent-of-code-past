@@ -1,9 +1,9 @@
 //! Day 11: Corporate Policy
 //! https://adventofcode.com/2015/day/11
 
+use crate::SimpleError;
 use std::collections::HashSet;
 use std::error::Error;
-use crate::SimpleError;
 
 fn solve_part(input: &str) -> Result<String, SimpleError> {
     let line = crate::read_single_line(input)?;
@@ -37,9 +37,10 @@ fn solve_part(input: &str) -> Result<String, SimpleError> {
 }
 
 fn is_valid(s: &[u8]) -> bool {
-    if !s.windows(3).any(|window| {
-        window[1] == window[0] + 1 && window[2] == window[1] + 1
-    }) {
+    if !s
+        .windows(3)
+        .any(|window| window[1] == window[0] + 1 && window[2] == window[1] + 1)
+    {
         return false;
     }
 
@@ -50,7 +51,8 @@ fn is_valid(s: &[u8]) -> bool {
     s.windows(2)
         .filter(|window| window[0] == window[1])
         .collect::<HashSet<_>>()
-        .len() >= 2
+        .len()
+        >= 2
 }
 
 pub fn solve(input: &str) -> Result<(String, String), Box<dyn Error>> {

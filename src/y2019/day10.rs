@@ -1,10 +1,10 @@
 //! Day 10: Monitoring Station
 //! https://adventofcode.com/2019/day/10
 
+use crate::SimpleError;
 use std::cmp;
 use std::cmp::Ordering;
 use std::error::Error;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 struct Point {
@@ -121,12 +121,21 @@ fn gcd(a: i32, b: i32) -> i32 {
     gcd(b % a, a)
 }
 
-fn find_nth_destroyed(grid: &[Vec<bool>], i: usize, j: usize, n: usize) -> Result<(usize, usize), SimpleError> {
-    let total_asteroids: usize = grid.iter().map(|row| {
-        row.iter().filter(|&&b| b).count()
-    }).sum();
+fn find_nth_destroyed(
+    grid: &[Vec<bool>],
+    i: usize,
+    j: usize,
+    n: usize,
+) -> Result<(usize, usize), SimpleError> {
+    let total_asteroids: usize = grid
+        .iter()
+        .map(|row| row.iter().filter(|&&b| b).count())
+        .sum();
     if total_asteroids < n + 1 {
-        return Err(SimpleError::new(format!("input has {total_asteroids} asteroids, expected at least {}", n + 1)));
+        return Err(SimpleError::new(format!(
+            "input has {total_asteroids} asteroids, expected at least {}",
+            n + 1
+        )));
     }
 
     // Flip i/y value sign so that the math works out properly
@@ -134,18 +143,19 @@ fn find_nth_destroyed(grid: &[Vec<bool>], i: usize, j: usize, n: usize) -> Resul
     let x = j as i32;
     let laser_point = Point::new(x, y);
 
-    let mut asteroid_positions: Vec<_> = grid.iter().enumerate()
+    let mut asteroid_positions: Vec<_> = grid
+        .iter()
+        .enumerate()
         .flat_map(|(asteroid_i, row)| {
-            row.iter().enumerate()
-                .filter_map(move |(asteroid_j, &b)| {
-                    if b && (asteroid_i != i || asteroid_j != j) {
-                        let asteroid_y = -(asteroid_i as i32);
-                        let asteroid_x = asteroid_j as i32;
-                        Some(Point::new(asteroid_x, asteroid_y))
-                    } else {
-                        None
-                    }
-                })
+            row.iter().enumerate().filter_map(move |(asteroid_j, &b)| {
+                if b && (asteroid_i != i || asteroid_j != j) {
+                    let asteroid_y = -(asteroid_i as i32);
+                    let asteroid_x = asteroid_j as i32;
+                    Some(Point::new(asteroid_x, asteroid_y))
+                } else {
+                    None
+                }
+            })
         })
         .collect();
 
@@ -161,16 +171,15 @@ fn find_nth_destroyed(grid: &[Vec<bool>], i: usize, j: usize, n: usize) -> Resul
         };
 
         // Ensure that closer points come before farther points
-        angle_cmp.then(
-            laser_point.distance_to(a).cmp(&laser_point.distance_to(b))
-        )
+        angle_cmp.then(laser_point.distance_to(a).cmp(&laser_point.distance_to(b)))
     });
 
     // First position where angle is pi/2 or less
-    let first_position = asteroid_positions.iter().position(|&point| {
-        laser_point.angle_to(point) - std::f64::consts::FRAC_PI_2 < 1e-9
-    }).unwrap_or(0);
-    
+    let first_position = asteroid_positions
+        .iter()
+        .position(|&point| laser_point.angle_to(point) - std::f64::consts::FRAC_PI_2 < 1e-9)
+        .unwrap_or(0);
+
     let mut destroyed = vec![false; asteroid_positions.len()];
 
     let mut position = first_position;
@@ -178,7 +187,10 @@ fn find_nth_destroyed(grid: &[Vec<bool>], i: usize, j: usize, n: usize) -> Resul
     for _ in 0..n {
         // Advance until we reach a non-destroyed asteroid that is not at the same angle as the
         // last destroyed asteroid
-        while destroyed[position] || (last_destroyed_angle - laser_point.angle_to(asteroid_positions[position])).abs() < 1e-9 {
+        while destroyed[position]
+            || (last_destroyed_angle - laser_point.angle_to(asteroid_positions[position])).abs()
+                < 1e-9
+        {
             position = (position + 1) % asteroid_positions.len();
         }
 
@@ -186,20 +198,24 @@ fn find_nth_destroyed(grid: &[Vec<bool>], i: usize, j: usize, n: usize) -> Resul
         last_destroyed_angle = laser_point.angle_to(asteroid_positions[position]);
     }
 
-    Ok((-asteroid_positions[position].y as usize, asteroid_positions[position].x as usize))
+    Ok((
+        -asteroid_positions[position].y as usize,
+        asteroid_positions[position].x as usize,
+    ))
 }
 
 fn parse_input(input: &str) -> Result<Vec<Vec<bool>>, SimpleError> {
-    input.lines().map(|line| {
-        line.chars().map(|c| {
-            match c {
-                '#' => Ok(true),
-                '.' => Ok(false),
-                _ => Err(SimpleError::new(format!("invalid input char: {c}")))
-            }
+    input
+        .lines()
+        .map(|line| {
+            line.chars()
+                .map(|c| match c {
+                    '#' => Ok(true),
+                    '.' => Ok(false),
+                    _ => Err(SimpleError::new(format!("invalid input char: {c}"))),
+                })
+                .collect()
         })
-            .collect()
-    })
         .collect()
 }
 

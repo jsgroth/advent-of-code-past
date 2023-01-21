@@ -1,14 +1,14 @@
 //! Day 7: Amplification Circuit
 //! https://adventofcode.com/2019/day/7
 
+use crate::y2019::intcode;
+use crate::y2019::intcode::{InputFn, IntcodeProgram, OutputFn};
+use crate::SimpleError;
 use std::cell::RefCell;
 use std::cmp;
 use std::collections::VecDeque;
 use std::error::Error;
 use std::rc::Rc;
-use crate::SimpleError;
-use crate::y2019::intcode;
-use crate::y2019::intcode::{InputFn, IntcodeProgram, OutputFn};
 
 #[derive(Debug)]
 struct QueueInputFn {
@@ -51,7 +51,9 @@ fn solve_part_1(input: &str) -> Result<i64, Box<dyn Error>> {
             );
 
             if outputs.is_empty() {
-                return Err(Box::new(SimpleError::new(format!("amplifier returned no output for phase {phase}"))));
+                return Err(Box::new(SimpleError::new(format!(
+                    "amplifier returned no output for phase {phase}"
+                ))));
             }
 
             last_amplifier_output = outputs[0];
@@ -104,9 +106,9 @@ fn solve_part_2(input: &str) -> Result<i64, Box<dyn Error>> {
             }
         }
 
-        let thruster_signal = queues[0].borrow_mut().pop_front().ok_or_else(
-            || SimpleError::new(String::from("programs did not produce a thruster signal"))
-        )?;
+        let thruster_signal = queues[0].borrow_mut().pop_front().ok_or_else(|| {
+            SimpleError::new(String::from("programs did not produce a thruster signal"))
+        })?;
         max_thruster_signal = cmp::max(max_thruster_signal, thruster_signal);
     }
 
@@ -120,9 +122,7 @@ fn permutations(numbers: &Vec<usize>) -> Vec<Vec<usize>> {
 
     let mut result = Vec::new();
     for &number in numbers {
-        let new_numbers = numbers.iter().copied()
-            .filter(|&n| n != number)
-            .collect();
+        let new_numbers = numbers.iter().copied().filter(|&n| n != number).collect();
         for mut sub_permutation in permutations(&new_numbers) {
             sub_permutation.push(number);
             result.push(sub_permutation);
@@ -145,8 +145,17 @@ mod tests {
 
     #[test]
     fn test_sample_input_part_1() {
-        assert_eq!(43210, solve_part_1("3,15,3,16,1002,16,10,16,1,16,15,15,4,15,99,0,0").unwrap());
-        assert_eq!(54321, solve_part_1("3,23,3,24,1002,24,10,24,1002,23,-1,23,101,5,23,23,1,24,23,23,4,23,99,0,0").unwrap());
+        assert_eq!(
+            43210,
+            solve_part_1("3,15,3,16,1002,16,10,16,1,16,15,15,4,15,99,0,0").unwrap()
+        );
+        assert_eq!(
+            54321,
+            solve_part_1(
+                "3,23,3,24,1002,24,10,24,1002,23,-1,23,101,5,23,23,1,24,23,23,4,23,99,0,0"
+            )
+            .unwrap()
+        );
         assert_eq!(65210, solve_part_1("3,31,3,32,1002,32,10,32,1001,31,-2,31,1007,31,0,33,1002,33,7,33,1,33,31,31,1,32,31,31,4,31,99,0,0,0").unwrap());
     }
 

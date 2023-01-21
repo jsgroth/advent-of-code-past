@@ -1,9 +1,9 @@
 //! Day 22: Wizard Simulator 20XX
 //! https://adventofcode.com/2015/day/22
 
+use crate::SimpleError;
 use std::cmp;
 use std::error::Error;
-use crate::SimpleError;
 
 struct Boss {
     hit_points: i32,
@@ -20,7 +20,13 @@ enum Spell {
 }
 
 impl Spell {
-    const SPELLS: [Self; 5] = [Self::MagicMissile, Self::Drain, Self::Shield, Self::Poison, Self::Recharge];
+    const SPELLS: [Self; 5] = [
+        Self::MagicMissile,
+        Self::Drain,
+        Self::Shield,
+        Self::Poison,
+        Self::Recharge,
+    ];
 
     const MAGIC_MISSILE_DAMAGE: i32 = 4;
     const DRAIN_DAMAGE: i32 = 2;
@@ -43,7 +49,11 @@ impl Spell {
     }
 
     fn min_mana_cost() -> i32 {
-        Self::SPELLS.iter().map(|spell| spell.mana_cost()).min().unwrap()
+        Self::SPELLS
+            .iter()
+            .map(|spell| spell.mana_cost())
+            .min()
+            .unwrap()
     }
 }
 
@@ -88,16 +98,31 @@ impl SearchState {
 fn solve_part_1(input: &str) -> Result<i32, SimpleError> {
     let boss = parse_input(input)?;
 
-    Ok(search_for_min_cost(&boss, SearchState::new(boss.hit_points), false, &mut i32::MAX.clone()))
+    Ok(search_for_min_cost(
+        &boss,
+        SearchState::new(boss.hit_points),
+        false,
+        &mut i32::MAX.clone(),
+    ))
 }
 
 fn solve_part_2(input: &str) -> Result<i32, SimpleError> {
     let boss = parse_input(input)?;
 
-    Ok(search_for_min_cost(&boss, SearchState::new(boss.hit_points), true, &mut i32::MAX.clone()))
+    Ok(search_for_min_cost(
+        &boss,
+        SearchState::new(boss.hit_points),
+        true,
+        &mut i32::MAX.clone(),
+    ))
 }
 
-fn search_for_min_cost(boss: &Boss, state: SearchState, hard_mode: bool, min_so_far: &mut i32) -> i32 {
+fn search_for_min_cost(
+    boss: &Boss,
+    state: SearchState,
+    hard_mode: bool,
+    min_so_far: &mut i32,
+) -> i32 {
     if state.spent_mana >= *min_so_far {
         return i32::MAX;
     }
@@ -125,10 +150,11 @@ fn search_for_min_cost(boss: &Boss, state: SearchState, hard_mode: bool, min_so_
 
     let mut result = i32::MAX;
     for spell in Spell::SPELLS {
-        if (spell == Spell::Shield && state.shield_timer > 0) ||
-            (spell == Spell::Poison && state.poison_timer > 0) ||
-            (spell == Spell::Recharge && state.recharge_timer > 0) ||
-            state.player_mana < spell.mana_cost() {
+        if (spell == Spell::Shield && state.shield_timer > 0)
+            || (spell == Spell::Poison && state.poison_timer > 0)
+            || (spell == Spell::Recharge && state.recharge_timer > 0)
+            || state.player_mana < spell.mana_cost()
+        {
             continue;
         }
 
@@ -167,14 +193,21 @@ fn search_for_min_cost(boss: &Boss, state: SearchState, hard_mode: bool, min_so_
         }
 
         // Boss turn action
-        let player_armor = if new_state.shield_timer > 0 { Spell::SHIELD_ARMOR } else { 0 };
+        let player_armor = if new_state.shield_timer > 0 {
+            Spell::SHIELD_ARMOR
+        } else {
+            0
+        };
         let boss_damage = cmp::max(boss.damage - player_armor, 1);
         new_state.player_hp -= boss_damage;
         if new_state.player_hp <= 0 {
             continue;
         }
 
-        result = cmp::min(result, search_for_min_cost(boss, new_state, hard_mode, min_so_far));
+        result = cmp::min(
+            result,
+            search_for_min_cost(boss, new_state, hard_mode, min_so_far),
+        );
     }
 
     *min_so_far = cmp::min(*min_so_far, result);
@@ -185,17 +218,19 @@ fn parse_input(input: &str) -> Result<Boss, SimpleError> {
     let mut lines = input.lines();
 
     let hit_points = match lines.next() {
-        Some(line) => line.split(' ').last().ok_or_else(
-            || SimpleError::new(String::from("hit points line has no space"))
-        )?,
+        Some(line) => line
+            .split(' ')
+            .last()
+            .ok_or_else(|| SimpleError::new(String::from("hit points line has no space")))?,
         None => return Err(SimpleError::new(String::from("missing hit points line"))),
     };
     let hit_points: i32 = hit_points.parse()?;
 
     let damage = match lines.next() {
-        Some(line) => line.split(' ').last().ok_or_else(
-            || SimpleError::new(String::from("damage line has no space"))
-        )?,
+        Some(line) => line
+            .split(' ')
+            .last()
+            .ok_or_else(|| SimpleError::new(String::from("damage line has no space")))?,
         None => return Err(SimpleError::new(String::from("missing damage line"))),
     };
     let damage: i32 = damage.parse()?;

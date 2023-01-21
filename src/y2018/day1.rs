@@ -1,10 +1,10 @@
 //! Day 1: Chronal Calibration
 //! https://adventofcode.com/2018/day/1
 
+use crate::SimpleError;
 use std::collections::HashSet;
 use std::error::Error;
 use std::iter;
-use crate::SimpleError;
 
 fn solve_part_1(input: &str) -> Result<i32, SimpleError> {
     Ok(parse_input(input)?.into_iter().sum())
@@ -26,13 +26,13 @@ fn solve_part_2(input: &str) -> Result<i32, SimpleError> {
 }
 
 fn parse_input(input: &str) -> Result<Vec<i32>, SimpleError> {
-    input.lines().map(|line| {
-        match line.chars().next() {
+    input
+        .lines()
+        .map(|line| match line.chars().next() {
             Some('+') => Ok(line[1..].parse::<i32>()?),
             Some('-') => Ok(line.parse::<i32>()?),
-            _ => Err(SimpleError::new(format!("invalid line: {line}")))
-        }
-    })
+            _ => Err(SimpleError::new(format!("invalid line: {line}"))),
+        })
         .collect()
 }
 

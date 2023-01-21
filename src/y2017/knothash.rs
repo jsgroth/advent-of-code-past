@@ -15,11 +15,7 @@ pub fn compute_knot_hash(s: &str) -> Vec<u8> {
     }
 
     list.chunks(16)
-        .map(|chunk| {
-            chunk.iter().copied()
-                .reduce(|a, b| a ^ b)
-                .unwrap()
-        })
+        .map(|chunk| chunk.iter().copied().reduce(|a, b| a ^ b).unwrap())
         .collect()
 }
 
@@ -43,9 +39,21 @@ mod tests {
 
     #[test]
     fn test_compute_knot_hash() {
-        assert_eq!(String::from("a2582a3a0e66e6e86e3812dcb672a272"), to_hex_string(&compute_knot_hash("")));
-        assert_eq!(String::from("33efeb34ea91902bb2f59c9920caa6cd"), to_hex_string(&compute_knot_hash("AoC 2017")));
-        assert_eq!(String::from("3efbe78a8d82f29979031a4aa0b16a9d"), to_hex_string(&compute_knot_hash("1,2,3")));
-        assert_eq!(String::from("63960835bcdc130f0b66d7ff4f6a5a8e"), to_hex_string(&compute_knot_hash("1,2,4")));
+        assert_eq!(
+            String::from("a2582a3a0e66e6e86e3812dcb672a272"),
+            to_hex_string(&compute_knot_hash(""))
+        );
+        assert_eq!(
+            String::from("33efeb34ea91902bb2f59c9920caa6cd"),
+            to_hex_string(&compute_knot_hash("AoC 2017"))
+        );
+        assert_eq!(
+            String::from("3efbe78a8d82f29979031a4aa0b16a9d"),
+            to_hex_string(&compute_knot_hash("1,2,3"))
+        );
+        assert_eq!(
+            String::from("63960835bcdc130f0b66d7ff4f6a5a8e"),
+            to_hex_string(&compute_knot_hash("1,2,4"))
+        );
     }
 }

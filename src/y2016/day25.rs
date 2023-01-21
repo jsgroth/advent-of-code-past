@@ -1,17 +1,18 @@
 //! Day 25: Clock Signal
 //! https://adventofcode.com/2016/day/25
 
+use crate::y2016::assembunny::AssembunnyProgram;
+use crate::SimpleError;
 use std::collections::HashMap;
 use std::error::Error;
-use crate::SimpleError;
-use crate::y2016::assembunny::AssembunnyProgram;
 
 fn solve_part(input: &str) -> Result<i64, SimpleError> {
     let mut program = AssembunnyProgram::from_lines(input)?;
 
     for a in 1.. {
-        let mut registers: HashMap<_, _> =
-            [('a', a), ('b', 0), ('c', 0), ('d', 0)].into_iter().collect();
+        let mut registers: HashMap<_, _> = [('a', a), ('b', 0), ('c', 0), ('d', 0)]
+            .into_iter()
+            .collect();
 
         let pattern = [0, 1].into_iter().cycle().take(20);
         if program.outputs_pattern(&mut registers, pattern) {

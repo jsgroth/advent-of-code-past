@@ -1,8 +1,8 @@
 //! Day 8: Memory Maneuver
 //! https://adventofcode.com/2018/day/8
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 fn solve_part_1(input: &str) -> Result<u32, SimpleError> {
     let numbers = parse_input(input)?;

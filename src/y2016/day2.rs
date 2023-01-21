@@ -1,8 +1,8 @@
 //! Day 2: Bathroom Security
 //! https://adventofcode.com/2016/day/2
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 enum Direction {
     Up,
@@ -18,18 +18,14 @@ impl Direction {
             'L' => Self::Left,
             'R' => Self::Right,
             'D' => Self::Down,
-            _ => return Err(SimpleError::new(format!("invalid direction char: {c}")))
+            _ => return Err(SimpleError::new(format!("invalid direction char: {c}"))),
         };
 
         Ok(direction)
     }
 }
 
-const KEYPAD_1: [[char; 3]; 3] = [
-    ['1', '2', '3'],
-    ['4', '5', '6'],
-    ['7', '8', '9'],
-];
+const KEYPAD_1: [[char; 3]; 3] = [['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9']];
 
 const KEYPAD_2: [[char; 5]; 5] = [
     [' ', ' ', '1', ' ', ' '],
@@ -112,9 +108,9 @@ fn solve_part_2(input: &str) -> Result<String, SimpleError> {
 }
 
 fn parse_input(input: &str) -> Result<Vec<Vec<Direction>>, SimpleError> {
-    input.lines().map(|line| {
-        line.chars().map(Direction::from_char).collect()
-    })
+    input
+        .lines()
+        .map(|line| line.chars().map(Direction::from_char).collect())
         .collect()
 }
 

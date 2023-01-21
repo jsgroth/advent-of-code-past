@@ -1,10 +1,10 @@
 //! Day 6: Universal Orbit Map
 //! https://adventofcode.com/2019/day/6
 
+use crate::SimpleError;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::error::Error;
 use std::iter;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 struct OrbitRelation<'a> {
@@ -35,7 +35,9 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
     find_shortest_path_to_santa(&bidirectional_map)
 }
 
-fn find_shortest_path_to_santa(bidirectional_map: &HashMap<String, Vec<String>>) -> Result<usize, SimpleError> {
+fn find_shortest_path_to_santa(
+    bidirectional_map: &HashMap<String, Vec<String>>,
+) -> Result<usize, SimpleError> {
     if !bidirectional_map.contains_key("YOU") {
         return Err(SimpleError::new(String::from("map does not contain 'YOU'")));
     }
@@ -87,7 +89,11 @@ fn make_bidirectional(orbit_dag: &HashMap<String, String>) -> HashMap<String, Ve
     bidirectional_map
 }
 
-fn compute_orbit_counts(object: &str, orbit_dag: &HashMap<String, String>, orbit_counts: &mut HashMap<String, usize>) -> usize {
+fn compute_orbit_counts(
+    object: &str,
+    orbit_dag: &HashMap<String, String>,
+    orbit_counts: &mut HashMap<String, usize>,
+) -> usize {
     if let Some(&value) = orbit_counts.get(object) {
         return value;
     }
@@ -105,24 +111,31 @@ fn compute_orbit_counts(object: &str, orbit_dag: &HashMap<String, String>, orbit
 }
 
 fn build_orbit_dag(orbit_relations: &[OrbitRelation]) -> HashMap<String, String> {
-    orbit_relations.iter()
+    orbit_relations
+        .iter()
         .map(|orbit_relation| {
-            (String::from(orbit_relation.orbiting), String::from(orbit_relation.orbited))
+            (
+                String::from(orbit_relation.orbiting),
+                String::from(orbit_relation.orbited),
+            )
         })
         .collect()
 }
 
 fn parse_input(input: &str) -> Result<Vec<OrbitRelation>, SimpleError> {
-    input.lines().map(|line| {
-        let close_paren_index = line.chars().position(|c| c == ')').ok_or_else(
-            || SimpleError::new(format!("line contains no ')': {line}"))
-        )?;
+    input
+        .lines()
+        .map(|line| {
+            let close_paren_index = line
+                .chars()
+                .position(|c| c == ')')
+                .ok_or_else(|| SimpleError::new(format!("line contains no ')': {line}")))?;
 
-        let orbited = &line[..close_paren_index];
-        let orbiting = &line[close_paren_index + 1..];
+            let orbited = &line[..close_paren_index];
+            let orbiting = &line[close_paren_index + 1..];
 
-        Ok(OrbitRelation { orbiting, orbited })
-    })
+            Ok(OrbitRelation { orbiting, orbited })
+        })
         .collect()
 }
 

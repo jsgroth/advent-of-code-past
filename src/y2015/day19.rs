@@ -1,18 +1,15 @@
 //! Day 19: Medicine for Rudolph
 //! https://adventofcode.com/2015/day/19
 
+use crate::SimpleError;
 use std::cmp;
 use std::collections::{HashMap, HashSet};
 use std::error::Error;
-use crate::SimpleError;
 
 fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
     let (replacements_map, molecule) = parse_input(input)?;
 
-    let max_replacement_len = replacements_map.keys()
-        .map(String::len)
-        .max()
-        .unwrap();
+    let max_replacement_len = replacements_map.keys().map(String::len).max().unwrap();
 
     let mut unique_molecules: HashSet<String> = HashSet::new();
     for i in 0..molecule.len() {
@@ -36,10 +33,7 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
     let (replacements_map, target_molecule) = parse_input(input)?;
     let replacements_map = reverse_map(&replacements_map);
 
-    let max_replacement_len = replacements_map.keys()
-        .map(String::len)
-        .max()
-        .unwrap();
+    let max_replacement_len = replacements_map.keys().map(String::len).max().unwrap();
 
     match search_reverse(&target_molecule, &replacements_map, max_replacement_len) {
         Some(result) => Ok(result),
@@ -47,7 +41,11 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
     }
 }
 
-fn search_reverse(molecule: &str, replacements_map: &HashMap<String, String>, max_replacement_len: usize) -> Option<usize> {
+fn search_reverse(
+    molecule: &str,
+    replacements_map: &HashMap<String, String>,
+    max_replacement_len: usize,
+) -> Option<usize> {
     if molecule == "e" {
         return Some(0);
     }
@@ -87,11 +85,17 @@ fn parse_input(input: &str) -> Result<(HashMap<String, Vec<String>>, String), Si
     let split: Vec<_> = lines.split(|line| line.is_empty()).collect();
     let (replacement_lines, molecule_lines) = match split.as_slice() {
         [a, b] => (*a, *b),
-        _ => return Err(SimpleError::new(String::from("input does not contain exactly one blank line"))),
+        _ => {
+            return Err(SimpleError::new(String::from(
+                "input does not contain exactly one blank line",
+            )))
+        }
     };
 
     if replacement_lines.is_empty() {
-        return Err(SimpleError::new(String::from("no replacement lines before blank line")));
+        return Err(SimpleError::new(String::from(
+            "no replacement lines before blank line",
+        )));
     }
 
     let mut replacements_map: HashMap<String, Vec<String>> = HashMap::new();
@@ -106,13 +110,21 @@ fn parse_input(input: &str) -> Result<(HashMap<String, Vec<String>>, String), Si
                     replacements_map.insert(String::from(*from), replacements);
                 }
             }
-            _ => return Err(SimpleError::new(format!("invalid replacement line: {replacement_line}"))),
+            _ => {
+                return Err(SimpleError::new(format!(
+                    "invalid replacement line: {replacement_line}"
+                )))
+            }
         }
     }
 
     let molecule_line = match molecule_lines.iter().next() {
         Some(line) => String::from(*line),
-        None => return Err(SimpleError::new(String::from("no molecule line after blank line"))),
+        None => {
+            return Err(SimpleError::new(String::from(
+                "no molecule line after blank line",
+            )))
+        }
     };
 
     Ok((replacements_map, molecule_line))

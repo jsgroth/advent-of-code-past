@@ -1,9 +1,9 @@
 //! Day 5: Alchemical Reduction
 //! https://adventofcode.com/2018/day/5
 
+use crate::SimpleError;
 use std::cmp;
 use std::error::Error;
-use crate::SimpleError;
 
 fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
     let polymer = crate::read_single_line(input)?;
@@ -22,9 +22,9 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
             continue;
         }
 
-        let polymer = polymer.chars().filter(|&polymer_c| {
-            polymer_c != c && polymer_c != c.to_ascii_uppercase()
-        });
+        let polymer = polymer
+            .chars()
+            .filter(|&polymer_c| polymer_c != c && polymer_c != c.to_ascii_uppercase());
         let reacted = react(polymer);
         min_length = cmp::min(min_length, reacted.len());
     }
@@ -35,19 +35,17 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
 fn react(chars: impl Iterator<Item = char>) -> String {
     let (last_char, mut reacted) = chars.fold(
         (None, Vec::new()),
-        |(last_char, mut result), next_char| {
-            match last_char {
-                Some(last_char) => {
-                    if is_matching_pair(last_char, next_char) {
-                        (result.pop(), result)
-                    } else {
-                        result.push(last_char);
-                        (Some(next_char), result)
-                    }
+        |(last_char, mut result), next_char| match last_char {
+            Some(last_char) => {
+                if is_matching_pair(last_char, next_char) {
+                    (result.pop(), result)
+                } else {
+                    result.push(last_char);
+                    (Some(next_char), result)
                 }
-                None => (Some(next_char), result)
             }
-        }
+            None => (Some(next_char), result),
+        },
     );
     if let Some(c) = last_char {
         reacted.push(c);
@@ -56,8 +54,8 @@ fn react(chars: impl Iterator<Item = char>) -> String {
 }
 
 fn is_matching_pair(a: char, b: char) -> bool {
-    (a.is_ascii_lowercase() && b == a.to_ascii_uppercase()) ||
-        (a.is_ascii_uppercase() && b == a.to_ascii_lowercase())
+    (a.is_ascii_lowercase() && b == a.to_ascii_uppercase())
+        || (a.is_ascii_uppercase() && b == a.to_ascii_lowercase())
 }
 
 pub fn solve(input: &str) -> Result<(usize, usize), Box<dyn Error>> {

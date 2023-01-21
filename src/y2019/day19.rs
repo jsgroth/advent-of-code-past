@@ -1,11 +1,11 @@
 //! Day 19: Tractor Beam
 //! https://adventofcode.com/2019/day/19
 
+use crate::y2019::intcode;
+use crate::SimpleError;
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashSet};
 use std::error::Error;
-use crate::SimpleError;
-use crate::y2019::intcode;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 struct HeapEntry {
@@ -55,8 +55,10 @@ fn solve_part_2(input: &str) -> Result<i64, Box<dyn Error>> {
     let mut visited = HashSet::new();
 
     while let Some(HeapEntry { x, y }) = heap.pop() {
-        if is_in_beam(program.clone(), x + 100, y) &&
-            is_in_beam(program.clone(), x, y + 100) && is_in_beam(program.clone(), x + 100, y + 100) {
+        if is_in_beam(program.clone(), x + 100, y)
+            && is_in_beam(program.clone(), x, y + 100)
+            && is_in_beam(program.clone(), x + 100, y + 100)
+        {
             return Ok(10000 * x + y);
         }
 
@@ -75,7 +77,9 @@ fn solve_part_2(input: &str) -> Result<i64, Box<dyn Error>> {
         }
     }
 
-    Err(Box::new(SimpleError::new(String::from("no solution found"))))
+    Err(Box::new(SimpleError::new(String::from(
+        "no solution found",
+    ))))
 }
 
 fn is_in_beam(mut program: Vec<i64>, x: i64, y: i64) -> bool {

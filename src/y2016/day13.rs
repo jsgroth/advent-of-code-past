@@ -1,10 +1,10 @@
 //! Day 13: A Maze of Twisty Little Cubicles
 //! https://adventofcode.com/2016/day/13
 
+use crate::SimpleError;
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashSet, VecDeque};
 use std::error::Error;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 struct Point {
@@ -70,7 +70,9 @@ impl PartialOrd<Self> for AStarHeapEntry {
 
 impl Ord for AStarHeapEntry {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.best_solution_lower_bound.cmp(&other.best_solution_lower_bound).reverse()
+        self.best_solution_lower_bound
+            .cmp(&other.best_solution_lower_bound)
+            .reverse()
     }
 }
 

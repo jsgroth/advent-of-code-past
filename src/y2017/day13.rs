@@ -1,13 +1,14 @@
 //! Day 13: Packet Scanners
 //! https://adventofcode.com/2017/day/13
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
     let scanner_layers = parse_input(input)?;
 
-    let total_severity = scanner_layers.into_iter()
+    let total_severity = scanner_layers
+        .into_iter()
         .filter_map(|(depth, range)| {
             if depth % (2 * (range - 1)) == 0 {
                 Some(depth * range)
@@ -24,9 +25,10 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
     let scanner_layers = parse_input(input)?;
 
     for i in 1.. {
-        if !scanner_layers.iter().any(|&(depth, range)| {
-            (depth + i) % (2 * (range - 1)) == 0
-        }) {
+        if !scanner_layers
+            .iter()
+            .any(|&(depth, range)| (depth + i) % (2 * (range - 1)) == 0)
+        {
             return Ok(i);
         }
     }
@@ -35,12 +37,14 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
 }
 
 fn parse_input(input: &str) -> Result<Vec<(usize, usize)>, SimpleError> {
-    input.lines().map(|line| {
-        let (depth, range) = line.split_once(": ").ok_or_else(
-            || SimpleError::new(format!("invalid line, no ': ': {line}"))
-        )?;
-        Ok((depth.parse()?, range.parse()?))
-    })
+    input
+        .lines()
+        .map(|line| {
+            let (depth, range) = line
+                .split_once(": ")
+                .ok_or_else(|| SimpleError::new(format!("invalid line, no ': ': {line}")))?;
+            Ok((depth.parse()?, range.parse()?))
+        })
         .collect()
 }
 

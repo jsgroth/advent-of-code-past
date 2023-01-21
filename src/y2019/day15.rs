@@ -1,13 +1,13 @@
 //! Day 15: Oxygen System
 //! https://adventofcode.com/2019/day/15
 
-use std::collections::{HashSet, VecDeque};
-use std::error::Error;
-use std::{cmp, iter};
-use std::ops::Add;
-use crate::SimpleError;
 use crate::y2019::intcode;
 use crate::y2019::intcode::InteractiveIntcodeProgram;
+use crate::SimpleError;
+use std::collections::{HashSet, VecDeque};
+use std::error::Error;
+use std::ops::Add;
+use std::{cmp, iter};
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 struct Point {
@@ -82,13 +82,16 @@ fn solve_both_parts(input: &str) -> Result<(usize, usize), Box<dyn Error>> {
                 let outputs = program.fetch_outputs();
 
                 match outputs[0] {
-                    0 | 2 => {},
+                    0 | 2 => {}
                     1 => {
                         queue.push_back((program, new_position, steps + 1));
                     }
-                    _ => return Err(Box::new(SimpleError::new(
-                        format!("unexpected program output: {}", outputs[0])
-                    )))
+                    _ => {
+                        return Err(Box::new(SimpleError::new(format!(
+                            "unexpected program output: {}",
+                            outputs[0]
+                        ))))
+                    }
                 }
             }
         }
@@ -97,7 +100,9 @@ fn solve_both_parts(input: &str) -> Result<(usize, usize), Box<dyn Error>> {
     Ok((steps_to_oxygen_system, max_steps_from_oxygen_system))
 }
 
-fn find_oxygen_system(program: Vec<i64>) -> Result<(InteractiveIntcodeProgram, usize), Box<dyn Error>> {
+fn find_oxygen_system(
+    program: Vec<i64>,
+) -> Result<(InteractiveIntcodeProgram, usize), Box<dyn Error>> {
     let mut visited: HashSet<_> = iter::once(Point::new(0, 0)).collect();
 
     let mut queue = VecDeque::new();
@@ -116,28 +121,34 @@ fn find_oxygen_system(program: Vec<i64>) -> Result<(InteractiveIntcodeProgram, u
 
                 let outputs = program.fetch_outputs();
                 if outputs.len() != 1 {
-                    return Err(Box::new(SimpleError::new(
-                        format!("expected 1 output from program, got {}", outputs.len())
-                    )));
+                    return Err(Box::new(SimpleError::new(format!(
+                        "expected 1 output from program, got {}",
+                        outputs.len()
+                    ))));
                 }
 
                 match outputs[0] {
-                    0 => {},
+                    0 => {}
                     1 => {
                         queue.push_back((program, new_position, steps + 1));
                     }
                     2 => {
                         return Ok((program, steps + 1));
                     }
-                    _ => return Err(Box::new(SimpleError::new(
-                        format!("unexpected program output: {}", outputs[0])
-                    )))
+                    _ => {
+                        return Err(Box::new(SimpleError::new(format!(
+                            "unexpected program output: {}",
+                            outputs[0]
+                        ))))
+                    }
                 }
             }
         }
     }
 
-    Err(Box::new(SimpleError::new(String::from("no solution found"))))
+    Err(Box::new(SimpleError::new(String::from(
+        "no solution found",
+    ))))
 }
 
 pub fn solve(input: &str) -> Result<(usize, usize), Box<dyn Error>> {

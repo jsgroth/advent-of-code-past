@@ -1,8 +1,8 @@
 //! Day 4: The Ideal Stocking Stuffer
 //! https://adventofcode.com/2015/day/4
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 fn solve_part(input: &str, target_prefix: &str) -> Result<usize, SimpleError> {
     let line = crate::read_single_line(input)?;
@@ -17,7 +17,9 @@ fn solve_part(input: &str, target_prefix: &str) -> Result<usize, SimpleError> {
         }
     }
 
-    Err(SimpleError::new(String::from("no solution found for part 1")))
+    Err(SimpleError::new(String::from(
+        "no solution found for part 1",
+    )))
 }
 
 pub fn solve(input: &str) -> Result<(usize, usize), Box<dyn Error>> {

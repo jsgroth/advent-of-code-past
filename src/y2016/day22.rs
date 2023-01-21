@@ -1,11 +1,11 @@
 //! Day 22: Grid Computing
 //! https://adventofcode.com/2016/day/22
 
+use crate::SimpleError;
 use std::cmp;
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashSet};
 use std::error::Error;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 struct Node {
@@ -47,13 +47,17 @@ impl SearchState {
 
     fn a_star_heuristic(&self) -> usize {
         let distance_to_target = distance_between((0, 0), self.target_location);
-        let empty_distance_from_target = distance_between(self.empty_location, self.target_location);
+        let empty_distance_from_target =
+            distance_between(self.empty_location, self.target_location);
 
         self.steps + empty_distance_from_target - 1 + (distance_to_target - 1) * 5 - 2
     }
 
     fn make_visited_key(&self) -> VisitedKey {
-        VisitedKey { empty_location: self.empty_location, target_location: self.target_location }
+        VisitedKey {
+            empty_location: self.empty_location,
+            target_location: self.target_location,
+        }
     }
 }
 
@@ -65,7 +69,9 @@ impl PartialOrd<Self> for SearchState {
 
 impl Ord for SearchState {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.a_star_heuristic().cmp(&other.a_star_heuristic()).reverse()
+        self.a_star_heuristic()
+            .cmp(&other.a_star_heuristic())
+            .reverse()
     }
 }
 
@@ -154,7 +160,9 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
     Err(SimpleError::new(String::from("no solution found")))
 }
 
-fn find_initial_empty_location(node_types: &[Vec<NodeType>]) -> Result<(usize, usize), SimpleError> {
+fn find_initial_empty_location(
+    node_types: &[Vec<NodeType>],
+) -> Result<(usize, usize), SimpleError> {
     for (y, row) in node_types.iter().enumerate() {
         for (x, &node_type) in row.iter().enumerate() {
             if node_type == NodeType::Empty {
@@ -163,18 +171,19 @@ fn find_initial_empty_location(node_types: &[Vec<NodeType>]) -> Result<(usize, u
         }
     }
 
-    Err(SimpleError::new(String::from("input does not contain empty node")))
+    Err(SimpleError::new(String::from(
+        "input does not contain empty node",
+    )))
 }
 
 fn gridify_nodes(mut nodes: Vec<Node>) -> Vec<Vec<Node>> {
-    let (max_x, max_y) = nodes.iter().fold((usize::MIN, usize::MIN), |(max_x, max_y), node| {
-        (cmp::max(max_x, node.x), cmp::max(max_y, node.y))
-    });
+    let (max_x, max_y) = nodes
+        .iter()
+        .fold((usize::MIN, usize::MIN), |(max_x, max_y), node| {
+            (cmp::max(max_x, node.x), cmp::max(max_y, node.y))
+        });
 
-    nodes.sort_by(|a, b| {
-        a.y.cmp(&b.y)
-            .then(a.x.cmp(&b.x))
-    });
+    nodes.sort_by(|a, b| a.y.cmp(&b.y).then(a.x.cmp(&b.x)));
 
     let mut grid = Vec::new();
     for i in 0..=max_y {
@@ -186,41 +195,55 @@ fn gridify_nodes(mut nodes: Vec<Node>) -> Vec<Vec<Node>> {
 }
 
 fn classify_nodes(nodes: &[Vec<Node>]) -> Vec<Vec<NodeType>> {
-    nodes.iter().map(|row| {
-        row.iter().map(|node| {
-            if node.used_tb == 0 {
-                NodeType::Empty
-            } else if node.used_tb < 100 {
-                NodeType::Small
-            } else {
-                NodeType::Large
-            }
+    nodes
+        .iter()
+        .map(|row| {
+            row.iter()
+                .map(|node| {
+                    if node.used_tb == 0 {
+                        NodeType::Empty
+                    } else if node.used_tb < 100 {
+                        NodeType::Small
+                    } else {
+                        NodeType::Large
+                    }
+                })
+                .collect()
         })
-            .collect()
-    })
         .collect()
 }
 
 fn parse_input(input: &str) -> Result<Vec<Node>, SimpleError> {
-    input.lines().skip(2).map(|line| {
-        let words = split_whitespace(line);
-        if words.len() < 4 {
-            return Err(SimpleError::new(format!("invalid line, not enough words: {line}")));
-        }
+    input
+        .lines()
+        .skip(2)
+        .map(|line| {
+            let words = split_whitespace(line);
+            if words.len() < 4 {
+                return Err(SimpleError::new(format!(
+                    "invalid line, not enough words: {line}"
+                )));
+            }
 
-        let node_word = &words[0]["/dev/grid/node-".len()..];
-        let (x, y) = node_word.split_once('-').ok_or_else(
-            || SimpleError::new(format!("invalid line, no '-' in node word: {line}"))
-        )?;
-        let x: usize = x[1..].parse()?;
-        let y: usize = y[1..].parse()?;
+            let node_word = &words[0]["/dev/grid/node-".len()..];
+            let (x, y) = node_word.split_once('-').ok_or_else(|| {
+                SimpleError::new(format!("invalid line, no '-' in node word: {line}"))
+            })?;
+            let x: usize = x[1..].parse()?;
+            let y: usize = y[1..].parse()?;
 
-        let size_tb = parse_size(words[1])?;
-        let used_tb = parse_size(words[2])?;
-        let avail_tb = parse_size(words[3])?;
+            let size_tb = parse_size(words[1])?;
+            let used_tb = parse_size(words[2])?;
+            let avail_tb = parse_size(words[3])?;
 
-        Ok(Node { x, y, size_tb, used_tb, avail_tb })
-    })
+            Ok(Node {
+                x,
+                y,
+                size_tb,
+                used_tb,
+                avail_tb,
+            })
+        })
         .collect()
 }
 
@@ -250,7 +273,9 @@ fn split_whitespace(s: &str) -> Vec<&str> {
 
 fn parse_size(s: &str) -> Result<usize, SimpleError> {
     if !s.ends_with('T') {
-        return Err(SimpleError::new(format!("invalid size string, does not end in 'T': {s}")));
+        return Err(SimpleError::new(format!(
+            "invalid size string, does not end in 'T': {s}"
+        )));
     }
 
     Ok(s[..s.len() - 1].parse()?)

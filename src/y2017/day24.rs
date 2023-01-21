@@ -1,22 +1,15 @@
 //! Day 24: Electromagnetic Moat
 //! https://adventofcode.com/2017/day/24
 
+use crate::SimpleError;
 use std::cmp;
 use std::error::Error;
-use crate::SimpleError;
 
 fn solve_part_1(input: &str) -> Result<u32, SimpleError> {
     let components = parse_input(input)?;
 
     let visited = vec![false; components.len()];
-    let max_strength = search(
-        &components,
-        visited,
-        0,
-        false,
-        0,
-        None,
-    );
+    let max_strength = search(&components, visited, 0, false, 0, None);
 
     Ok(max_strength)
 }
@@ -25,23 +18,9 @@ fn solve_part_2(input: &str) -> Result<u32, SimpleError> {
     let components = parse_input(input)?;
 
     let visited = vec![false; components.len()];
-    let longest_bridge_len = search(
-        &components,
-        visited.clone(),
-        0,
-        true,
-        0,
-        None,
-    );
+    let longest_bridge_len = search(&components, visited.clone(), 0, true, 0, None);
 
-    let max_strength = search(
-        &components,
-        visited,
-        0,
-        false,
-        0,
-        Some(longest_bridge_len),
-    );
+    let max_strength = search(&components, visited, 0, false, 0, Some(longest_bridge_len));
 
     Ok(max_strength)
 }
@@ -60,7 +39,11 @@ fn search(
         }
     }
 
-    let mut max_score = if path_len_filter.is_none() { prefix_score } else { 0 };
+    let mut max_score = if path_len_filter.is_none() {
+        prefix_score
+    } else {
+        0
+    };
     for (i, &component) in components.iter().enumerate() {
         if visited[i] {
             continue;
@@ -75,9 +58,18 @@ fn search(
         if component.0 == target_end || component.1 == target_end {
             let mut new_visited = visited.clone();
             new_visited[i] = true;
-            let new_target_end = if component.0 == target_end { component.1 } else { component.0 };
+            let new_target_end = if component.0 == target_end {
+                component.1
+            } else {
+                component.0
+            };
             let path_score = search(
-                components, new_visited, new_target_end, find_longest_len, prefix_score + component_score, path_len_filter
+                components,
+                new_visited,
+                new_target_end,
+                find_longest_len,
+                prefix_score + component_score,
+                path_len_filter,
             );
             max_score = cmp::max(max_score, path_score);
         }
@@ -87,12 +79,14 @@ fn search(
 }
 
 fn parse_input(input: &str) -> Result<Vec<(u32, u32)>, SimpleError> {
-    input.lines().map(|line| {
-        let (l, r) = line.split_once('/').ok_or_else(
-            || SimpleError::new(format!("line has no '/': {line}"))
-        )?;
-        Ok((l.parse()?, r.parse()?))
-    })
+    input
+        .lines()
+        .map(|line| {
+            let (l, r) = line
+                .split_once('/')
+                .ok_or_else(|| SimpleError::new(format!("line has no '/': {line}")))?;
+            Ok((l.parse()?, r.parse()?))
+        })
         .collect()
 }
 

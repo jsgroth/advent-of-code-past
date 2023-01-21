@@ -1,10 +1,10 @@
 //! Day 3: Perfectly Spherical Houses in a Vacuum
 //! https://adventofcode.com/2015/day/3
 
+use crate::SimpleError;
 use std::collections::HashSet;
 use std::error::Error;
 use std::mem;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Hash)]
 struct Point {
@@ -33,7 +33,7 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
             'v' => i += 1,
             '<' => j -= 1,
             '>' => j += 1,
-            _ => return Err(SimpleError::new(format!("unexpected char: {c}")))
+            _ => return Err(SimpleError::new(format!("unexpected char: {c}"))),
         }
 
         visited.insert(Point::new(i, j));
@@ -59,7 +59,7 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
             'v' => i1 += 1,
             '<' => j1 -= 1,
             '>' => j1 += 1,
-            _ => return Err(SimpleError::new(format!("unexpected char: {c}")))
+            _ => return Err(SimpleError::new(format!("unexpected char: {c}"))),
         }
 
         visited.insert(Point::new(i1, j1));

@@ -1,9 +1,9 @@
 //! Day 16: Flawed Frequency Transmission
 //! https://adventofcode.com/2019/day/16
 
+use crate::SimpleError;
 use std::error::Error;
 use std::iter;
-use crate::SimpleError;
 
 fn solve_part_1(input: &str, phases: usize) -> Result<String, SimpleError> {
     let numbers = crate::read_single_line(input)?;
@@ -27,12 +27,15 @@ fn solve_part_2(input: &str) -> Result<String, SimpleError> {
     let offset: usize = numbers[..7].parse()?;
 
     if offset <= 10000 * digits.len() / 2 {
-        return Err(SimpleError::new(
-            format!("expected offset to be in second half of expanded list; offset={offset}, len={}", 10000 * digits.len())
-        ));
+        return Err(SimpleError::new(format!(
+            "expected offset to be in second half of expanded list; offset={offset}, len={}",
+            10000 * digits.len()
+        )));
     }
 
-    let mut expanded_digits: Vec<_> = digits.iter().copied()
+    let mut expanded_digits: Vec<_> = digits
+        .iter()
+        .copied()
         .cycle()
         .skip(offset % digits.len())
         .take(10000 * digits.len() - offset)
@@ -51,7 +54,8 @@ fn fft(digits: &[i32]) -> Vec<i32> {
     let mut transformed_digits = Vec::with_capacity(digits.len());
 
     for i in 1..=digits.len() {
-        let sum: i32 = pattern_iter(i).zip(digits.iter().copied())
+        let sum: i32 = pattern_iter(i)
+            .zip(digits.iter().copied())
             .map(|(a, b)| a * b)
             .sum();
         let digit = sum.abs() % 10;
@@ -75,7 +79,8 @@ fn cheat_fft(digits: &[i32]) -> Vec<i32> {
 }
 
 fn pattern_iter(position: usize) -> impl Iterator<Item = i32> {
-    iter::repeat(0).take(position)
+    iter::repeat(0)
+        .take(position)
         .chain(iter::repeat(1).take(position))
         .chain(iter::repeat(0).take(position))
         .chain(iter::repeat(-1).take(position))
@@ -94,7 +99,9 @@ fn to_digits(s: &str) -> Result<Vec<i32>, SimpleError> {
 }
 
 fn digits_to_string(digits: &[i32]) -> String {
-    digits.iter().copied()
+    digits
+        .iter()
+        .copied()
         .map(|digit| char::from_digit(digit as u32, 10).unwrap())
         .collect()
 }
@@ -117,15 +124,33 @@ mod tests {
         assert_eq!(Ok(String::from("03415518")), solve_part_1("12345678", 3));
         assert_eq!(Ok(String::from("01029498")), solve_part_1("12345678", 4));
 
-        assert_eq!(Ok(String::from("24176176")), solve_part_1("80871224585914546619083218645595", 100));
-        assert_eq!(Ok(String::from("73745418")), solve_part_1("19617804207202209144916044189917", 100));
-        assert_eq!(Ok(String::from("52432133")), solve_part_1("69317163492948606335995924319873", 100));
+        assert_eq!(
+            Ok(String::from("24176176")),
+            solve_part_1("80871224585914546619083218645595", 100)
+        );
+        assert_eq!(
+            Ok(String::from("73745418")),
+            solve_part_1("19617804207202209144916044189917", 100)
+        );
+        assert_eq!(
+            Ok(String::from("52432133")),
+            solve_part_1("69317163492948606335995924319873", 100)
+        );
     }
 
     #[test]
     fn test_sample_input_part_2() {
-        assert_eq!(Ok(String::from("84462026")), solve_part_2("03036732577212944063491565474664"));
-        assert_eq!(Ok(String::from("78725270")), solve_part_2("02935109699940807407585447034323"));
-        assert_eq!(Ok(String::from("53553731")), solve_part_2("03081770884921959731165446850517"));
+        assert_eq!(
+            Ok(String::from("84462026")),
+            solve_part_2("03036732577212944063491565474664")
+        );
+        assert_eq!(
+            Ok(String::from("78725270")),
+            solve_part_2("02935109699940807407585447034323")
+        );
+        assert_eq!(
+            Ok(String::from("53553731")),
+            solve_part_2("03081770884921959731165446850517")
+        );
     }
 }

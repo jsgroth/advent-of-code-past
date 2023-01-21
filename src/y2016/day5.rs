@@ -1,8 +1,8 @@
 //! Day 5: How About a Nice Game of Chess?
 //! https://adventofcode.com/2016/day/5
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 fn solve_part_1(input: &str) -> Result<String, SimpleError> {
     let door_id = crate::read_single_line(input)?;

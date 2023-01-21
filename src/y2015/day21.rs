@@ -1,9 +1,9 @@
 //! Day 21: RPG Simulator 20XX
 //! https://adventofcode.com/2015/day/21
 
+use crate::SimpleError;
 use std::cmp;
 use std::error::Error;
-use crate::SimpleError;
 
 #[derive(Debug)]
 struct Weapon {
@@ -32,10 +32,22 @@ struct Boss {
 
 const WEAPONS: [Weapon; 5] = [
     Weapon { cost: 8, damage: 4 },
-    Weapon { cost: 10, damage: 5 },
-    Weapon { cost: 25, damage: 6 },
-    Weapon { cost: 40, damage: 7 },
-    Weapon { cost: 74, damage: 8 },
+    Weapon {
+        cost: 10,
+        damage: 5,
+    },
+    Weapon {
+        cost: 25,
+        damage: 6,
+    },
+    Weapon {
+        cost: 40,
+        damage: 7,
+    },
+    Weapon {
+        cost: 74,
+        damage: 8,
+    },
 ];
 
 const ARMOR: [Armor; 6] = [
@@ -44,16 +56,43 @@ const ARMOR: [Armor; 6] = [
     Armor { cost: 31, armor: 2 },
     Armor { cost: 53, armor: 3 },
     Armor { cost: 75, armor: 4 },
-    Armor { cost: 102, armor: 5 },
+    Armor {
+        cost: 102,
+        armor: 5,
+    },
 ];
 
 const RINGS: [Ring; 6] = [
-    Ring { cost: 25, damage: 1, armor: 0 },
-    Ring { cost: 50, damage: 2, armor: 0 },
-    Ring { cost: 100, damage: 3, armor: 0 },
-    Ring { cost: 20, damage: 0, armor: 1 },
-    Ring { cost: 40, damage: 0, armor: 2 },
-    Ring { cost: 80, damage: 0, armor: 3 },
+    Ring {
+        cost: 25,
+        damage: 1,
+        armor: 0,
+    },
+    Ring {
+        cost: 50,
+        damage: 2,
+        armor: 0,
+    },
+    Ring {
+        cost: 100,
+        damage: 3,
+        armor: 0,
+    },
+    Ring {
+        cost: 20,
+        damage: 0,
+        armor: 1,
+    },
+    Ring {
+        cost: 40,
+        damage: 0,
+        armor: 2,
+    },
+    Ring {
+        cost: 80,
+        damage: 0,
+        armor: 3,
+    },
 ];
 
 fn solve_both_parts(input: &str) -> Result<(u32, u32), SimpleError> {
@@ -133,13 +172,18 @@ fn parse_input(input: &str) -> Result<Boss, SimpleError> {
         None => return Err(SimpleError::new(String::from("missing armor line"))),
     };
 
-    Ok(Boss { hit_points, damage, armor })
+    Ok(Boss {
+        hit_points,
+        damage,
+        armor,
+    })
 }
 
 fn parse_number_end_of_line(line: &str) -> Result<i32, SimpleError> {
-    let num = line.split(' ').last().ok_or_else(
-        || SimpleError::new(format!("invalid line format: {line}"))
-    )?;
+    let num = line
+        .split(' ')
+        .last()
+        .ok_or_else(|| SimpleError::new(format!("invalid line format: {line}")))?;
     Ok(num.parse()?)
 }
 

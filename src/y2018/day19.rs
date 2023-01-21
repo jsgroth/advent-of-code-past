@@ -1,9 +1,9 @@
 //! Day 19: Go With The Flow
 //! https://adventofcode.com/2018/day/19
 
-use std::error::Error;
-use crate::SimpleError;
 use crate::y2018::chronodevice::ChronoInstruction;
+use crate::SimpleError;
+use std::error::Error;
 
 fn solve_part_1(input: &str) -> Result<u64, SimpleError> {
     let (ip, instructions) = parse_input(input)?;
@@ -15,7 +15,9 @@ fn solve_part_1(input: &str) -> Result<u64, SimpleError> {
         registers[ip] = pc as u64;
 
         let instruction = &instructions[pc];
-        registers[instruction.c] = instruction.op.execute(&registers, instruction.a, instruction.b);
+        registers[instruction.c] = instruction
+            .op
+            .execute(&registers, instruction.a, instruction.b);
         pc = registers[ip] as usize;
 
         pc += 1;
@@ -37,7 +39,9 @@ fn solve_part_2(input: &str) -> Result<u64, SimpleError> {
         registers[ip] = pc as u64;
 
         let instruction = &instructions[pc];
-        registers[instruction.c] = instruction.op.execute(&registers, instruction.a, instruction.b);
+        registers[instruction.c] = instruction
+            .op
+            .execute(&registers, instruction.a, instruction.b);
         pc = registers[ip] as usize;
 
         if instruction.c != ip && instruction.c != 0 {
@@ -63,12 +67,16 @@ fn parse_input(input: &str) -> Result<(usize, Vec<ChronoInstruction>), SimpleErr
     let first_line = crate::read_single_line(input)?;
 
     if !first_line.starts_with("#ip ") {
-        return Err(SimpleError::new(format!("expected '#ip ' prefix in first line: {first_line}")));
+        return Err(SimpleError::new(format!(
+            "expected '#ip ' prefix in first line: {first_line}"
+        )));
     }
 
     let ip = first_line[4..].parse()?;
 
-    let instructions: Result<_, _> = input.lines().skip(1)
+    let instructions: Result<_, _> = input
+        .lines()
+        .skip(1)
         .map(ChronoInstruction::from_line)
         .collect();
     let instructions = instructions?;

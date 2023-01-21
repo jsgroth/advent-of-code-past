@@ -1,9 +1,9 @@
 //! Day 2: 1202 Program Alarm
 //! https://adventofcode.com/2019/day/2
 
-use std::error::Error;
-use crate::SimpleError;
 use crate::y2019::intcode;
+use crate::SimpleError;
+use std::error::Error;
 
 fn solve_part_1(input: &str) -> Result<i64, Box<dyn Error>> {
     let mut program = intcode::parse_program(input)?;
@@ -33,7 +33,9 @@ fn solve_part_2(input: &str) -> Result<i64, Box<dyn Error>> {
         }
     }
 
-    Err(Box::new(SimpleError::new(String::from("no solution found"))))
+    Err(Box::new(SimpleError::new(String::from(
+        "no solution found",
+    ))))
 }
 
 pub fn solve(input: &str) -> Result<(i64, i64), Box<dyn Error>> {

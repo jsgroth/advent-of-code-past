@@ -1,8 +1,8 @@
 //! Day 25: Let It Snow
 //! https://adventofcode.com/2015/day/25
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 fn solve_part_1(input: &str) -> Result<u64, SimpleError> {
     let (row, col) = parse_input(input)?;

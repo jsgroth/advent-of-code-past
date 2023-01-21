@@ -1,9 +1,9 @@
 //! Day 13: Knights of the Dinner Table
 //! https://adventofcode.com/2015/day/13
 
+use crate::SimpleError;
 use std::collections::HashMap;
 use std::error::Error;
-use crate::SimpleError;
 
 #[derive(Debug)]
 struct Person {
@@ -13,7 +13,10 @@ struct Person {
 
 impl Person {
     fn new(name: String) -> Self {
-        Self { name, happiness_relations: HashMap::new() }
+        Self {
+            name,
+            happiness_relations: HashMap::new(),
+        }
     }
 }
 
@@ -36,18 +39,26 @@ fn solve_part(input: &str, include_you: bool) -> Result<i32, SimpleError> {
 
     let arrangements = permutations(&people.values().collect());
 
-    let max_happiness = arrangements.into_iter().map(|permutation| {
-        let mut total_happiness = 0;
-        for i in 0..permutation.len() {
-            let prev_index = if i == 0 { permutation.len() - 1 } else { i - 1 };
-            let next_index = (i + 1) % permutation.len();
+    let max_happiness = arrangements
+        .into_iter()
+        .map(|permutation| {
+            let mut total_happiness = 0;
+            for i in 0..permutation.len() {
+                let prev_index = if i == 0 { permutation.len() - 1 } else { i - 1 };
+                let next_index = (i + 1) % permutation.len();
 
-            let person = permutation[i];
-            total_happiness += person.happiness_relations.get(&permutation[prev_index].name).unwrap();
-            total_happiness += person.happiness_relations.get(&permutation[next_index].name).unwrap();
-        }
-        total_happiness
-    })
+                let person = permutation[i];
+                total_happiness += person
+                    .happiness_relations
+                    .get(&permutation[prev_index].name)
+                    .unwrap();
+                total_happiness += person
+                    .happiness_relations
+                    .get(&permutation[next_index].name)
+                    .unwrap();
+            }
+            total_happiness
+        })
         .max()
         .unwrap_or(0);
 
@@ -60,7 +71,11 @@ fn permutations<'a, T>(items: &Vec<&'a T>) -> Vec<Vec<&'a T>> {
     permutations
 }
 
-fn permutations_helper<'a, T>(permutations: &mut Vec<Vec<&'a T>>, items: &Vec<&'a T>, visited: Vec<usize>) {
+fn permutations_helper<'a, T>(
+    permutations: &mut Vec<Vec<&'a T>>,
+    items: &Vec<&'a T>,
+    visited: Vec<usize>,
+) {
     if visited.len() == items.len() {
         permutations.push(visited.into_iter().map(|i| items[i]).collect());
         return;
@@ -94,10 +109,14 @@ fn parse_input(input: &str) -> Result<HashMap<String, Person>, SimpleError> {
         }
 
         if let Some(person) = people.get_mut(person_name) {
-            person.happiness_relations.insert(String::from(other_name), happiness_change);
+            person
+                .happiness_relations
+                .insert(String::from(other_name), happiness_change);
         } else {
             let mut person = Person::new(String::from(person_name));
-            person.happiness_relations.insert(String::from(other_name), happiness_change);
+            person
+                .happiness_relations
+                .insert(String::from(other_name), happiness_change);
             people.insert(String::from(person_name), person);
         }
     }

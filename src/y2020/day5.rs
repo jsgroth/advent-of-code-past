@@ -1,21 +1,17 @@
 //! Day 5: Binary Boarding
 //! https://adventofcode.com/2020/day/5
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 fn solve_part_1(input: &str) -> Result<u32, SimpleError> {
-    let seat_ids: Vec<_> = input.lines()
-        .map(seat_id)
-        .collect::<Result<_, _>>()?;
+    let seat_ids: Vec<_> = input.lines().map(seat_id).collect::<Result<_, _>>()?;
 
     Ok(seat_ids.into_iter().max().unwrap())
 }
 
 fn solve_part_2(input: &str) -> Result<u32, SimpleError> {
-    let mut seat_ids: Vec<_> = input.lines()
-        .map(seat_id)
-        .collect::<Result<_, _>>()?;
+    let mut seat_ids: Vec<_> = input.lines().map(seat_id).collect::<Result<_, _>>()?;
 
     seat_ids.sort();
 
@@ -30,7 +26,9 @@ fn solve_part_2(input: &str) -> Result<u32, SimpleError> {
 
 fn seat_id(seat: &str) -> Result<u32, SimpleError> {
     if seat.len() != 10 {
-        return Err(SimpleError::new(format!("input string should be exactly 10 characters: {seat}")));
+        return Err(SimpleError::new(format!(
+            "input string should be exactly 10 characters: {seat}"
+        )));
     }
 
     let mut row_start = 0;
@@ -43,7 +41,11 @@ fn seat_id(seat: &str) -> Result<u32, SimpleError> {
             'B' => {
                 row_start = (row_end + row_start) / 2;
             }
-            _ => return Err(SimpleError::new(format!("invalid row direction: {row_direction}")))
+            _ => {
+                return Err(SimpleError::new(format!(
+                    "invalid row direction: {row_direction}"
+                )))
+            }
         }
     }
 
@@ -57,7 +59,11 @@ fn seat_id(seat: &str) -> Result<u32, SimpleError> {
             'R' => {
                 col_start = (col_end + col_start) / 2;
             }
-            _ => return Err(SimpleError::new(format!("invalid column direction: {col_direction}")))
+            _ => {
+                return Err(SimpleError::new(format!(
+                    "invalid column direction: {col_direction}"
+                )))
+            }
         }
     }
 

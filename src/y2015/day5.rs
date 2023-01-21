@@ -12,7 +12,12 @@ fn solve_part_2(input: &str) -> usize {
 }
 
 fn is_nice(line: &str) -> bool {
-    if line.chars().filter(|c| ['a', 'e', 'i', 'o', 'u'].contains(c)).count() < 3 {
+    if line
+        .chars()
+        .filter(|c| ['a', 'e', 'i', 'o', 'u'].contains(c))
+        .count()
+        < 3
+    {
         return false;
     }
 
@@ -21,9 +26,9 @@ fn is_nice(line: &str) -> bool {
         return false;
     }
 
-    !chars.windows(2).any(|window| {
-        matches!(window, ['a', 'b'] | ['c', 'd'] | ['p', 'q'] | ['x', 'y'])
-    })
+    !chars
+        .windows(2)
+        .any(|window| matches!(window, ['a', 'b'] | ['c', 'd'] | ['p', 'q'] | ['x', 'y']))
 }
 
 fn is_nice_2(line: &str) -> bool {

@@ -1,8 +1,8 @@
 //! Day 19: An Elephant Named Joseph
 //! https://adventofcode.com/2016/day/19
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 #[derive(Debug)]
 struct Elf {
@@ -31,7 +31,9 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
 fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
     let elf_count: usize = crate::read_single_line(input)?.parse()?;
     if elf_count < 2 {
-        return Err(SimpleError::new(format!("elf_count is {elf_count}, must be at least 2")));
+        return Err(SimpleError::new(format!(
+            "elf_count is {elf_count}, must be at least 2"
+        )));
     }
 
     let mut elf_circle = new_elf_circle(elf_count);

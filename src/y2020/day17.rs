@@ -1,11 +1,11 @@
 //! Day 17: Conway Cubes
 //! https://adventofcode.com/2020/day/17
 
+use crate::SimpleError;
 use std::cmp;
 use std::collections::HashSet;
 use std::error::Error;
 use std::hash::Hash;
-use crate::SimpleError;
 
 trait Point: Eq + Hash + Copy {
     fn from_2d(x: i32, y: i32) -> Self;
@@ -42,8 +42,12 @@ impl Point for Point3D {
         let (min_x, min_y, min_z) = iter.fold(
             (i32::MAX, i32::MAX, i32::MAX),
             |(min_x, min_y, min_z), point| {
-                (cmp::min(min_x, point.x), cmp::min(min_y, point.y), cmp::min(min_z, point.z))
-            }
+                (
+                    cmp::min(min_x, point.x),
+                    cmp::min(min_y, point.y),
+                    cmp::min(min_z, point.z),
+                )
+            },
         );
         Self::new(min_x, min_y, min_z)
     }
@@ -52,17 +56,20 @@ impl Point for Point3D {
         let (max_x, max_y, max_z) = iter.fold(
             (i32::MIN, i32::MIN, i32::MIN),
             |(max_x, max_y, max_z), point| {
-                (cmp::max(max_x, point.x), cmp::max(max_y, point.y), cmp::max(max_z, point.z))
-            }
+                (
+                    cmp::max(max_x, point.x),
+                    cmp::max(max_y, point.y),
+                    cmp::max(max_z, point.z),
+                )
+            },
         );
         Self::new(max_x, max_y, max_z)
     }
 
     fn points_including_range(min: Self, max: Self) -> Box<dyn Iterator<Item = Self>> {
         let iter = ((min.x - 1)..=(max.x + 1)).flat_map(move |x| {
-            ((min.y - 1)..=(max.y + 1)).flat_map(move |y| {
-                ((min.z - 1)..=(max.z + 1)).map(move |z| Self::new(x, y, z))
-            })
+            ((min.y - 1)..=(max.y + 1))
+                .flat_map(move |y| ((min.z - 1)..=(max.z + 1)).map(move |z| Self::new(x, y, z)))
         });
         Box::new(iter)
     }
@@ -72,14 +79,11 @@ impl Point for Point3D {
         let y = self.y;
         let z = self.z;
 
-        let iter = (-1..=1).flat_map(|dx| {
-            (-1..=1).flat_map(move |dy| {
-                (-1..=1).map(move |dz| (dx, dy, dz))
-            })
-        })
+        let iter = (-1..=1)
+            .flat_map(|dx| (-1..=1).flat_map(move |dy| (-1..=1).map(move |dz| (dx, dy, dz))))
             .filter(|&(dx, dy, dz)| dx != 0 || dy != 0 || dz != 0)
             .map(move |(dx, dy, dz)| Self::new(x + dx, y + dy, z + dz));
-         Box::new(iter)
+        Box::new(iter)
     }
 }
 
@@ -106,8 +110,13 @@ impl Point for Point4D {
         let (min_x, min_y, min_z, min_w) = iter.fold(
             (i32::MAX, i32::MAX, i32::MAX, i32::MAX),
             |(min_x, min_y, min_z, min_w), point| {
-                (cmp::min(min_x, point.x), cmp::min(min_y, point.y), cmp::min(min_z, point.z), cmp::min(min_w, point.w))
-            }
+                (
+                    cmp::min(min_x, point.x),
+                    cmp::min(min_y, point.y),
+                    cmp::min(min_z, point.z),
+                    cmp::min(min_w, point.w),
+                )
+            },
         );
         Self::new(min_x, min_y, min_z, min_w)
     }
@@ -116,8 +125,13 @@ impl Point for Point4D {
         let (max_x, max_y, max_z, max_w) = iter.fold(
             (i32::MIN, i32::MIN, i32::MIN, i32::MIN),
             |(max_x, max_y, max_z, max_w), point| {
-                (cmp::max(max_x, point.x), cmp::max(max_y, point.y), cmp::max(max_z, point.z), cmp::max(max_w, point.w))
-            }
+                (
+                    cmp::max(max_x, point.x),
+                    cmp::max(max_y, point.y),
+                    cmp::max(max_z, point.z),
+                    cmp::max(max_w, point.w),
+                )
+            },
         );
         Self::new(max_x, max_y, max_z, max_w)
     }
@@ -133,20 +147,18 @@ impl Point for Point4D {
         Box::new(iter)
     }
 
-
     fn adjacent_points(&self) -> Box<dyn Iterator<Item = Self>> {
         let x = self.x;
         let y = self.y;
         let z = self.z;
         let w = self.w;
 
-        let iter = (-1..=1).flat_map(|dx| {
-            (-1..=1).flat_map(move |dy| {
-                (-1..=1).flat_map(move |dz| {
-                    (-1..=1).map(move |dw| (dx, dy, dz, dw))
+        let iter = (-1..=1)
+            .flat_map(|dx| {
+                (-1..=1).flat_map(move |dy| {
+                    (-1..=1).flat_map(move |dz| (-1..=1).map(move |dw| (dx, dy, dz, dw)))
                 })
             })
-        })
             .filter(|&(dx, dy, dz, dw)| dx != 0 || dy != 0 || dz != 0 || dw != 0)
             .map(move |(dx, dy, dz, dw)| Self::new(x + dx, y + dy, z + dz, w + dw));
         Box::new(iter)
@@ -163,7 +175,8 @@ fn solve_part<P: Point>(input: &str) -> Result<usize, SimpleError> {
         let mut next_active_points = HashSet::new();
 
         for point in P::points_including_range(minimums, maximums) {
-            let neighbor_count = point.adjacent_points()
+            let neighbor_count = point
+                .adjacent_points()
                 .filter(|&adj_point| active_points.contains(&adj_point))
                 .count();
 
@@ -179,15 +192,16 @@ fn solve_part<P: Point>(input: &str) -> Result<usize, SimpleError> {
 }
 
 fn parse_input<P: Point>(input: &str) -> Result<HashSet<P>, SimpleError> {
-    input.lines().enumerate()
+    input
+        .lines()
+        .enumerate()
         .flat_map(|(i, line)| {
-            line.chars().enumerate()
-                .filter_map(|(j, c)| {
-                    match c {
-                        '#' => Some(Ok(P::from_2d(j as i32, i as i32))),
-                        '.' => None,
-                        _ => Some(Err(SimpleError::new(format!("invalid char: {c}"))))
-                    }
+            line.chars()
+                .enumerate()
+                .filter_map(|(j, c)| match c {
+                    '#' => Some(Ok(P::from_2d(j as i32, i as i32))),
+                    '.' => None,
+                    _ => Some(Err(SimpleError::new(format!("invalid char: {c}")))),
                 })
                 .collect::<Vec<_>>()
         })

@@ -1,10 +1,10 @@
 //! Day 8: I Heard You Like Registers
 //! https://adventofcode.com/2017/day/8
 
+use crate::SimpleError;
 use std::cmp;
 use std::collections::HashMap;
 use std::error::Error;
-use crate::SimpleError;
 
 #[derive(Debug)]
 enum Condition {
@@ -26,7 +26,7 @@ impl Condition {
             [a, "<=", b] => Ok(Self::Le(String::from(*a), b.parse()?)),
             [a, "==", b] => Ok(Self::Eq(String::from(*a), b.parse()?)),
             [a, "!=", b] => Ok(Self::Ne(String::from(*a), b.parse()?)),
-            _ => Err(SimpleError::new(format!("invalid line: {s}")))
+            _ => Err(SimpleError::new(format!("invalid line: {s}"))),
         }
     }
 
@@ -69,28 +69,35 @@ fn solve_part(input: &str, find_max_ever: bool) -> Result<i64, SimpleError> {
         return Ok(max_ever);
     }
 
-    let max = registers.into_values().max().ok_or_else(
-        || SimpleError::new(String::from("no registers were set"))
-    )?;
+    let max = registers
+        .into_values()
+        .max()
+        .ok_or_else(|| SimpleError::new(String::from("no registers were set")))?;
 
     Ok(max)
 }
 
 fn parse_input(input: &str) -> Result<Vec<Instruction>, SimpleError> {
-    input.lines().map(|line| {
-        let split: Vec<_> = line.splitn(5, ' ').collect();
+    input
+        .lines()
+        .map(|line| {
+            let split: Vec<_> = line.splitn(5, ' ').collect();
 
-        let register = String::from(split[0]);
+            let register = String::from(split[0]);
 
-        let mut value: i64 = split[2].parse()?;
-        if split[1] == "dec" {
-            value = -value;
-        }
+            let mut value: i64 = split[2].parse()?;
+            if split[1] == "dec" {
+                value = -value;
+            }
 
-        let condition = Condition::from_str(split[4])?;
+            let condition = Condition::from_str(split[4])?;
 
-        Ok(Instruction { register, value, condition })
-    })
+            Ok(Instruction {
+                register,
+                value,
+                condition,
+            })
+        })
         .collect()
 }
 

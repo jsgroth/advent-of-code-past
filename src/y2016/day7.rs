@@ -1,8 +1,8 @@
 //! Day 7: Internet Protocol Version 7
 //! https://adventofcode.com/2016/day/7
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 struct ParsedIp7String<'a> {
     outer_strings: Vec<&'a str>,
@@ -12,10 +12,17 @@ struct ParsedIp7String<'a> {
 fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
     let ip_addresses = parse_input(input)?;
 
-    let valid = ip_addresses.into_iter()
-        .filter(|ParsedIp7String { outer_strings, inner_strings }| {
-            outer_strings.iter().any(|s| has_abba(s)) && !inner_strings.iter().any(|s| has_abba(s))
-        })
+    let valid = ip_addresses
+        .into_iter()
+        .filter(
+            |ParsedIp7String {
+                 outer_strings,
+                 inner_strings,
+             }| {
+                outer_strings.iter().any(|s| has_abba(s))
+                    && !inner_strings.iter().any(|s| has_abba(s))
+            },
+        )
         .count();
 
     Ok(valid)
@@ -24,18 +31,27 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
 fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
     let ip_addresses = parse_input(input)?;
 
-    let num_valid = ip_addresses.into_iter()
-        .filter(|ParsedIp7String { outer_strings, inner_strings }| {
-            outer_strings.iter().any(|outer_string| {
-                let chars: Vec<_> = outer_string.chars().collect();
-                chars.windows(3).any(|window| {
-                    window[0] == window[2] && window[0] != window[1] && inner_strings.iter().any(|inner_string| {
-                        let bab: String = [window[1], window[0], window[1]].into_iter().collect();
-                        inner_string.contains(&bab)
+    let num_valid = ip_addresses
+        .into_iter()
+        .filter(
+            |ParsedIp7String {
+                 outer_strings,
+                 inner_strings,
+             }| {
+                outer_strings.iter().any(|outer_string| {
+                    let chars: Vec<_> = outer_string.chars().collect();
+                    chars.windows(3).any(|window| {
+                        window[0] == window[2]
+                            && window[0] != window[1]
+                            && inner_strings.iter().any(|inner_string| {
+                                let bab: String =
+                                    [window[1], window[0], window[1]].into_iter().collect();
+                                inner_string.contains(&bab)
+                            })
                     })
                 })
-            })
-        })
+            },
+        )
         .count();
 
     Ok(num_valid)
@@ -56,7 +72,11 @@ fn partition_line(line: &str) -> Result<ParsedIp7String, SimpleError> {
 
         let close_bracket_index = match line.chars().skip(i).position(|c| c == ']') {
             Some(index) => index + i,
-            None => return Err(SimpleError::new(format!("line has an unclosed bracket: {line}"))),
+            None => {
+                return Err(SimpleError::new(format!(
+                    "line has an unclosed bracket: {line}"
+                )))
+            }
         };
 
         inner_strings.push(&line[open_bracket_index + 1..close_bracket_index]);
@@ -68,7 +88,10 @@ fn partition_line(line: &str) -> Result<ParsedIp7String, SimpleError> {
         outer_strings.push(&line[i..]);
     }
 
-    Ok(ParsedIp7String { outer_strings, inner_strings })
+    Ok(ParsedIp7String {
+        outer_strings,
+        inner_strings,
+    })
 }
 
 fn has_abba(s: &str) -> bool {

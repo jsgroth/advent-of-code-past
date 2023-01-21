@@ -1,9 +1,9 @@
 //! Day 2: Inventory Management System
 //! https://adventofcode.com/2018/day/2
 
+use crate::SimpleError;
 use std::collections::HashMap;
 use std::error::Error;
-use crate::SimpleError;
 
 fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
     let mut two_counts = 0;
@@ -33,7 +33,9 @@ fn solve_part_2(input: &str) -> Result<String, SimpleError> {
     for (i, line) in input.lines().enumerate() {
         for other_line in input.lines().skip(i + 1) {
             if line.len() == other_line.len() {
-                let diff_count = line.chars().zip(other_line.chars())
+                let diff_count = line
+                    .chars()
+                    .zip(other_line.chars())
                     .filter(|&(a, b)| a != b)
                     .count();
 

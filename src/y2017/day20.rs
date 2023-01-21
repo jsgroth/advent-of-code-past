@@ -1,10 +1,10 @@
 //! Day 20: Particle Swarm
 //! https://adventofcode.com/2017/day/20
 
+use crate::SimpleError;
 use std::collections::HashMap;
 use std::error::Error;
 use std::ops::{Add, AddAssign};
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 struct Coords {
@@ -25,7 +25,11 @@ impl Coords {
             return Err(SimpleError::new(format!("invalid coordinate string: {s}")));
         }
 
-        Ok(Self::new(split[0].parse()?, split[1].parse()?, split[2].parse()?))
+        Ok(Self::new(
+            split[0].parse()?,
+            split[1].parse()?,
+            split[2].parse()?,
+        ))
     }
 
     fn distance_to(&self, other: Coords) -> i64 {
@@ -59,14 +63,18 @@ impl Particle {
         let split: Vec<_> = line.split(", ").collect();
         let (p, v, a) = match split.as_slice() {
             [p, v, a] => (p, v, a),
-            _ => return Err(SimpleError::new(format!("invalid line format: {line}")))
+            _ => return Err(SimpleError::new(format!("invalid line format: {line}"))),
         };
 
         let position = Coords::from_str(&p[2..])?;
         let velocity = Coords::from_str(&v[2..])?;
         let acceleration = Coords::from_str(&a[2..])?;
 
-        Ok(Self { position, velocity, acceleration })
+        Ok(Self {
+            position,
+            velocity,
+            acceleration,
+        })
     }
 
     fn distance_from_origin(&self) -> i64 {
@@ -90,7 +98,9 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
             particle.tick();
         }
 
-        if let Some(solution) = check_for_solution(&particles, &last_particles, &destroyed_particles) {
+        if let Some(solution) =
+            check_for_solution(&particles, &last_particles, &destroyed_particles)
+        {
             return Ok(solution);
         }
 
@@ -134,31 +144,39 @@ fn check_for_solution(
             return None;
         }
 
-        if particle.position.x.signum() != last_particle.position.x.signum() ||
-            particle.position.y.signum() != last_particle.position.y.signum() ||
-            particle.position.z.signum() != last_particle.position.z.signum() {
+        if particle.position.x.signum() != last_particle.position.x.signum()
+            || particle.position.y.signum() != last_particle.position.y.signum()
+            || particle.position.z.signum() != last_particle.position.z.signum()
+        {
             return None;
         }
     }
-
 
     for (i, (particle, last_particle)) in particles.iter().zip(last_particles).enumerate() {
         if destroyed_particles[i] {
             continue;
         }
 
-        for (j, (other_particle, last_other_particle)) in particles.iter().zip(last_particles).enumerate().skip(i + 1) {
+        for (j, (other_particle, last_other_particle)) in
+            particles.iter().zip(last_particles).enumerate().skip(i + 1)
+        {
             if destroyed_particles[j] {
                 continue;
             }
 
-            if particle.position.distance_to(other_particle.position) < last_particle.position.distance_to(last_other_particle.position) {
+            if particle.position.distance_to(other_particle.position)
+                < last_particle
+                    .position
+                    .distance_to(last_other_particle.position)
+            {
                 return None;
             }
         }
     }
 
-    let (min_index, _) = particles.iter().enumerate()
+    let (min_index, _) = particles
+        .iter()
+        .enumerate()
         .min_by_key(|(_, particle)| particle.distance_from_origin())
         .unwrap();
     Some(min_index)
@@ -179,7 +197,8 @@ fn update_destroyed_particles(particles: &[Particle], destroyed_particles: &mut 
     }
 
     for (i, particle) in particles.iter().enumerate() {
-        if !destroyed_particles[i] && position_counts.get(&particle.position).copied().unwrap() > 1 {
+        if !destroyed_particles[i] && position_counts.get(&particle.position).copied().unwrap() > 1
+        {
             destroyed_particles[i] = true;
         }
     }

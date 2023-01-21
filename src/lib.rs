@@ -42,6 +42,8 @@ fn read_input() -> io::Result<String> {
 fn read_single_line(input: &str) -> Result<&str, SimpleError> {
     match input.lines().next() {
         Some(line) => Ok(line),
-        None => Err(SimpleError::new(String::from("input is empty, expected a single line"))),
+        None => Err(SimpleError::new(String::from(
+            "input is empty, expected a single line",
+        ))),
     }
 }

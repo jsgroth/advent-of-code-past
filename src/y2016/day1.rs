@@ -1,10 +1,10 @@
 //! Day 1: No Time for a Taxicab
 //! https://adventofcode.com/2016/day/1
 
+use crate::SimpleError;
 use std::collections::HashSet;
 use std::error::Error;
 use std::mem;
-use crate::SimpleError;
 
 #[derive(Debug, Clone, Copy)]
 enum Rotation {
@@ -72,16 +72,17 @@ fn solve_part_2(input: &str) -> Result<i32, SimpleError> {
 fn parse_input(input: &str) -> Result<Vec<(Rotation, i32)>, SimpleError> {
     let line = crate::read_single_line(input)?;
 
-    line.split(", ").map(|word| {
-        let direction = match word.chars().next() {
-            Some('L') => Rotation::Left,
-            Some('R') => Rotation::Right,
-            _ => return Err(SimpleError::new(format!("invalid word format: {word}")))
-        };
-        let distance: i32 = word[1..].parse()?;
+    line.split(", ")
+        .map(|word| {
+            let direction = match word.chars().next() {
+                Some('L') => Rotation::Left,
+                Some('R') => Rotation::Right,
+                _ => return Err(SimpleError::new(format!("invalid word format: {word}"))),
+            };
+            let distance: i32 = word[1..].parse()?;
 
-        Ok((direction, distance))
-    })
+            Ok((direction, distance))
+        })
         .collect()
 }
 

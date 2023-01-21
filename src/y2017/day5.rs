@@ -1,9 +1,9 @@
 //! Day 5: A Maze of Twisty Trampolines, All Alike
 //! https://adventofcode.com/2017/day/5
 
+use crate::SimpleError;
 use std::error::Error;
 use std::num::ParseIntError;
-use crate::SimpleError;
 
 fn solve_part(input: &str, part_two: bool) -> Result<usize, SimpleError> {
     let mut jumps = parse_input(input)?;

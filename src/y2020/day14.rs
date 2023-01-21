@@ -1,10 +1,10 @@
 //! Day 14: Docking Data
 //! https://adventofcode.com/2020/day/14
 
+use crate::SimpleError;
 use std::collections::HashMap;
 use std::error::Error;
 use std::str::FromStr;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 enum Instruction {
@@ -58,7 +58,9 @@ impl BitMask {
 
     fn mask_address(&self, address: u64) -> Vec<u64> {
         let initial_address = address | self.ones;
-        self.x_indices.iter().copied()
+        self.x_indices
+            .iter()
+            .copied()
             .fold(vec![initial_address], |addresses, x_index| {
                 let mut next_addresses = Vec::with_capacity(2 * addresses.len());
                 for address in addresses {
@@ -75,7 +77,9 @@ impl FromStr for BitMask {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s.len() > 64 {
-            return Err(SimpleError::new(format!("bit mask string is too long: {s}")));
+            return Err(SimpleError::new(format!(
+                "bit mask string is too long: {s}"
+            )));
         }
 
         let mut bit_mask = Self::new();
@@ -83,14 +87,14 @@ impl FromStr for BitMask {
             match c {
                 'X' => {
                     bit_mask.x_indices.push(i as u64);
-                },
+                }
                 '0' => {
                     bit_mask.zeroes &= !(1 << i);
                 }
                 '1' => {
                     bit_mask.ones |= 1 << i;
                 }
-                _ => return Err(SimpleError::new(format!("invalid bit mask char: {c}")))
+                _ => return Err(SimpleError::new(format!("invalid bit mask char: {c}"))),
             }
         }
 

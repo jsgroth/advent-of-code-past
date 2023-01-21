@@ -1,9 +1,9 @@
 //! Day 10: Adapter Array
 //! https://adventofcode.com/2020/day/10
 
+use crate::SimpleError;
 use std::error::Error;
 use std::num::ParseIntError;
-use crate::SimpleError;
 
 fn solve_part_1(input: &str) -> Result<u32, SimpleError> {
     let mut numbers = parse_input(input)?;
@@ -54,9 +54,7 @@ fn count_valid_combinations(numbers: &[u32]) -> u64 {
 }
 
 fn parse_input(input: &str) -> Result<Vec<u32>, ParseIntError> {
-    input.lines()
-        .map(|line| line.parse::<u32>())
-        .collect()
+    input.lines().map(|line| line.parse::<u32>()).collect()
 }
 
 pub fn solve(input: &str) -> Result<(u32, u64), Box<dyn Error>> {

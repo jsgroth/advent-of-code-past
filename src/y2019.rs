@@ -1,14 +1,6 @@
 mod intcode;
 
 mod day1;
-mod day2;
-mod day3;
-mod day4;
-mod day5;
-mod day6;
-mod day7;
-mod day8;
-mod day9;
 mod day10;
 mod day11;
 mod day12;
@@ -19,15 +11,23 @@ mod day16;
 mod day17;
 mod day18;
 mod day19;
+mod day2;
 mod day20;
 mod day21;
 mod day22;
 mod day23;
 mod day24;
 mod day25;
+mod day3;
+mod day4;
+mod day5;
+mod day6;
+mod day7;
+mod day8;
+mod day9;
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 pub fn run_day(day: usize) -> Result<(), Box<dyn Error>> {
     match day {
@@ -56,6 +56,6 @@ pub fn run_day(day: usize) -> Result<(), Box<dyn Error>> {
         23 => crate::run_solution(day23::solve),
         24 => crate::run_solution(day24::solve),
         25 => day25::run(),
-        _ => Err(Box::new(SimpleError::new(format!("unexpected day: {day}"))))
+        _ => Err(Box::new(SimpleError::new(format!("unexpected day: {day}")))),
     }
 }

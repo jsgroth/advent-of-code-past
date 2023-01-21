@@ -1,9 +1,9 @@
 //! Day 20: Jurassic Jigsaw
 //! https://adventofcode.com/2020/day/20
 
+use crate::SimpleError;
 use std::collections::HashMap;
 use std::error::Error;
-use crate::SimpleError;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 struct Edge(Vec<bool>);
@@ -79,7 +79,11 @@ impl Image {
     }
 
     fn get_right_edge(&self) -> Edge {
-        Edge((0..self.0.len()).map(|i| self.0[i][self.0.len() - 1]).collect())
+        Edge(
+            (0..self.0.len())
+                .map(|i| self.0[i][self.0.len() - 1])
+                .collect(),
+        )
     }
 
     fn get_edges_with_direction(&self) -> Vec<(EdgeDirection, Edge)> {
@@ -104,7 +108,9 @@ impl Image {
     }
 
     fn flipped_horizontally(&self) -> Self {
-        let flipped_image = self.0.iter()
+        let flipped_image = self
+            .0
+            .iter()
             .map(|row| row.iter().rev().copied().collect())
             .collect();
 
@@ -120,7 +126,9 @@ impl Image {
     fn reoriented_to(&self, target_edge: &Edge, target_direction: EdgeDirection) -> Self {
         let canonicalized_target_edge = target_edge.canonicalize();
 
-        let (matching_direction, _) = self.get_edges_with_direction().into_iter()
+        let (matching_direction, _) = self
+            .get_edges_with_direction()
+            .into_iter()
             .find(|(_, edge)| edge.canonicalize() == canonicalized_target_edge)
             .unwrap();
 
@@ -146,19 +154,18 @@ impl Image {
     }
 
     fn without_border(&self) -> Self {
-        let image = self.0[1..self.0.len() - 1].iter()
-            .map(|row| {
-                row[1..row.len() - 1].to_vec()
-            })
+        let image = self.0[1..self.0.len() - 1]
+            .iter()
+            .map(|row| row[1..row.len() - 1].to_vec())
             .collect();
 
         Self(image)
     }
 
     fn cardinality(&self) -> usize {
-        self.0.iter().map(|row| {
-            row.iter().filter(|&&b| b).count()
-        })
+        self.0
+            .iter()
+            .map(|row| row.iter().filter(|&&b| b).count())
             .sum()
     }
 
@@ -192,7 +199,8 @@ impl Image {
 
         for image_row in images {
             for i in 0..image_row[0].0.len() {
-                let combined_row: Vec<_> = image_row.iter()
+                let combined_row: Vec<_> = image_row
+                    .iter()
                     .flat_map(|image| image.0[i].clone())
                     .collect();
                 combined.push(combined_row);
@@ -213,7 +221,10 @@ fn solve_part_1(input: &str) -> Result<u64, SimpleError> {
     let tiles = parse_input(input)?;
 
     let mut edge_to_count = HashMap::new();
-    for (_, edge) in tiles.iter().flat_map(|tile| tile.image.get_edges_with_direction()) {
+    for (_, edge) in tiles
+        .iter()
+        .flat_map(|tile| tile.image.get_edges_with_direction())
+    {
         let edge = edge.canonicalize();
         if let Some(count) = edge_to_count.get_mut(&edge) {
             *count += 1;
@@ -222,18 +233,20 @@ fn solve_part_1(input: &str) -> Result<u64, SimpleError> {
         }
     }
 
-    let corner_tiles: Vec<_> = tiles.iter()
+    let corner_tiles: Vec<_> = tiles
+        .iter()
         .filter(|tile| {
-            let unmatched_edge_count = tile.image.get_edges_with_direction().into_iter()
+            let unmatched_edge_count = tile
+                .image
+                .get_edges_with_direction()
+                .into_iter()
                 .filter(|(_, edge)| *edge_to_count.get(&edge.canonicalize()).unwrap() == 1)
                 .count();
             unmatched_edge_count == 2
         })
         .collect();
 
-    let corner_tile_id_product = corner_tiles.iter()
-        .map(|tile| tile.id)
-        .product();
+    let corner_tile_id_product = corner_tiles.iter().map(|tile| tile.id).product();
 
     Ok(corner_tile_id_product)
 }
@@ -242,8 +255,13 @@ fn solve_part_2(input: &str) -> Result<usize, SimpleError> {
     let tiles = parse_input(input)?;
 
     let connected_tiles = connect_tiles(&tiles);
-    let connected_images_without_border: Vec<Vec<_>> = connected_tiles.into_iter()
-        .map(|row| row.into_iter().map(|tile| tile.image.without_border()).collect())
+    let connected_images_without_border: Vec<Vec<_>> = connected_tiles
+        .into_iter()
+        .map(|row| {
+            row.into_iter()
+                .map(|tile| tile.image.without_border())
+                .collect()
+        })
         .collect();
 
     let combined_image = Image::combine(&connected_images_without_border);
@@ -261,9 +279,9 @@ const SEA_MONSTER_PATTERN: &str = concat!(
 );
 
 fn new_sea_monster_image() -> Image {
-    let sea_monster_image = SEA_MONSTER_PATTERN.lines().map(|line| {
-        line.chars().map(|c| c == '#').collect()
-    })
+    let sea_monster_image = SEA_MONSTER_PATTERN
+        .lines()
+        .map(|line| line.chars().map(|c| c == '#').collect())
         .collect();
     Image(sea_monster_image)
 }
@@ -299,9 +317,13 @@ fn connect_tiles(tiles: &[Tile]) -> Vec<Vec<Tile>> {
         }
     }
 
-    let mut top_left_tile = tiles.iter()
+    let mut top_left_tile = tiles
+        .iter()
         .find(|tile| {
-            let unmatched_edge_count = tile.image.get_edges_with_direction().into_iter()
+            let unmatched_edge_count = tile
+                .image
+                .get_edges_with_direction()
+                .into_iter()
                 .filter(|(_, edge)| edge_to_ids.get(&edge.canonicalize()).unwrap().len() == 1)
                 .count();
             unmatched_edge_count == 2
@@ -313,7 +335,9 @@ fn connect_tiles(tiles: &[Tile]) -> Vec<Vec<Tile>> {
         let top_edge = top_left_tile.image.get_top_edge().canonicalize();
         let left_edge = top_left_tile.image.get_left_edge().canonicalize();
 
-        if edge_to_ids.get(&top_edge).unwrap().len() == 1 && edge_to_ids.get(&left_edge).unwrap().len() == 1 {
+        if edge_to_ids.get(&top_edge).unwrap().len() == 1
+            && edge_to_ids.get(&left_edge).unwrap().len() == 1
+        {
             break;
         }
 
@@ -323,9 +347,7 @@ fn connect_tiles(tiles: &[Tile]) -> Vec<Vec<Tile>> {
         };
     }
 
-    let id_to_tile: HashMap<_, _> = tiles.iter()
-        .map(|tile| (tile.id, tile))
-        .collect();
+    let id_to_tile: HashMap<_, _> = tiles.iter().map(|tile| (tile.id, tile)).collect();
 
     let connected_side_len = (tiles.len() as f64).sqrt().round() as usize;
     let mut connected_tiles: Vec<Vec<Tile>> = Vec::new();
@@ -340,24 +362,42 @@ fn connect_tiles(tiles: &[Tile]) -> Vec<Vec<Tile>> {
                 let target_tile = &connected_tiles[connected_tiles.len() - 1][0];
                 let target_edge = target_tile.image.get_bottom_edge();
 
-                let matching_tile_id = edge_to_ids.get(&target_edge.canonicalize()).unwrap().iter().copied()
+                let matching_tile_id = edge_to_ids
+                    .get(&target_edge.canonicalize())
+                    .unwrap()
+                    .iter()
+                    .copied()
                     .find(|&id| id != target_tile.id)
                     .unwrap();
                 let matching_tile = *id_to_tile.get(&matching_tile_id).unwrap();
 
-                let reoriented_image = matching_tile.image.reoriented_to(&target_edge, EdgeDirection::Top);
-                current_row.push(Tile { id: matching_tile_id, image: reoriented_image });
+                let reoriented_image = matching_tile
+                    .image
+                    .reoriented_to(&target_edge, EdgeDirection::Top);
+                current_row.push(Tile {
+                    id: matching_tile_id,
+                    image: reoriented_image,
+                });
             } else {
                 let target_tile = current_row.last().unwrap();
                 let target_edge = target_tile.image.get_right_edge();
 
-                let matching_tile_id = edge_to_ids.get(&target_edge.canonicalize()).unwrap().iter().copied()
+                let matching_tile_id = edge_to_ids
+                    .get(&target_edge.canonicalize())
+                    .unwrap()
+                    .iter()
+                    .copied()
                     .find(|&id| id != target_tile.id)
                     .unwrap();
                 let matching_tile = *id_to_tile.get(&matching_tile_id).unwrap();
 
-                let reoriented_image = matching_tile.image.reoriented_to(&target_edge, EdgeDirection::Left);
-                current_row.push(Tile { id: matching_tile_id, image: reoriented_image });
+                let reoriented_image = matching_tile
+                    .image
+                    .reoriented_to(&target_edge, EdgeDirection::Left);
+                current_row.push(Tile {
+                    id: matching_tile_id,
+                    image: reoriented_image,
+                });
             }
         }
         connected_tiles.push(current_row);
@@ -370,32 +410,43 @@ fn connect_tiles(tiles: &[Tile]) -> Vec<Vec<Tile>> {
 fn parse_input(input: &str) -> Result<Vec<Tile>, SimpleError> {
     let lines: Vec<_> = input.lines().collect();
 
-    lines.split(|s| s.is_empty())
+    lines
+        .split(|s| s.is_empty())
         .filter(|tile_lines| !tile_lines.is_empty())
         .map(|tile_lines| {
             if tile_lines.len() < 2 {
-                return Err(SimpleError::new(format!("found a tile with only {} lines", tile_lines.len())));
+                return Err(SimpleError::new(format!(
+                    "found a tile with only {} lines",
+                    tile_lines.len()
+                )));
             }
 
-            let (_, tile_id) = tile_lines[0].split_once(' ').ok_or_else(
-                || SimpleError::new(format!("tile id line not in expected format: {}", tile_lines[0]))
-            )?;
+            let (_, tile_id) = tile_lines[0].split_once(' ').ok_or_else(|| {
+                SimpleError::new(format!(
+                    "tile id line not in expected format: {}",
+                    tile_lines[0]
+                ))
+            })?;
 
             let tile_id = tile_id[..tile_id.len() - 1].parse()?;
 
-            let image = tile_lines[1..].iter().map(|line| {
-                line.chars().map(|c| {
-                    match c {
-                        '#' => Ok(true),
-                        '.' => Ok(false),
-                        _ => Err(SimpleError::new(format!("invalid image char: {c}")))
-                    }
+            let image = tile_lines[1..]
+                .iter()
+                .map(|line| {
+                    line.chars()
+                        .map(|c| match c {
+                            '#' => Ok(true),
+                            '.' => Ok(false),
+                            _ => Err(SimpleError::new(format!("invalid image char: {c}"))),
+                        })
+                        .collect()
                 })
-                    .collect()
-            })
                 .collect::<Result<_, _>>()?;
 
-            Ok(Tile { id: tile_id, image: Image(image) })
+            Ok(Tile {
+                id: tile_id,
+                image: Image(image),
+            })
         })
         .collect()
 }

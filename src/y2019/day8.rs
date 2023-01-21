@@ -1,8 +1,8 @@
 //! Day 8: Space Image Format
 //! https://adventofcode.com/2019/day/8
 
-use std::error::Error;
 use crate::SimpleError;
+use std::error::Error;
 
 fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
     let line = crate::read_single_line(input)?;
@@ -11,9 +11,7 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
     let mut fewest_zero_digits = usize::MAX;
     let mut fewest_zero_digits_layer = Vec::new();
     for layer in chars.chunks(25 * 6) {
-        let zero_digits = layer.iter().copied()
-            .filter(|&c| c == '0')
-            .count();
+        let zero_digits = layer.iter().copied().filter(|&c| c == '0').count();
 
         if zero_digits < fewest_zero_digits {
             fewest_zero_digits = zero_digits;
@@ -21,8 +19,16 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
         }
     }
 
-    let ones = fewest_zero_digits_layer.iter().copied().filter(|&c| c == '1').count();
-    let twos = fewest_zero_digits_layer.iter().copied().filter(|&c| c == '2').count();
+    let ones = fewest_zero_digits_layer
+        .iter()
+        .copied()
+        .filter(|&c| c == '1')
+        .count();
+    let twos = fewest_zero_digits_layer
+        .iter()
+        .copied()
+        .filter(|&c| c == '2')
+        .count();
 
     Ok(ones * twos)
 }
@@ -33,12 +39,16 @@ fn solve_part_2(input: &str) -> Result<String, SimpleError> {
 
     let mut image = vec![vec![false; 25]; 6];
     for (row, image_row) in image.iter_mut().enumerate() {
-        for (col, value) in image_row.iter_mut().enumerate(){
-            let c = chars.iter().copied()
+        for (col, value) in image_row.iter_mut().enumerate() {
+            let c = chars
+                .iter()
+                .copied()
                 .skip(25 * row + col)
                 .step_by(25 * 6)
                 .find(|&c| c != '2')
-                .ok_or_else(|| SimpleError::new(format!("no visible pixel at row={row}, col={col}")))?;
+                .ok_or_else(|| {
+                    SimpleError::new(format!("no visible pixel at row={row}, col={col}"))
+                })?;
             *value = c == '1';
         }
     }

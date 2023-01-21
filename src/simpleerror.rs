@@ -34,7 +34,7 @@ impl Error for SimpleError {
     }
 }
 
-trait ErrorWrapper : Error + 'static {}
+trait ErrorWrapper: Error + 'static {}
 
 impl ErrorWrapper for ParseIntError {}
 
@@ -44,6 +44,9 @@ impl ErrorWrapper for FromUtf8Error {}
 
 impl<T: ErrorWrapper> From<T> for SimpleError {
     fn from(t: T) -> Self {
-        Self { msg: t.to_string(), source: Some(Box::new(t)) }
+        Self {
+            msg: t.to_string(),
+            source: Some(Box::new(t)),
+        }
     }
 }
