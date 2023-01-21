@@ -1,5 +1,6 @@
 //! Day 15: Oxygen System
-//! https://adventofcode.com/2019/day/15
+//!
+//! <https://adventofcode.com/2019/day/15>
 
 use crate::y2019::intcode;
 use crate::y2019::intcode::InteractiveIntcodeProgram;

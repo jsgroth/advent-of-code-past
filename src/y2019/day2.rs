@@ -1,5 +1,6 @@
 //! Day 2: 1202 Program Alarm
-//! https://adventofcode.com/2019/day/2
+//!
+//! <https://adventofcode.com/2019/day/2>
 
 use crate::y2019::intcode;
 use crate::SimpleError;

@@ -1,5 +1,6 @@
 //! Day 6: Memory Reallocation
-//! https://adventofcode.com/2017/day/6
+//!
+//! <https://adventofcode.com/2017/day/6>
 
 use crate::SimpleError;
 use std::collections::HashMap;

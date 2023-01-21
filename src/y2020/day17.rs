@@ -1,5 +1,6 @@
 //! Day 17: Conway Cubes
-//! https://adventofcode.com/2020/day/17
+//!
+//! <https://adventofcode.com/2020/day/17>
 
 use crate::SimpleError;
 use std::cmp;

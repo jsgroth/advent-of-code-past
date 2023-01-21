@@ -1,5 +1,6 @@
 //! Day 9: Explosives in Cyberspace
-//! https://adventofcode.com/2016/day/9
+//!
+//! <https://adventofcode.com/2016/day/9>
 
 use crate::SimpleError;
 use std::error::Error;

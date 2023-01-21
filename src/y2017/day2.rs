@@ -1,5 +1,6 @@
 //! Day 2: Corruption Checksum
-//! https://adventofcode.com/2017/day/2
+//!
+//! <https://adventofcode.com/2017/day/2>
 
 use crate::SimpleError;
 use std::cmp;

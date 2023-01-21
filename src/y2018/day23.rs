@@ -1,5 +1,6 @@
 //! Day 23: Experimental Emergency Teleportation
-//! https://adventofcode.com/2018/day/23
+//!
+//! <https://adventofcode.com/2018/day/23>
 
 use crate::SimpleError;
 use std::cmp;

@@ -1,5 +1,6 @@
 //! Day 16: Chronal Classification
-//! https://adventofcode.com/2018/day/16
+//!
+//! <https://adventofcode.com/2018/day/16>
 
 use crate::y2018::chronodevice::ChronoOperation;
 use crate::SimpleError;

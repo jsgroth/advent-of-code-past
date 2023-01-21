@@ -1,5 +1,6 @@
 //! Day 15: Beverage Bandits
-//! https://adventofcode.com/2018/day/15
+//!
+//! <https://adventofcode.com/2018/day/15>
 
 use crate::SimpleError;
 use std::cell::RefCell;

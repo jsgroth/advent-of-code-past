@@ -1,5 +1,6 @@
 //! Day 12: Subterranean Sustainability
-//! https://adventofcode.com/2018/day/12
+//!
+//! <https://adventofcode.com/2018/day/12>
 
 use crate::SimpleError;
 use std::collections::{HashSet, VecDeque};

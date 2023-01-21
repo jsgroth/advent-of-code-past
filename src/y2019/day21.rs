@@ -1,5 +1,6 @@
 //! Day 21: Springdroid Adventure
-//! https://adventofcode.com/2019/day/21
+//!
+//! <https://adventofcode.com/2019/day/21>
 
 use crate::y2019::intcode;
 use crate::y2019::intcode::InteractiveIntcodeProgram;

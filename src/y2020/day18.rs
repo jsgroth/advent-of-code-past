@@ -1,5 +1,6 @@
 //! Day 18: Operation Order
-//! https://adventofcode.com/2020/day/18
+//!
+//! <https://adventofcode.com/2020/day/18>
 
 use crate::SimpleError;
 use std::error::Error;

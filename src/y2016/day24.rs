@@ -1,5 +1,6 @@
 //! Day 24: Air Duct Spelunking
-//! https://adventofcode.com/2016/day/24
+//!
+//! <https://adventofcode.com/2016/day/24>
 
 use crate::SimpleError;
 use std::collections::{HashMap, HashSet, VecDeque};

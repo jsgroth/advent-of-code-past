@@ -1,5 +1,6 @@
 //! Day 7: Amplification Circuit
-//! https://adventofcode.com/2019/day/7
+//!
+//! <https://adventofcode.com/2019/day/7>
 
 use crate::y2019::intcode;
 use crate::y2019::intcode::{InputFn, IntcodeProgram, OutputFn};

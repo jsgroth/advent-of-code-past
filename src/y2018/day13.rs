@@ -1,5 +1,6 @@
 //! Day 13: Mine Cart Madness
-//! https://adventofcode.com/2018/day/13
+//!
+//! <https://adventofcode.com/2018/day/13>
 
 use crate::SimpleError;
 use std::cmp::Ordering;

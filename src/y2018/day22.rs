@@ -1,5 +1,6 @@
 //! Day 22: Mode Maze
-//! https://adventofcode.com/2018/day/22
+//!
+//! <https://adventofcode.com/2018/day/22>
 
 use crate::SimpleError;
 use std::cmp::Ordering;

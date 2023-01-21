@@ -1,5 +1,6 @@
 //! Day 20: Jurassic Jigsaw
-//! https://adventofcode.com/2020/day/20
+//!
+//! <https://adventofcode.com/2020/day/20>
 
 use crate::SimpleError;
 use std::collections::HashMap;

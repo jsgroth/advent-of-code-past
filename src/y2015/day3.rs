@@ -1,5 +1,6 @@
 //! Day 3: Perfectly Spherical Houses in a Vacuum
-//! https://adventofcode.com/2015/day/3
+//!
+//! <https://adventofcode.com/2015/day/3>
 
 use crate::SimpleError;
 use std::collections::HashSet;

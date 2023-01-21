@@ -1,5 +1,6 @@
 //! Day 19: Go With The Flow
-//! https://adventofcode.com/2018/day/19
+//!
+//! <https://adventofcode.com/2018/day/19>
 
 use crate::y2018::chronodevice::ChronoInstruction;
 use crate::SimpleError;

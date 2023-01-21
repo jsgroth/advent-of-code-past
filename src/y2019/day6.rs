@@ -1,5 +1,6 @@
 //! Day 6: Universal Orbit Map
-//! https://adventofcode.com/2019/day/6
+//!
+//! <https://adventofcode.com/2019/day/6>
 
 use crate::SimpleError;
 use std::collections::{HashMap, HashSet, VecDeque};

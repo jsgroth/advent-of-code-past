@@ -1,5 +1,6 @@
 //! Day 23: Category Six
-//! https://adventofcode.com/2019/day/23
+//!
+//! <https://adventofcode.com/2019/day/23>
 
 use crate::y2019::intcode;
 use crate::y2019::intcode::{InputFn, IntcodeProgram, OutputFn};

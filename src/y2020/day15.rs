@@ -1,5 +1,6 @@
 //! Day 15: Rambunctious Recitation
-//! https://adventofcode.com/2020/day/15
+//!
+//! <https://adventofcode.com/2020/day/15>
 
 use crate::SimpleError;
 use std::error::Error;

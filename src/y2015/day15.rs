@@ -1,5 +1,6 @@
 //! Day 15: Science for Hungry People
-//! https://adventofcode.com/2015/day/15
+//!
+//! <https://adventofcode.com/2015/day/15>
 
 use crate::SimpleError;
 use std::cmp;

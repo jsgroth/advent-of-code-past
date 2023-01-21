@@ -1,5 +1,6 @@
 //! Day 19: Monster Messages
-//! https://adventofcode.com/2020/day/19
+//!
+//! <https://adventofcode.com/2020/day/19>
 
 use crate::SimpleError;
 use std::error::Error;

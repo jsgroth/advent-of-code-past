@@ -1,5 +1,6 @@
 //! Day 4: Repose Record
-//! https://adventofcode.com/2018/day/4
+//!
+//! <https://adventofcode.com/2018/day/4>
 
 use crate::SimpleError;
 use std::collections::HashMap;

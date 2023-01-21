@@ -1,5 +1,6 @@
 //! Day 16: Flawed Frequency Transmission
-//! https://adventofcode.com/2019/day/16
+//!
+//! <https://adventofcode.com/2019/day/16>
 
 use crate::SimpleError;
 use std::error::Error;

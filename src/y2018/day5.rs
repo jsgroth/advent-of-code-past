@@ -1,5 +1,6 @@
 //! Day 5: Alchemical Reduction
-//! https://adventofcode.com/2018/day/5
+//!
+//! <https://adventofcode.com/2018/day/5>
 
 use crate::SimpleError;
 use std::cmp;

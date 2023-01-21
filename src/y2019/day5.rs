@@ -1,5 +1,6 @@
 //! Day 5: Sunny with a Chance of Asteroids
-//! https://adventofcode.com/2019/day/5
+//!
+//! <https://adventofcode.com/2019/day/5>
 
 use crate::y2019::intcode;
 use crate::SimpleError;

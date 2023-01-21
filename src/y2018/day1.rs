@@ -1,5 +1,6 @@
 //! Day 1: Chronal Calibration
-//! https://adventofcode.com/2018/day/1
+//!
+//! <https://adventofcode.com/2018/day/1>
 
 use crate::SimpleError;
 use std::collections::HashSet;

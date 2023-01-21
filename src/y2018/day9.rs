@@ -1,5 +1,6 @@
 //! Day 9: Marble Mania
-//! https://adventofcode.com/2018/day/9
+//!
+//! <https://adventofcode.com/2018/day/9>
 
 use crate::SimpleError;
 use std::collections::VecDeque;

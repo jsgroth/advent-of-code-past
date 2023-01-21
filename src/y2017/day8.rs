@@ -1,5 +1,6 @@
 //! Day 8: I Heard You Like Registers
-//! https://adventofcode.com/2017/day/8
+//!
+//! <https://adventofcode.com/2017/day/8>
 
 use crate::SimpleError;
 use std::cmp;

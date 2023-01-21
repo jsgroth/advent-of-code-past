@@ -1,5 +1,6 @@
 //! Day 21: Chronal Conversion
-//! https://adventofcode.com/2018/day/21
+//!
+//! <https://adventofcode.com/2018/day/21>
 
 use crate::y2018::chronodevice::{ChronoInstruction, ChronoOperation};
 use crate::SimpleError;

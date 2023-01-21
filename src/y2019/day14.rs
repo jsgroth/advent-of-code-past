@@ -1,5 +1,6 @@
 //! Day 14: Space Stoichiometry
-//! https://adventofcode.com/2019/day/14
+//!
+//! <https://adventofcode.com/2019/day/14>
 
 use crate::SimpleError;
 use std::collections::{HashMap, HashSet};

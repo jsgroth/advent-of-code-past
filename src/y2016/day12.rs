@@ -1,5 +1,6 @@
 //! Day 12: Leonardo's Monorail
-//! https://adventofcode.com/2016/day/12
+//!
+//! <https://adventofcode.com/2016/day/12>
 
 use crate::y2016::assembunny::AssembunnyProgram;
 use crate::SimpleError;

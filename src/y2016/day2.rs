@@ -1,5 +1,6 @@
 //! Day 2: Bathroom Security
-//! https://adventofcode.com/2016/day/2
+//!
+//! <https://adventofcode.com/2016/day/2>
 
 use crate::SimpleError;
 use std::error::Error;

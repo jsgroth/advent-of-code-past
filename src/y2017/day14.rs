@@ -1,5 +1,6 @@
 //! Day 14: Disk Defragmentation
-//! https://adventofcode.com/2017/day/14
+//!
+//! <https://adventofcode.com/2017/day/14>
 
 use crate::y2017::knothash;
 use crate::SimpleError;

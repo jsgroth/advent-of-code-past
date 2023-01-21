@@ -1,5 +1,6 @@
 //! Day 14: Chocolate Charts
-//! https://adventofcode.com/2018/day/14
+//!
+//! <https://adventofcode.com/2018/day/14>
 
 use crate::SimpleError;
 use std::error::Error;

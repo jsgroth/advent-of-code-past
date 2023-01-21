@@ -1,5 +1,6 @@
 //! Day 22: Grid Computing
-//! https://adventofcode.com/2016/day/22
+//!
+//! <https://adventofcode.com/2016/day/22>
 
 use crate::SimpleError;
 use std::cmp;

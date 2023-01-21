@@ -1,5 +1,6 @@
 //! Day 10: Balance Bots
-//! https://adventofcode.com/2016/day/10
+//!
+//! <https://adventofcode.com/2016/day/10>
 
 use crate::SimpleError;
 use std::cmp;

@@ -1,5 +1,6 @@
 //! Day 7: Handy Haversacks
-//! https://adventofcode.com/2020/day/7
+//!
+//! <https://adventofcode.com/2020/day/7>
 
 use crate::SimpleError;
 use std::collections::HashMap;

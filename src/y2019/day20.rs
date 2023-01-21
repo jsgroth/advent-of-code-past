@@ -1,5 +1,6 @@
 //! Day 20: Donut Maze
-//! https://adventofcode.com/2019/day/20
+//!
+//! <https://adventofcode.com/2019/day/20>
 
 use crate::SimpleError;
 use std::collections::{HashMap, HashSet, VecDeque};

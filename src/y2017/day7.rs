@@ -1,5 +1,6 @@
 //! Day 7: Recursive Circus
-//! https://adventofcode.com/2017/day/7
+//!
+//! <https://adventofcode.com/2017/day/7>
 
 use crate::SimpleError;
 use std::collections::{HashMap, HashSet};

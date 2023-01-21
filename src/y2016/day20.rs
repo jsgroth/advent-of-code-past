@@ -1,5 +1,6 @@
 //! Day 20: Firewall Rules
-//! https://adventofcode.com/2016/day/20
+//!
+//! <https://adventofcode.com/2016/day/20>
 
 use crate::SimpleError;
 use std::cmp;

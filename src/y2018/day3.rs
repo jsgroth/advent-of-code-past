@@ -1,5 +1,6 @@
 //! Day 3: No Matter How You Slice It
-//! https://adventofcode.com/2018/day/3
+//!
+//! <https://adventofcode.com/2018/day/3>
 
 use crate::SimpleError;
 use std::error::Error;

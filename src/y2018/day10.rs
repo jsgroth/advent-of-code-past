@@ -1,5 +1,6 @@
 //! Day 10: The Stars Align
-//! https://adventofcode.com/2018/day/10
+//!
+//! <https://adventofcode.com/2018/day/10>
 
 use crate::SimpleError;
 use std::cmp;

@@ -1,5 +1,6 @@
 //! Day 9: Stream Processing
-//! https://adventofcode.com/2017/day/9
+//!
+//! <https://adventofcode.com/2017/day/9>
 
 use crate::SimpleError;
 use std::error::Error;

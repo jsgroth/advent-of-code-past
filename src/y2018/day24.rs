@@ -1,5 +1,6 @@
 //! Day 24: Immune System Simulator 20XX
-//! https://adventofcode.com/2018/day/24
+//!
+//! <https://adventofcode.com/2018/day/24>
 
 use crate::SimpleError;
 use std::error::Error;

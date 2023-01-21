@@ -1,5 +1,6 @@
 //! Day 13: Packet Scanners
-//! https://adventofcode.com/2017/day/13
+//!
+//! <https://adventofcode.com/2017/day/13>
 
 use crate::SimpleError;
 use std::error::Error;

@@ -1,5 +1,6 @@
 //! Day 23: Safe Cracking
-//! https://adventofcode.com/2016/day/23
+//!
+//! <https://adventofcode.com/2016/day/23>
 
 use crate::y2016::assembunny::AssembunnyProgram;
 use crate::SimpleError;

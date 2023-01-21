@@ -1,5 +1,6 @@
 //! Day 4: High-Entropy Passphrases
-//! https://adventofcode.com/2017/day/4
+//!
+//! <https://adventofcode.com/2017/day/4>
 
 use crate::SimpleError;
 use std::collections::HashSet;

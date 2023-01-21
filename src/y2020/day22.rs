@@ -1,5 +1,6 @@
 //! Day 22: Crab Combat
-//! https://adventofcode.com/2020/day/22
+//!
+//! <https://adventofcode.com/2020/day/22>
 
 use crate::SimpleError;
 use std::collections::{HashSet, VecDeque};

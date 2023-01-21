@@ -1,5 +1,6 @@
 //! Day 3: Spiral Memory
-//! https://adventofcode.com/2017/day/3
+//!
+//! <https://adventofcode.com/2017/day/3>
 
 use crate::SimpleError;
 use std::collections::HashMap;

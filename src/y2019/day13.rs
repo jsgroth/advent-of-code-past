@@ -1,5 +1,6 @@
 //! Day 13: Care Package
-//! https://adventofcode.com/2019/day/13
+//!
+//! <https://adventofcode.com/2019/day/13>
 
 use crate::y2019::intcode;
 use crate::y2019::intcode::InteractiveIntcodeProgram;

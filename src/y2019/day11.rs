@@ -1,5 +1,6 @@
 //! Day 11: Space Police
-//! https://adventofcode.com/2019/day/11
+//!
+//! <https://adventofcode.com/2019/day/11>
 
 use crate::y2019::intcode;
 use crate::y2019::intcode::InteractiveIntcodeProgram;

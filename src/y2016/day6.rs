@@ -1,5 +1,6 @@
 //! Day 6: Signals and Noise
-//! https://adventofcode.com/2016/day/6
+//!
+//! <https://adventofcode.com/2016/day/6>
 
 use crate::SimpleError;
 use std::collections::HashMap;

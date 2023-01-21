@@ -1,5 +1,6 @@
 //! Day 21: Allergen Assessment
-//! https://adventofcode.com/2020/day/21
+//!
+//! <https://adventofcode.com/2020/day/21>
 
 use crate::SimpleError;
 use std::collections::{HashMap, HashSet};

@@ -1,5 +1,6 @@
 //! Day 23: Coprocessor Conflagration
-//! https://adventofcode.com/2017/day/23
+//!
+//! <https://adventofcode.com/2017/day/23>
 
 use crate::SimpleError;
 use std::collections::HashMap;

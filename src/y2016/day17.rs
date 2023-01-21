@@ -1,5 +1,6 @@
 //! Day 17: Two Steps Forward
-//! https://adventofcode.com/2016/day/17
+//!
+//! <https://adventofcode.com/2016/day/17>
 
 use crate::SimpleError;
 use std::collections::VecDeque;

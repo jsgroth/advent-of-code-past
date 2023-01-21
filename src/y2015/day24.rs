@@ -1,5 +1,6 @@
 //! Day 24: It Hangs in the Balance
-//! https://adventofcode.com/2015/day/24
+//!
+//! <https://adventofcode.com/2015/day/24>
 
 use crate::SimpleError;
 use std::cmp;

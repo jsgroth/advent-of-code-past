@@ -1,5 +1,6 @@
 //! Day 21: Scrambled Letters and Hash
-//! https://adventofcode.com/2016/day/21
+//!
+//! <https://adventofcode.com/2016/day/21>
 
 use crate::SimpleError;
 use std::error::Error;

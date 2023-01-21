@@ -1,5 +1,6 @@
 //! Day 20: Particle Swarm
-//! https://adventofcode.com/2017/day/20
+//!
+//! <https://adventofcode.com/2017/day/20>
 
 use crate::SimpleError;
 use std::collections::HashMap;

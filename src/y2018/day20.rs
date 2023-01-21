@@ -1,5 +1,6 @@
 //! Day 20: A Regular Map
-//! https://adventofcode.com/2018/day/20
+//!
+//! <https://adventofcode.com/2018/day/20>
 
 use crate::SimpleError;
 use std::collections::{HashMap, HashSet, VecDeque};

@@ -1,5 +1,6 @@
 //! Day 21: RPG Simulator 20XX
-//! https://adventofcode.com/2015/day/21
+//!
+//! <https://adventofcode.com/2015/day/21>
 
 use crate::SimpleError;
 use std::cmp;

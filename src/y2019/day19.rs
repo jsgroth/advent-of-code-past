@@ -1,5 +1,6 @@
 //! Day 19: Tractor Beam
-//! https://adventofcode.com/2019/day/19
+//!
+//! <https://adventofcode.com/2019/day/19>
 
 use crate::y2019::intcode;
 use crate::SimpleError;

@@ -1,5 +1,6 @@
 //! Day 9: Sensor Boost
-//! https://adventofcode.com/2019/day/9
+//!
+//! <https://adventofcode.com/2019/day/9>
 
 use crate::y2019::intcode;
 use crate::SimpleError;

@@ -1,5 +1,6 @@
 //! Day 14: One-Time Pad
-//! https://adventofcode.com/2016/day/14
+//!
+//! <https://adventofcode.com/2016/day/14>
 
 use crate::SimpleError;
 use std::collections::VecDeque;

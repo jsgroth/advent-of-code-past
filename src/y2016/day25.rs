@@ -1,5 +1,6 @@
 //! Day 25: Clock Signal
-//! https://adventofcode.com/2016/day/25
+//!
+//! <https://adventofcode.com/2016/day/25>
 
 use crate::y2016::assembunny::AssembunnyProgram;
 use crate::SimpleError;

@@ -1,5 +1,6 @@
 //! Day 4: Security Through Obscurity
-//! https://adventofcode.com/2016/day/4
+//!
+//! <https://adventofcode.com/2016/day/4>
 
 use crate::SimpleError;
 use std::collections::HashMap;

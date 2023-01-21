@@ -1,5 +1,6 @@
 //! Day 7: The Sum of Its Parts
-//! https://adventofcode.com/2018/day/7
+//!
+//! <https://adventofcode.com/2018/day/7>
 
 use crate::SimpleError;
 use std::collections::{HashMap, HashSet};

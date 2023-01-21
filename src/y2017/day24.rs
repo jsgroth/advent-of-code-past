@@ -1,5 +1,6 @@
 //! Day 24: Electromagnetic Moat
-//! https://adventofcode.com/2017/day/24
+//!
+//! <https://adventofcode.com/2017/day/24>
 
 use crate::SimpleError;
 use std::cmp;

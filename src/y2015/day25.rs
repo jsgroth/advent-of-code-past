@@ -1,5 +1,6 @@
 //! Day 25: Let It Snow
-//! https://adventofcode.com/2015/day/25
+//!
+//! <https://adventofcode.com/2015/day/25>
 
 use crate::SimpleError;
 use std::error::Error;

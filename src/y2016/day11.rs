@@ -1,5 +1,6 @@
 //! Day 11: Radioisotope Thermoelectric Generators
-//! https://adventofcode.com/2016/day/11
+//!
+//! <https://adventofcode.com/2016/day/11>
 
 use crate::SimpleError;
 use std::cmp::Ordering;

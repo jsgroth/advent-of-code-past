@@ -1,5 +1,6 @@
 //! Day 19: A Series of Tubes
-//! https://adventofcode.com/2017/day/19
+//!
+//! <https://adventofcode.com/2017/day/19>
 
 use crate::SimpleError;
 use std::error::Error;

@@ -1,5 +1,6 @@
 //! Day 19: An Elephant Named Joseph
-//! https://adventofcode.com/2016/day/19
+//!
+//! <https://adventofcode.com/2016/day/19>
 
 use crate::SimpleError;
 use std::error::Error;

@@ -1,5 +1,6 @@
 //! Day 1: No Time for a Taxicab
-//! https://adventofcode.com/2016/day/1
+//!
+//! <https://adventofcode.com/2016/day/1>
 
 use crate::SimpleError;
 use std::collections::HashSet;

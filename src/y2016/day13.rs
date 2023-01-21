@@ -1,5 +1,6 @@
 //! Day 13: A Maze of Twisty Little Cubicles
-//! https://adventofcode.com/2016/day/13
+//!
+//! <https://adventofcode.com/2016/day/13>
 
 use crate::SimpleError;
 use std::cmp::Ordering;

@@ -1,5 +1,6 @@
 //! Day 4: Secure Container
-//! https://adventofcode.com/2019/day/4
+//!
+//! <https://adventofcode.com/2019/day/4>
 
 use crate::SimpleError;
 use std::error::Error;

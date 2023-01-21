@@ -1,5 +1,6 @@
 //! Day 17: Set and Forget
-//! https://adventofcode.com/2019/day/17
+//!
+//! <https://adventofcode.com/2019/day/17>
 
 use crate::y2019::intcode;
 use crate::y2019::intcode::InteractiveIntcodeProgram;

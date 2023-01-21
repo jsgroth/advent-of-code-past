@@ -1,5 +1,6 @@
 //! Day 8: Memory Maneuver
-//! https://adventofcode.com/2018/day/8
+//!
+//! <https://adventofcode.com/2018/day/8>
 
 use crate::SimpleError;
 use std::error::Error;
