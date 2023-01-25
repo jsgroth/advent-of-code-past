@@ -83,6 +83,14 @@ impl Range {
             vec![Self::new(self.start, mid), Self::new(mid, self.end)]
         }
     }
+
+    fn min_distance_to(self, n: i64) -> i64 {
+        if self.contains(n) {
+            0
+        } else {
+            cmp::min((n - self.start).abs(), (n - self.end + 1).abs())
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -104,23 +112,9 @@ impl Cube {
     }
 
     fn min_distance_to(&self, p: Point) -> i64 {
-        let x_distance = if self.x.contains(p.x) {
-            0
-        } else {
-            cmp::min((p.x - self.x.start).abs(), (p.x - self.x.end + 1).abs())
-        };
-
-        let y_distance = if self.y.contains(p.y) {
-            0
-        } else {
-            cmp::min((p.y - self.y.start).abs(), (p.y - self.y.end + 1).abs())
-        };
-
-        let z_distance = if self.z.contains(p.z) {
-            0
-        } else {
-            cmp::min((p.z - self.z.start).abs(), (p.z - self.z.end + 1).abs())
-        };
+        let x_distance = self.x.min_distance_to(p.x);
+        let y_distance = self.y.min_distance_to(p.y);
+        let z_distance = self.z.min_distance_to(p.z);
 
         x_distance + y_distance + z_distance
     }
