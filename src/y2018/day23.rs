@@ -133,13 +133,11 @@ struct HeapEntry {
 }
 
 impl HeapEntry {
-    fn from_cube(cube: Cube, nanobots: &[Nanobot]) -> Self {
-        let mut intersecting_nanobots = 0;
-        for &nanobot in nanobots {
-            if cube.min_distance_to(nanobot.position) <= nanobot.radius {
-                intersecting_nanobots += 1;
-            }
-        }
+    fn create(cube: Cube, nanobots: &[Nanobot]) -> Self {
+        let intersecting_nanobots = nanobots
+            .iter()
+            .filter(|nanobot| cube.min_distance_to(nanobot.position) <= nanobot.radius)
+            .count();
 
         Self {
             cube,
@@ -178,12 +176,12 @@ fn solve_part_1(input: &str) -> Result<usize, SimpleError> {
         .max_by_key(|&nanobot| nanobot.radius)
         .unwrap();
 
-    let mut in_range_count = 0;
-    for &nanobot in &nanobots {
-        if strongest_nanobot.position.distance_to(nanobot.position) <= strongest_nanobot.radius {
-            in_range_count += 1;
-        }
-    }
+    let in_range_count = nanobots
+        .into_iter()
+        .filter(|nanobot| {
+            strongest_nanobot.position.distance_to(nanobot.position) <= strongest_nanobot.radius
+        })
+        .count();
 
     Ok(in_range_count)
 }
@@ -214,12 +212,12 @@ fn solve_part_2(input: &str) -> Result<i64, SimpleError> {
 
     let best_point = find_optimal_position(cube, &nanobots);
 
-    Ok(best_point.x.abs() + best_point.y.abs() + best_point.z.abs())
+    Ok(best_point.distance_to(Point::ORIGIN))
 }
 
 fn find_optimal_position(cube: Cube, nanobots: &[Nanobot]) -> Point {
     let mut heap = BinaryHeap::new();
-    heap.push(HeapEntry::from_cube(cube, nanobots));
+    heap.push(HeapEntry::create(cube, nanobots));
 
     let mut best_so_far = 0;
     let mut best_point_so_far = Point::ORIGIN;
@@ -250,7 +248,7 @@ fn find_optimal_position(cube: Cube, nanobots: &[Nanobot]) -> Point {
             for ys in cube.y.split() {
                 for zs in cube.z.split() {
                     let new_cube = Cube::new(xs, ys, zs);
-                    heap.push(HeapEntry::from_cube(new_cube, nanobots));
+                    heap.push(HeapEntry::create(new_cube, nanobots));
                 }
             }
         }
