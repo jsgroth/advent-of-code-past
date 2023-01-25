@@ -4,6 +4,8 @@
 
 use crate::SimpleError;
 use std::cmp;
+use std::cmp::Ordering;
+use std::collections::BinaryHeap;
 use std::error::Error;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
@@ -14,6 +16,8 @@ struct Point {
 }
 
 impl Point {
+    const ORIGIN: Self = Self { x: 0, y: 0, z: 0 };
+
     fn new(x: i64, y: i64, z: i64) -> Self {
         Self { x, y, z }
     }
@@ -67,13 +71,13 @@ impl Range {
         Self { start, end }
     }
 
-    fn contains(&self, n: i64) -> bool {
+    fn contains(self, n: i64) -> bool {
         n >= self.start && n < self.end
     }
 
-    fn split(&self) -> Vec<Self> {
+    fn split(self) -> Vec<Self> {
         if self.end == self.start + 1 {
-            vec![*self]
+            vec![self]
         } else {
             let mid = (self.start + self.end) / 2;
             vec![Self::new(self.start, mid), Self::new(mid, self.end)]
@@ -93,7 +97,13 @@ impl Cube {
         Self { x, y, z }
     }
 
-    fn distance_to(&self, p: Point) -> i64 {
+    fn is_single_point(&self) -> bool {
+        self.x.end == self.x.start + 1
+            && self.y.end == self.y.start + 1
+            && self.z.end == self.z.start + 1
+    }
+
+    fn min_distance_to(&self, p: Point) -> i64 {
         let x_distance = if self.x.contains(p.x) {
             0
         } else {
@@ -113,6 +123,49 @@ impl Cube {
         };
 
         x_distance + y_distance + z_distance
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, Clone)]
+struct HeapEntry {
+    cube: Cube,
+    intersecting_nanobots: usize,
+}
+
+impl HeapEntry {
+    fn from_cube(cube: Cube, nanobots: &[Nanobot]) -> Self {
+        let mut intersecting_nanobots = 0;
+        for &nanobot in nanobots {
+            if cube.min_distance_to(nanobot.position) <= nanobot.radius {
+                intersecting_nanobots += 1;
+            }
+        }
+
+        Self {
+            cube,
+            intersecting_nanobots,
+        }
+    }
+}
+
+impl PartialOrd for HeapEntry {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for HeapEntry {
+    fn cmp(&self, other: &Self) -> Ordering {
+        // Order by intersecting nanobots asc then distance to origin desc, which will get
+        // reversed in the max heap
+        self.intersecting_nanobots
+            .cmp(&other.intersecting_nanobots)
+            .then(
+                self.cube
+                    .min_distance_to(Point::ORIGIN)
+                    .cmp(&other.cube.min_distance_to(Point::ORIGIN))
+                    .reverse(),
+            )
     }
 }
 
@@ -159,79 +212,51 @@ fn solve_part_2(input: &str) -> Result<i64, SimpleError> {
 
     let cube = Cube::new(x_range, y_range, z_range);
 
-    let (best_point, _) = find_optimal_position(cube, &nanobots, &mut 0);
+    let best_point = find_optimal_position(cube, &nanobots);
 
     Ok(best_point.x.abs() + best_point.y.abs() + best_point.z.abs())
 }
 
-fn find_optimal_position(
-    cube: Cube,
-    nanobots: &[Nanobot],
-    best_so_far: &mut usize,
-) -> (Point, usize) {
-    if cube.x.end == cube.x.start + 1
-        && cube.y.end == cube.y.start + 1
-        && cube.z.end == cube.z.start + 1
+fn find_optimal_position(cube: Cube, nanobots: &[Nanobot]) -> Point {
+    let mut heap = BinaryHeap::new();
+    heap.push(HeapEntry::from_cube(cube, nanobots));
+
+    let mut best_so_far = 0;
+    let mut best_point_so_far = Point::ORIGIN;
+
+    while let Some(HeapEntry {
+        cube,
+        intersecting_nanobots,
+    }) = heap.pop()
     {
-        let mut nanobot_overlap_count = 0;
-        let p = Point::new(cube.x.start, cube.y.start, cube.z.start);
-        for &nanobot in nanobots {
-            if p.distance_to(nanobot.position) <= nanobot.radius {
-                nanobot_overlap_count += 1;
+        if cube.is_single_point() {
+            let p = Point::new(cube.x.start, cube.y.start, cube.z.start);
+            if intersecting_nanobots > best_so_far
+                || (intersecting_nanobots == best_so_far
+                    && p.distance_to(Point::ORIGIN) < best_point_so_far.distance_to(Point::ORIGIN))
+            {
+                best_so_far = intersecting_nanobots;
+                best_point_so_far = p;
             }
+
+            continue;
         }
 
-        *best_so_far = cmp::max(*best_so_far, nanobot_overlap_count);
-        return (
-            Point::new(cube.x.start, cube.y.start, cube.z.start),
-            nanobot_overlap_count,
-        );
-    }
+        if intersecting_nanobots < best_so_far {
+            continue;
+        }
 
-    let x_split = cube.x.split();
-    let y_split = cube.y.split();
-    let z_split = cube.z.split();
-    let mut cubes_to_search = Vec::new();
-    for &xs in &x_split {
-        for &ys in &y_split {
-            for &zs in &z_split {
-                let new_cube = Cube::new(xs, ys, zs);
-                let mut overlap_count = 0;
-                for &nanobot in nanobots {
-                    if new_cube.distance_to(nanobot.position) <= nanobot.radius {
-                        overlap_count += 1;
-                    }
-                }
-
-                if overlap_count > *best_so_far {
-                    cubes_to_search.push(new_cube);
+        for xs in cube.x.split() {
+            for ys in cube.y.split() {
+                for zs in cube.z.split() {
+                    let new_cube = Cube::new(xs, ys, zs);
+                    heap.push(HeapEntry::from_cube(new_cube, nanobots));
                 }
             }
         }
     }
 
-    if cubes_to_search.is_empty() {
-        return (Point::new(0, 0, 0), 0);
-    }
-
-    cubes_to_search.sort_by_key(|&cube| cube.distance_to(Point::new(0, 0, 0)));
-
-    let mut best_overlap_count = 0;
-    let mut best_point = Point::new(0, 0, 0);
-    for &cube in &cubes_to_search {
-        let (p, overlap_count) = find_optimal_position(cube, nanobots, best_so_far);
-        if overlap_count > best_overlap_count {
-            best_overlap_count = overlap_count;
-            best_point = p;
-        } else if overlap_count == best_overlap_count
-            && p.x.abs() + p.y.abs() + p.z.abs()
-                < best_point.x.abs() + best_point.y.abs() + best_point.z.abs()
-        {
-            best_point = p;
-        }
-    }
-
-    (best_point, best_overlap_count)
+    best_point_so_far
 }
 
 fn parse_input(input: &str) -> Result<Vec<Nanobot>, SimpleError> {
